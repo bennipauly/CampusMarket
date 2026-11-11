@@ -10,16 +10,19 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - Compose-Theme: `CampusMarketTheme` (`ui/theme/Theme.kt`), XML-Theme: `Theme.CampusMarket`
 - Build: Gradle 9.6.0, AGP 9.4.1, Kotlin 2.2.10, Version Catalog in `gradle/libs.versions.toml`
 - compileSdk / targetSdk 37, **minSdk 26**
+- Bibliotheksversionen müssen zu Kotlin 2.2 passen. Coil bleibt deshalb auf **3.3.0**, weil Coil 3.4 und neuer Kotlin 2.3/2.4 voraussetzen und der Build dann bricht.
+- Keine Bibliothek ohne Aufgabe: kein `room-ktx` (Flow/suspend steckt seit Room 2.7 in `room-runtime`), keine eigene `kotlinx-serialization-json` (Navigation bringt `serialization-core` mit).
 - Keine Netzwerkzugriffe, kein Login, kein Backend. Die App ist rein lokal.
 
 ## Arbeitsweise mit der KI
 
 1. **Prompts immer wortwörtlich ins Logbuch.** Jeder Prompt wird vor der Bearbeitung unverändert in `AI_USAGE.md` eingetragen (neue Aufgabe = neuer Eintrag, Rückfragen = Prompt 2, 3, … im selben Eintrag). Geheimnisse und personenbezogene Daten → `[REDACTED]`.
-2. Felder, die nur das Team kennt (Autor, Akzeptiert/Geändert/Abgelehnt, Geprüft, Commits), bleiben „eintragen“ oder bekommen einen markierten Vorschlag.
-3. **Kein Code ohne kurze Erklärung.** Nach jeder Änderung: kurze Erklärung auf Deutsch (was und warum), Testanleitung (Rotation, Permission verweigert, Flugmodus, App-Neustart, ungültige Eingaben) und Commit-Vorschlag.
-4. **Die KI committet und pusht nie selbst.** Commits macht das Team.
-5. Ein Schritt = ein Commit, der für sich baut. Nach jedem Schritt auf das OK des Teams warten.
-6. Diese Datei wird aktualisiert, sobald sich eine Regel ändert.
+2. **Komplettes KI-Ergebnis ins Logbuch.** Nach jedem Prompt kommt unter „Ergebnis der KI zu Prompt N (vollständig)“ die komplette Antwort der KI wortwörtlich in `AI_USAGE.md`, dazu eine Liste der ausgeführten Aktionen (gelesene, angelegte und geänderte Dateien, ausgeführte Befehle mit Ergebnis) und das Kurzfazit aus dem Antwortfeld der App. Nichts wird gekürzt.
+3. Felder, die nur das Team kennt (Autor, Akzeptiert/Geändert/Abgelehnt, Geprüft, Commits), bleiben „eintragen“ oder bekommen einen markierten Vorschlag.
+4. **Kein Code ohne kurze Erklärung.** Nach jeder Änderung: kurze Erklärung auf Deutsch (was und warum), Testanleitung (Rotation, Permission verweigert, Flugmodus, App-Neustart, ungültige Eingaben) und Commit-Vorschlag.
+5. **Die KI committet und pusht nie selbst.** Commits macht das Team.
+6. Ein Schritt = ein Commit, der für sich baut. Nach jedem Schritt auf das OK des Teams warten.
+7. Diese Datei wird aktualisiert, sobald sich eine Regel ändert.
 
 ## Code-Stil
 

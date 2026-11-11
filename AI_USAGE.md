@@ -113,9 +113,78 @@ Führe niemals selbst Git-Commits oder Git-Pushes durch.
 ```
 ````
 
-#### Ergebnis der KI (Kurzfassung)
+#### Ergebnis der KI zu Prompt 1 (vollständig)
 
-Die KI hat das Projekt angesehen (Paket `com.example.campusmarket`, Theme `CampusMarketTheme` / `Theme.CampusMarket`, AGP 9.4.1, Kotlin 2.2.10, Compose BOM 2026.02.01, compileSdk/targetSdk 37, minSdk 24), `CLAUDE.md` und diese Datei angelegt und einen Schrittplan vorgeschlagen. Es wurde noch kein App-Code geändert.
+**Ausgeführte Aktionen:** Dateiliste und Gradle-Dateien gelesen (`settings.gradle.kts`, `build.gradle.kts`, `app/build.gradle.kts`, `gradle/libs.versions.toml`, `gradle.properties`, `gradle-wrapper.properties`), außerdem `MainActivity.kt`, `AndroidManifest.xml`, `themes.xml`, `strings.xml`, `Theme.kt`, `gradle-daemon-jvm.properties`, `rules.keep`. Danach `AI_USAGE.md` und `CLAUDE.md` neu angelegt. Kein App-Code geändert.
+
+**Kurzfazit im Antwortfeld der App:** „CLAUDE.md und AI_USAGE.md liegen jetzt im Root, deine Nachricht steht wortwörtlich als Eintrag 1 drin. Am App-Code habe ich noch nichts geändert, und es ist nichts committet. Die Autorennamen fehlen noch.“ Frage: „Passt der Plan so, darf ich mit Schritt 1 anfangen?“
+
+**Antwort der KI:**
+
+````markdown
+Ich habe das Projekt angesehen und die beiden Dateien angelegt. Am App-Code habe ich noch nichts geändert.
+
+## Was im Projekt steht
+
+| | |
+|---|---|
+| Paket / applicationId | `com.example.campusmarket` |
+| Theme | `CampusMarketTheme` (Compose), `Theme.CampusMarket` (XML) |
+| Gradle / AGP / Kotlin | 9.6.0 / 9.4.1 / 2.2.10, Versionen in `gradle/libs.versions.toml` |
+| Compose BOM | 2026.02.01 |
+| compileSdk / targetSdk | 37 |
+| **minSdk** | **24**, muss laut Vorgabe auf **26**. Das ändere ich in Schritt 1. |
+
+Außerdem gibt es noch den Beispielcode von Android Studio (`Greeting`, `ExampleUnitTest`, `ExampleInstrumentedTest`). Der fliegt raus, sobald wir ihn ersetzen, damit kein toter Code bleibt. AGP 9 bringt Kotlin schon mit, deshalb brauchen wir kein extra `kotlin-android`-Plugin.
+
+## Angelegte Dateien
+
+- [AI_USAGE.md](AI_USAGE.md): Setup-Tabelle, Eintrag 1 mit deiner Nachricht wortwörtlich und einem Platzhalter für die Reflexion. Felder, die nur ihr kennt, stehen auf „eintragen“ oder haben einen markierten Vorschlag.
+- [CLAUDE.md](CLAUDE.md): prüfbare Regeln zu Architektur, State, Screens, Navigation, Kamera, Tests, Robustheit und Abgabe. Die vier Pflichtregeln sind dabei, zum Beispiel „Nur Room-Zugriffe im Repository/DAO“.
+
+## Plan (ein Schritt = ein Commit, der für sich baut)
+
+**Mindestanforderungen**
+1. **Build-Setup:** minSdk 26, Abhängigkeiten für Room + KSP, Navigation, Serialization, ViewModel-Compose und Coil.
+2. **Room-Datenschicht:** `Ad`-Entity, `AdDao` mit Flows, `AppDatabase`, `AdRepository`, `CampusMarketApplication` mit Beispieldaten beim ersten Start.
+3. **Navigation-Grundgerüst:** `@Serializable`-Destinations, `NavHost` in `MainActivity`, Beispielcode entfernen.
+4. **Liste:** `AdListViewModel` und UiState mit Loading/Error/Ready, Route und Screen mit Preview.
+5. **Suche:** reine Funktion `searchAds()` mit JUnit-Tests, Suchfeld in der Liste.
+6. **Detail mit Löschen:** Detail-Screen (Infos, Bild, Zustand, Übergabeort), Bestätigungsdialog vor dem Löschen.
+7. **Erstellen ohne Foto:** Formular mit Validierung im ViewModel; die Eingaben überleben eine Drehung.
+8. **Kamera:** Permission, `TakePicture` mit `FileProvider`, Hinweis bei Ablehnung, Anzeige mit Coil.
+9. **README** mit Build-Schritten und dem Pflichtsatz.
+
+**Weitere Features**
+
+10. **Bearbeiten:** das Formular aus Schritt 7 wiederverwenden, mit optionaler id.
+11. **Favoriten:** Feld in Room, Herz-Button, Favoriten-Filter.
+12. **Status verfügbar/verkauft:** Umschalten im Detail, Badge in der Liste.
+13. **Filter** nach Kategorie, Zustand und Status als reine Funktion mit Tests.
+14. **Sortierung** nach Preis und Datum als reine Funktion mit Tests.
+15. **Galerie-Fallback:** `PickVisualMedia`, wenn die Kamera abgelehnt wurde oder fehlt.
+
+Wenn danach noch Zeit ist, kommen Feinschliff (leere Liste, Texte, Icons) und die Reflexion.
+
+## Commit-Vorschlag für jetzt
+
+```
+docs: CLAUDE.md und AI_USAGE.md mit Regeln und Logbuch anlegen
+```
+
+**Wie heißen die beiden Autoren?** Ich trage die Namen ein, sobald ich sie habe, und wer von euch Eintrag 1 geschickt hat. Im Logbuch schreibe ich nur die Namen hinein. E-Mail-Adressen würde ich durch `[REDACTED]` ersetzen.
+````
+
+#### Prompt 2 (11.11.2026)
+
+````text
+Ändere deine Anleitung so, dass du dein komplettes Ergebnis in die AI-USAGE einfügst. Mache das rückwirkend auch für die erste Nachricht.
+Danach fangen wir mit Schritt 1 an
+````
+
+#### Ergebnis der KI zu Prompt 2 (vollständig)
+
+Siehe Eintrag 2. Die Antwort auf Prompt 2 deckt die Regeländerung und Schritt 1 gemeinsam ab und steht dort vollständig.
 
 #### Akzeptiert / Geändert / Abgelehnt
 
@@ -130,6 +199,113 @@ Beide Dateien gelesen und mit der Aufgabenstellung abgeglichen. Kein Build nöti
 #### Commits
 
 CLAUDE.md und AI_USAGE.md anlegen
+
+---
+
+### Eintrag 2: Schritt 1 – Build-Setup (minSdk 26, Room + KSP, Navigation, Serialization, ViewModel-Compose, Coil)
+
+- **Datum:** 11.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+Derselbe Prompt wie Eintrag 1, Prompt 2 (dort wortwörtlich). Der letzte Satz „Danach fangen wir mit Schritt 1 an“ hat diesen Eintrag ausgelöst.
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log` und Teile von `AI_USAGE.md` gelesen, `CLAUDE.md` nach der neuen Regel durchsucht. Ergebnis: Prompt 2, das Ergebnis zu Prompt 1 und die CLAUDE.md-Regel 2 waren schon aus einem früheren Lauf eingetragen; die Autoren hat das Team eingetragen.
+2. `AI_USAGE.md` ab Zeile 100 gelesen.
+3. `git diff` angesehen und den lokalen Gradle-Cache nach vorhandenen Bibliotheken durchsucht (Navigation 2.10.2 vorhanden).
+4. Aktuelle Versionen von Maven Central / Google Maven abgefragt (`curl` auf `maven-metadata.xml`): Room 2.8.5, KSP 2.3.13, Coil 3.6.3, kotlinx-serialization-json 1.12.0, Navigation 2.10.2.
+5. `gradle/libs.versions.toml`, `build.gradle.kts` und `app/build.gradle.kts` per Python-Skript geändert (Versionen, Bibliotheken, Plugins, minSdk 24 → 26).
+6. `room-ktx` per `sed` wieder entfernt.
+7. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD FAILED**, „Class 'kotlin.Unit' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.4.0, but the compiler version 2.2.0 can read versions up to 2.3.0.“
+8. `gradlew.bat :app:dependencyInsight` ausgeführt. Ergebnis: `coil-compose-core-android:3.6.3` zieht `kotlin-stdlib:2.4.10` und Compose 1.12.
+9. POM-Dateien von Coil 3.2.0 bis 3.5.0 abgefragt. Ergebnis: 3.3.0 → Kotlin 2.2.0, 3.4.0 → Kotlin 2.3.10, 3.5.0 → Kotlin 2.4.0.
+10. Coil per `sed` auf 3.3.0 gesetzt, `gradlew.bat assembleDebug testDebugUnitTest` erneut ausgeführt. Ergebnis: **BUILD SUCCESSFUL**.
+11. `CLAUDE.md` (Projektdaten: Versionsregel für Coil, keine überflüssigen Bibliotheken) und `AI_USAGE.md` (dieser Eintrag) geändert.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 1 ist umgesetzt: minSdk 26 und die Bibliotheken für Room, Navigation und Coil sind drin, Debug-Build und Unit-Tests laufen durch. Coil steht auf 3.3.0, weil neuere Versionen Kotlin 2.4 brauchen. Es ist nichts committet.“ Frage: „Soll ich mit Schritt 2 (Room-Datenschicht) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 1 ist fertig: Debug-Build und Unit-Tests laufen durch. Geändert habe ich nur die drei Gradle-Dateien, am App-Code nichts.
+
+## Logbuch
+
+Die Regel „Komplettes KI-Ergebnis ins Logbuch“ steht als Punkt 2 in [CLAUDE.md](CLAUDE.md). In [AI_USAGE.md](AI_USAGE.md) steht jetzt die komplette Antwort zu Prompt 1 mit Aktionen und Kurzfazit. Deinen letzten Prompt habe ich als Prompt 2 in Eintrag 1 eingetragen, weil er die Logbuch-Regel ändert. Schritt 1 und diese Antwort stehen vollständig in Eintrag 2.
+
+## Was sich geändert hat
+
+| Datei | Änderung | Warum |
+|---|---|---|
+| [app/build.gradle.kts](app/build.gradle.kts) | `minSdk` 24 → 26 | Vorgabe der Aufgabe |
+| [app/build.gradle.kts](app/build.gradle.kts) | Plugins `kotlin.serialization` und `ksp`, neue `implementation`-Zeilen, `ksp(room.compiler)` | Die App nutzt die Bibliotheken ab Schritt 2 |
+| [build.gradle.kts](build.gradle.kts) | Die zwei Plugins mit `apply false` | Gradle lädt die Plugin-Version einmal zentral, angewendet werden sie erst im App-Modul |
+| [gradle/libs.versions.toml](gradle/libs.versions.toml) | Versionen und Einträge für alle neuen Bibliotheken | Alle Versionen stehen an einer Stelle |
+
+**Neue Bibliotheken und wofür wir sie brauchen:**
+
+- **lifecycle-viewmodel-compose** (2.11.0): `viewModel(factory = …)` und `viewModelFactory { initializer { … } }` in der Route.
+- **lifecycle-runtime-compose** (2.11.0): `collectAsStateWithLifecycle()`, damit die UI den StateFlow nur sammelt, solange sie sichtbar ist.
+- **navigation-compose** (2.10.2): `NavHost` und typsichere Destinations.
+- **Plugin kotlin-serialization**: macht `@Serializable` auf den Destinations möglich. Eine eigene JSON-Bibliothek brauchen wir nicht, weil Navigation `kotlinx-serialization-core` schon mitbringt.
+- **room-runtime** + **room-compiler über KSP** (2.8.5, KSP 2.3.13): Die Datenbank; KSP erzeugt beim Build den Code für DAO und Datenbank. `room-ktx` habe ich wieder rausgenommen, weil Flow und `suspend` seit Room 2.7 schon in `room-runtime` stecken.
+- **coil-compose** (3.3.0): `AsyncImage` zeigt die Fotos an. Wir laden nur lokale Dateien, deshalb ohne Netzwerk-Modul.
+
+## Zwei Stolpersteine
+
+1. **Coil-Version:** Mit der neuesten Version 3.6.3 ist der Build gebrochen („compiled with an incompatible version of Kotlin … metadata version is 2.4.0“). Coil 3.6.3 zieht Kotlin 2.4 und Compose 1.12 rein, der Compiler im Projekt ist aber Kotlin 2.2. Coil 3.3.0 ist mit Kotlin 2.2.0 gebaut und passt. Das habe ich als Regel in CLAUDE.md festgehalten.
+2. **`.idea/` wird nicht ignoriert:** Ihr habt `.idea/` in `app/.gitignore` eingetragen. Diese Datei gilt aber nur für den Ordner `app/`, deshalb zeigt `git status` weiter `?? .idea/`. Die Zeile gehört in die `.gitignore` im Root. Ich habe sie nicht angefasst, weil die Änderung von euch kommt.
+
+## Testanleitung
+
+- In Android Studio „Sync Project with Gradle Files“, dann die App auf einem Emulator mit API 26 oder höher starten. Erwartung: Wie vorher erscheint „Hello Android!“.
+- Im Terminal (Windows: `gradlew.bat`) muss am Ende `BUILD SUCCESSFUL` stehen:
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- Rotation, Flugmodus und App-Neustart: Verhalten unverändert, kein Absturz.
+- Permission verweigert und ungültige Eingaben gibt es noch nicht; das testen wir ab Schritt 7 und 8.
+- Auf Geräten mit API 24/25 lässt sich die App jetzt nicht mehr installieren. Das ist gewollt.
+
+## Commit-Vorschläge
+
+Am besten zwei Commits, damit Doku und Build getrennt sind:
+
+```
+docs: Regel für vollständige KI-Ergebnisse im Logbuch
+```
+
+(`CLAUDE.md`, `AI_USAGE.md`)
+
+```
+build: minSdk 26 und Abhängigkeiten für Room, Navigation und Coil
+```
+
+(`gradle/libs.versions.toml`, `build.gradle.kts`, `app/build.gradle.kts`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Ganze Antwort
+- **Geändert:** Coil von 3.6.3 auf 3.3.0 gesenkt, weil 3.6.3 mit Kotlin 2.2 nicht baut
+- **Abgelehnt:** nichts
+
+#### Geprüft / Getestet
+
+`gradlew assembleDebug testDebugUnitTest` erfolgreich; App startet auf Emulator API ≥ 26.
+
+#### Commits
+
+1. docs: Regel für vollständige KI-Ergebnisse im Logbuch
+2. build: minSdk 26 und Abhängigkeiten für Room, Navigation und Coil
 
 ---
 
