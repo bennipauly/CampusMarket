@@ -304,8 +304,106 @@ build: minSdk 26 und Abhängigkeiten für Room, Navigation und Coil
 
 #### Commits
 
-1. docs: Regel für vollständige KI-Ergebnisse im Logbuch
-2. build: minSdk 26 und Abhängigkeiten für Room, Navigation und Coil
+1.  Regel für vollständige KI-Ergebnisse im Logbuch
+2.  minSdk 26 und Abhängigkeiten für Room, Navigation und Coil
+
+---
+
+### Eintrag 3: Schritt 2 – Room-Datenschicht (Entity, DAO, Datenbank, Repository, Application-Klasse, Beispieldaten)
+
+- **Datum:** 17.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 2
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log`, die Überschriften von `AI_USAGE.md` und die Root-`.gitignore` gelesen. Ergebnis: Schritt 1 ist committet (`3b78ba6`), `app/.gitignore` geändert, `.idea/` weiter untracked.
+2. `AI_USAGE.md`: Eintrag 3 mit dem Prompt angelegt.
+3. Neu angelegt: `data/Category.kt`, `data/Condition.kt`, `data/Ad.kt`, `data/AdDao.kt`, `data/AppDatabase.kt`, `data/AdRepository.kt`, `data/SampleData.kt`, `CampusMarketApplication.kt` (alle unter `app/src/main/java/com/example/campusmarket/`).
+4. Geändert: `app/src/main/AndroidManifest.xml` (`android:name=".CampusMarketApplication"`).
+5. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**. KSP hat `AdDao_Impl.kt` und `AppDatabase_Impl.kt` erzeugt.
+6. `adb devices` ausgeführt. Ergebnis: kein Gerät/Emulator verbunden, daher kein Laufzeittest.
+7. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 2 ist umgesetzt: Entity, DAO, Datenbank, Repository und CampusMarketApplication mit Beispieldaten sind angelegt, der Build läuft durch. Ob die Beispieldaten wirklich in der Datenbank landen, konnte ich nicht prüfen, weil kein Emulator lief. Es ist nichts committet.“ Frage: „Soll ich mit Schritt 3 (Navigation-Grundgerüst) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 2 ist fertig: Die Room-Datenschicht steht, und der Build läuft durch. KSP hat beim Build `AdDao_Impl` und `AppDatabase_Impl` erzeugt, also versteht Room unsere Klassen. Sichtbar ist in der App noch nichts, die Liste kommt in Schritt 4. Ob die Beispieldaten wirklich in der Datenbank landen, konnte ich nicht prüfen, weil kein Emulator lief. Das bitte selbst kurz testen (siehe unten).
+
+## Neue Dateien (`app/src/main/java/com/example/campusmarket/`)
+
+| Datei | Was sie tut |
+|---|---|
+| [data/Category.kt](app/src/main/java/com/example/campusmarket/data/Category.kt) | Enum mit den Kategorien (Bücher, Skripte, Taschenrechner, Technik, Möbel, Sonstiges) |
+| [data/Condition.kt](app/src/main/java/com/example/campusmarket/data/Condition.kt) | Enum für den Zustand (neu, wie neu, gut, gebraucht) |
+| [data/Ad.kt](app/src/main/java/com/example/campusmarket/data/Ad.kt) | `@Entity`: eine Anzeige = eine Zeile in der Tabelle `ads` |
+| [data/AdDao.kt](app/src/main/java/com/example/campusmarket/data/AdDao.kt) | Alle SQL-Zugriffe. Lesen liefert `Flow`, Schreiben ist `suspend` |
+| [data/AppDatabase.kt](app/src/main/java/com/example/campusmarket/data/AppDatabase.kt) | `@Database` mit der Tabelle `ads`, Version 1 |
+| [data/AdRepository.kt](app/src/main/java/com/example/campusmarket/data/AdRepository.kt) | Einziger Zugang der ViewModels zu den Daten, reicht an das DAO weiter |
+| [data/SampleData.kt](app/src/main/java/com/example/campusmarket/data/SampleData.kt) | Sechs Beispielanzeigen, eine davon schon „verkauft“ |
+| [CampusMarketApplication.kt](app/src/main/java/com/example/campusmarket/CampusMarketApplication.kt) | Baut Datenbank und Repository genau einmal und fügt beim Start die Beispieldaten ein |
+
+Außerdem steht in [AndroidManifest.xml](app/src/main/AndroidManifest.xml) jetzt `android:name=".CampusMarketApplication"`. Ohne diese Zeile würde Android unsere Klasse nie erzeugen.
+
+## Warum so
+
+- **Enums statt Strings für Kategorie und Zustand:** Es gibt keine Tippfehler wie „Buch“ gegen „Bücher“, und Filter in Schritt 13 können einfach mit `==` vergleichen. Room speichert Enums ohne extra Code als Text (`"BOOKS"`). Die deutschen Anzeigenamen kommen später in die UI über `strings.xml`, damit die Datenschicht keine Android-Ressourcen braucht.
+- **`isFavorite`, `isSold` und `createdAt` schon jetzt in `Ad`:** Das weicht leicht vom Plan ab (dort erst in Schritt 11/12). Sonst müssten wir später die Datenbank-Version erhöhen und eine Migration schreiben, und das ist mehr Code zum Erklären. Die Felder haben Standardwerte, stören also nicht.
+- **`Flow` beim Lesen:** Ändert sich die Tabelle, schickt Room die neue Liste von selbst. Damit ist die Datenbank die Single Source of Truth, und kein ViewModel muss nach dem Speichern „neu laden“.
+- **Beispieldaten über `count() == 0`:** Sie werden nur bei leerer Tabelle eingefügt. Nach einem Neustart tauchen sie also nicht doppelt auf. Das ist einfacher als ein `RoomDatabase.Callback` mit rohem SQL.
+- **`by lazy` in der Application:** Datenbank und Repository werden beim ersten Zugriff gebaut und danach immer wiederverwendet. Die ViewModel-Factories holen sich ab Schritt 4 das Repository über `application.repository`.
+- **`MainScope().launch`:** Room führt `suspend`-Funktionen selbst auf einem Hintergrund-Thread aus. Der Start blockiert also nicht, auch wenn wir auf dem Main-Scope starten.
+- **`exportSchema = false`:** Wir haben keine Migrationen, also brauchen wir keinen Schema-Export-Ordner. Ohne diese Angabe gäbe es eine Build-Warnung.
+- **Preis als `Double`:** Für eine Anzeige mit zwei Nachkommastellen reicht das und ist leicht zu erklären. Gerechnet wird mit dem Preis nicht, nur angezeigt und sortiert.
+
+## Testanleitung
+
+- Build im Terminal (Windows: `gradlew.bat`), Erwartung `BUILD SUCCESSFUL`:
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- **Beispieldaten prüfen:** App auf dem Emulator starten, dann in Android Studio **View → Tool Windows → App Inspection → Database Inspector** öffnen. Unter `campusmarket.db` steht die Tabelle `ads` mit 6 Zeilen.
+- **App-Neustart:** App schließen (aus „Zuletzt verwendet“ wegwischen) und neu starten. Es sind weiter genau 6 Zeilen, nicht 12.
+- **Daten löschen:** Einstellungen → Apps → CampusMarket → Speicher leeren, dann neu starten. Die 6 Beispielzeilen sind wieder da.
+- **Rotation, Flugmodus:** Die Oberfläche ist noch „Hello Android!“. Kein Absturz erwartet, die Datenbank braucht kein Netz.
+- Permission verweigert und ungültige Eingaben gibt es noch nicht.
+
+## Commit-Vorschlag
+
+```
+feat: Room-Datenschicht mit Repository und Beispieldaten
+```
+
+(`data/*`, `CampusMarketApplication.kt`, `AndroidManifest.xml`, `AI_USAGE.md`)
+
+Noch offen von letztem Mal: `.idea/` steht weiter in `app/.gitignore` statt in der `.gitignore` im Root. Deshalb zeigt `git status` den Ordner noch als untracked.
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Ganze Antwort
+- **Geändert:** nichts
+- **Abgelehnt:** nichts
+
+#### Geprüft / Getestet
+
+Build erfolgreich; im Database Inspector 6 Zeilen in `ads`, nach Neustart weiter 6.
+
+#### Commits
+
+Room-Datenschicht mit Repository und Beispieldaten.
 
 ---
 
