@@ -407,6 +407,111 @@ Room-Datenschicht mit Repository und Beispieldaten.
 
 ---
 
+### Eintrag 4: Schritt 3 – Navigation-Grundgerüst (Destinations, NavHost, Beispielcode entfernen)
+
+- **Datum:** 18.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Schau dir nochmal das komplette Projekt an und mach dann weiter mit Schritt 3
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git ls-files`, `git log --stat -3` und `git status` ausgeführt. Ergebnis: Schritt 2 ist committet (`1982a7c`), nur `.idea/` ist untracked.
+2. Gelesen: `AI_USAGE.md`, alle Gradle-Dateien (`app/build.gradle.kts`, `build.gradle.kts`, `gradle/libs.versions.toml`, `settings.gradle.kts`), beide `.gitignore`, `AndroidManifest.xml`, `CampusMarketApplication.kt`, `MainActivity.kt`, alle Dateien unter `data/`, `strings.xml`, `themes.xml`, `Theme.kt`, `ExampleUnitTest.kt`, `ExampleInstrumentedTest.kt`, `rules.keep`.
+3. `git show --stat 82ad9da` und `ls .idea` ausgeführt. Ergebnis: Der Commit hat `.idea/` aus dem Repo entfernt, aber keine Ignore-Regel hinzugefügt, die den ganzen Ordner abdeckt.
+4. `AI_USAGE.md`: Eintrag 4 mit dem Prompt angelegt.
+5. Neu angelegt: `ui/navigation/Destinations.kt`, `ui/navigation/AppNavHost.kt`, `ui/adlist/AdListScreen.kt`, `ui/addetail/AdDetailScreen.kt` (unter `app/src/main/java/com/example/campusmarket/`) und `app/src/main/res/drawable/ic_arrow_back.xml`.
+6. Geändert: `MainActivity.kt` (`Greeting` und `GreetingPreview` entfernt, ruft jetzt `AppNavHost()` auf), `res/values/strings.xml` (fünf neue Texte).
+7. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD FAILED**, „resource attr/colorControlNormal … not found“ in `ic_arrow_back.xml`.
+8. Die Zeile `android:tint="?attr/colorControlNormal"` aus `ic_arrow_back.xml` entfernt und den Kommentar ergänzt.
+9. `gradlew.bat assembleDebug testDebugUnitTest` erneut ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Kotlin-Warnungen.
+10. `adb devices` ausgeführt. Ergebnis: kein Gerät/Emulator verbunden, daher kein Laufzeittest.
+11. `CLAUDE.md` (Projektdaten: Regel für Icons als Vector-Drawable) und `AI_USAGE.md` (dieses Ergebnis) geändert.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 3 ist umgesetzt: typsichere Navigation mit AdList und AdDetail(adId), NavHost in der MainActivity, der Beispielcode Greeting ist weg. Debug-Build und Unit-Tests laufen durch; auf einem Gerät konnte ich es nicht testen, weil kein Emulator lief. Es ist nichts committet.“ Frage: „Soll ich mit Schritt 4 (Liste mit ViewModel) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 3 ist fertig: Die App startet jetzt über einen NavHost, und man kann von der Startseite zur Detailseite und wieder zurück. Debug-Build und Unit-Tests laufen durch. Auf einem Gerät konnte ich es nicht testen, weil kein Emulator lief. Bitte kurz selbst prüfen (siehe unten).
+
+## Projekt-Check vorab
+
+- Schritt 1 und 2 sind sauber committet, die Datenschicht passt zu den Regeln in CLAUDE.md (Room nur in DAO/Repository, Flow beim Lesen, `suspend` beim Schreiben, Application-Klasse im Manifest).
+- **`.idea/` ist weiter untracked.** Commit `82ad9da` hat den Ordner aus dem Repo entfernt, aber in der Root-`.gitignore` stehen nur einzelne Dateien wie `/.idea/workspace.xml`. Es fehlt eine Zeile `/.idea/` in der Root-`.gitignore`. Ich habe das nicht angefasst, weil es eure Entscheidung ist.
+- `ExampleUnitTest` und `ExampleInstrumentedTest` bleiben noch. Sie fliegen raus, sobald es echte Tests gibt (Schritt 5).
+
+## Neue Dateien (`app/src/main/java/com/example/campusmarket/`)
+
+| Datei | Was sie tut |
+|---|---|
+| [ui/navigation/Destinations.kt](app/src/main/java/com/example/campusmarket/ui/navigation/Destinations.kt) | Die zwei Ziele: `AdList` (Startseite) und `AdDetail(adId)` (nur die id) |
+| [ui/navigation/AppNavHost.kt](app/src/main/java/com/example/campusmarket/ui/navigation/AppNavHost.kt) | Der `NavHost`. Einziger Ort mit `navController` |
+| [ui/adlist/AdListScreen.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListScreen.kt) | Platzhalter mit `TopAppBar` und Button „Beispielanzeige öffnen“, plus Preview |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailScreen.kt) | Platzhalter mit Zurück-Pfeil, zeigt die übergebene id, plus Preview |
+| [res/drawable/ic_arrow_back.xml](app/src/main/res/drawable/ic_arrow_back.xml) | Zurück-Pfeil als Vector-Drawable |
+
+Geändert: [MainActivity.kt](app/src/main/java/com/example/campusmarket/MainActivity.kt) (Beispielcode `Greeting` raus, ruft nur noch `AppNavHost()` auf) und [strings.xml](app/src/main/res/values/strings.xml) (Texte der Platzhalter, „Zurück“, „Details“). In [CLAUDE.md](CLAUDE.md) steht eine neue Regel zu Icons.
+
+## Warum so
+
+- **`@Serializable` statt String-Routen:** `navController.navigate(AdDetail(5))` prüft der Compiler. Bei `"detail/5"` würde ein Tippfehler erst zur Laufzeit auffallen.
+- **Nur die id wird übergeben:** Die Detailseite holt sich die Anzeige ab Schritt 6 selbst aus Room. So zeigt sie immer den aktuellen Stand aus der Datenbank.
+- **Screens bekommen nur Callbacks** (`onAdClick`, `onBack`): Die Screens kennen keinen `navController`, dadurch lassen sie sich in der Preview ohne Navigation anzeigen.
+- **`navigateUp()` statt `popBackStack()`:** Tippt man zweimal schnell auf „Zurück“, könnte `popBackStack()` auch die Startseite entfernen, und der Bildschirm wäre leer. `navigateUp()` geht nie über die Startseite hinaus.
+- **Platzhalter-Screens:** Sie liegen schon in den Dateien, in denen die echten Screens entstehen. In Schritt 4 und 6 kommen dort Route, ViewModel und UiState dazu, und die Platzhalter-Texte samt Button werden wieder entfernt. Deshalb gibt es jetzt auch noch keine `…Route`-Funktion: Ohne ViewModel hätte sie nichts zu tun.
+- **Icon als Vector-Drawable statt `Icons.AutoMirrored.Filled.ArrowBack`:** Material 3 bringt die Icon-Bibliothek nicht mehr automatisch mit, und für ein paar Icons lohnt sich keine extra Bibliothek. `autoMirrored` dreht den Pfeil bei Sprachen, die von rechts nach links laufen.
+- **Ein Build-Fehler unterwegs:** Die Vorlage für das Icon nutzte die Farbe `?attr/colorControlNormal`. Die gibt es nur mit AppCompat, das wir nicht haben. Ich habe die Zeile entfernt. Das Compose-`Icon` färbt das Bild sowieso selbst in der Theme-Farbe ein.
+- **`@OptIn(ExperimentalMaterial3Api::class)`:** `TopAppBar` ist in Material 3 noch als experimentell markiert. Ohne die Annotation baut der Code nicht.
+
+## Testanleitung
+
+- Build im Terminal (Windows: `gradlew.bat`), Erwartung `BUILD SUCCESSFUL`:
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- **Navigation:** App starten. Oben steht „CampusMarket“, darunter der Platzhalter-Text und der Button. Button antippen → Seite „Details“ mit „Anzeige Nr. 1“. Pfeil oben links oder System-Zurück → wieder Startseite. Nochmal Zurück → App schließt sich.
+- **Rotation:** Auf der Detailseite das Gerät drehen. Man bleibt auf „Anzeige Nr. 1“ und landet nicht auf der Startseite.
+- **Doppelter Tipp:** Auf der Detailseite den Zurück-Pfeil zweimal schnell antippen. Die Startseite muss stehen bleiben, kein leerer Bildschirm.
+- **Flugmodus:** Kein Absturz, es gibt keine Netzwerkzugriffe.
+- **App-Neustart:** Die App startet wieder auf der Startseite. Die 6 Beispielzeilen im Database Inspector sind weiter da.
+- **Preview:** In Android Studio `AdListScreen.kt` und `AdDetailScreen.kt` öffnen, die Previews müssen rendern.
+- Permission verweigert und ungültige Eingaben gibt es noch nicht.
+
+## Commit-Vorschlag
+
+```
+feat: typsichere Navigation mit Liste und Detail als Platzhalter
+```
+
+(`ui/navigation/*`, `ui/adlist/AdListScreen.kt`, `ui/addetail/AdDetailScreen.kt`, `MainActivity.kt`, `strings.xml`, `ic_arrow_back.xml`, `CLAUDE.md`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Ganze Antwort
+- **Geändert:** Keine Änderung
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+App erfolgreich ohne Fehler gebaut
+
+#### Commits
+
+Typsichere Navigation mit Liste und Detail als Platzhalter
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

@@ -13,6 +13,7 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - Bibliotheksversionen müssen zu Kotlin 2.2 passen. Coil bleibt deshalb auf **3.3.0**, weil Coil 3.4 und neuer Kotlin 2.3/2.4 voraussetzen und der Build dann bricht.
 - Keine Bibliothek ohne Aufgabe: kein `room-ktx` (Flow/suspend steckt seit Room 2.7 in `room-runtime`), keine eigene `kotlinx-serialization-json` (Navigation bringt `serialization-core` mit).
 - Keine Netzwerkzugriffe, kein Login, kein Backend. Die App ist rein lokal.
+- Icons liegen als Vector-Drawable in `res/drawable` (z. B. `ic_arrow_back.xml`) und werden mit `painterResource` geladen. Keine `material-icons`-Bibliothek. Weil es kein AppCompat gibt, nutzen Drawables keine `?attr/…`-Farben.
 
 ## Arbeitsweise mit der KI
 
