@@ -512,6 +512,129 @@ Typsichere Navigation mit Liste und Detail als Platzhalter
 
 ---
 
+### Eintrag 5: Schritt 4 – Anzeigenliste mit ViewModel und UiState (Loading/Error/Ready)
+
+- **Datum:** 18.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 4
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -3` und `git diff .gitignore` ausgeführt, außerdem Eintrag 4 und das Ende von `AI_USAGE.md` gelesen. Ergebnis: Schritt 3 ist committet (`faa076a`), die Felder in Eintrag 4 hat das Team ausgefüllt, und in der Root-`.gitignore` steht neu `.idea/` (noch nicht committet).
+2. `AI_USAGE.md`: Eintrag 5 mit dem Prompt angelegt.
+3. Neu angelegt: `ui/adlist/AdListUiState.kt`, `ui/adlist/AdListViewModel.kt`.
+4. Geändert: `ui/adlist/AdListScreen.kt` (Platzhalter ersetzt durch `AdListRoute` und den stateless `AdListScreen` mit Loading/Error/Leer/Liste und zwei Previews), `ui/navigation/AppNavHost.kt` (ruft `AdListRoute` auf), `res/values/strings.xml` (Platzhalter-Texte raus, Texte für Fehler, „Erneut versuchen“, leere Liste und Preisformat rein).
+5. Die private Composable `AdList` per `sed` in `AdListContent` umbenannt, damit sie nicht mit der Destination `AdList` verwechselt wird.
+6. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen.
+7. `adb devices` ausgeführt. Ergebnis: `emulator-5554` verbunden.
+8. APK mit `adb install -r` installiert, App gestartet, Screenshot gemacht. Ergebnis: 6 Anzeigen sichtbar, aber Preise als „15.00 €“, weil der Emulator auf Englisch steht.
+9. Neu angelegt: `ui/PriceFormat.kt` (`formatPrice()` mit `Locale.GERMANY`) und `app/src/test/java/com/example/campusmarket/ui/PriceFormatTest.kt` (3 Tests). `AdListScreen.kt` nutzt jetzt `formatPrice()`, der String `price_format` und sein Kommentar sind per `sed` aus `strings.xml` entfernt.
+10. `app/src/test/java/com/example/campusmarket/ExampleUnitTest.kt` gelöscht, weil es jetzt einen echten Unit-Test gibt.
+11. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, `PriceFormatTest`: 3 Tests, 0 Fehler.
+12. Auf dem Emulator: dritte Anzeige angetippt, auf Querformat gedreht, Zurück gedrückt, Screenshots gemacht. Ergebnis: „Anzeige Nr. 3“ bleibt nach der Drehung stehen, Zurück führt zur Liste, Preise als „15,00 €“. Kein Eintrag unter `AndroidRuntime:E`. Danach wieder Hochformat eingestellt (automatisches Drehen bleibt im Emulator aus).
+13. Flugmodus eingeschaltet (`cmd connectivity airplane-mode enable`), App beendet und neu gestartet, Bildschirminhalt mit `uiautomator dump` gelesen. Ergebnis: Liste mit den Beispielanzeigen, kein Absturz. Flugmodus wieder ausgeschaltet. (Der erste Versuch scheiterte, weil Git Bash den Pfad `/sdcard/ui.xml` umgeschrieben hat; mit `MSYS_NO_PATHCONV=1` hat es geklappt.)
+14. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 4 ist umgesetzt: Die Startseite zeigt jetzt die Anzeigen aus Room über AdListViewModel und AdListUiState, mit Loading, Fehler mit „Erneut versuchen“, leerer Liste und Liste. Build, 3 Unit-Tests und ein Test auf dem Emulator (Antippen, Drehung, Zurück, Flugmodus, Neustart) liefen ohne Fehler. Es ist nichts committet.“ Frage: „Soll ich mit Schritt 5 (Suche mit Tests) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 4 ist fertig: Die Startseite zeigt jetzt die echten Anzeigen aus Room. Diesmal lief ein Emulator, deshalb habe ich auch auf dem Gerät getestet: Antippen, Drehung, Zurück, Flugmodus und Neustart liefen ohne Absturz.
+
+## Neue und geänderte Dateien (`app/src/main/java/com/example/campusmarket/`)
+
+| Datei | Was sie tut |
+|---|---|
+| [ui/adlist/AdListUiState.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListUiState.kt) | `isLoading`, `hasError`, `ads`: damit sind Loading, Error und Ready abgebildet |
+| [ui/adlist/AdListViewModel.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListViewModel.kt) | Sammelt `repository.getAllAds()` und schreibt das Ergebnis über `_uiState.update { … }` in den State. Die `Factory` holt das Repository aus `CampusMarketApplication` |
+| [ui/adlist/AdListScreen.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListScreen.kt) | `AdListRoute` (ViewModel + `collectAsStateWithLifecycle`) und der stateless `AdListScreen`, plus Previews für „Ready“ und „Error“ |
+| [ui/PriceFormat.kt](app/src/main/java/com/example/campusmarket/ui/PriceFormat.kt) | `formatPrice(12.5)` → „12,50 €“ |
+| [PriceFormatTest.kt](app/src/test/java/com/example/campusmarket/ui/PriceFormatTest.kt) | 3 JUnit-Tests für `formatPrice` |
+
+Außerdem: [AppNavHost.kt](app/src/main/java/com/example/campusmarket/ui/navigation/AppNavHost.kt) ruft jetzt `AdListRoute` statt des Platzhalters auf. In [strings.xml](app/src/main/res/values/strings.xml) sind die Platzhalter-Texte raus, die Texte für den Fehlerfall und die leere Liste sind neu. `ExampleUnitTest.kt` ist gelöscht, weil es jetzt einen echten Test gibt.
+
+## Warum so
+
+- **Drei Zustände in einer data class:** Der Screen entscheidet per `when` der Reihe nach: lädt → Spinner, Fehler → Text + „Erneut versuchen“, leere Liste → Hinweis, sonst die Liste. `isLoading` startet mit `true`, damit vor der ersten Antwort von Room kein „Noch keine Anzeigen“ aufblitzt.
+- **`hasError` statt Fehlertext im State:** Der ViewModel hat keinen `Context`, kann also keine Texte aus `strings.xml` holen. Der Screen wählt den Text selbst.
+- **`.catch { … }` vor `.collect`:** Wirft Room einen Fehler (z. B. kaputte Datenbankdatei), landet die App im Error-Zustand statt abzustürzen.
+- **`loadAds()` mit `loadJob?.cancel()`:** „Erneut versuchen“ startet das Sammeln neu, ohne dass zwei Sammler gleichzeitig laufen.
+- **Flow bleibt offen:** Nach Löschen oder Erstellen (Schritt 6/7) kommt die neue Liste von selbst, ohne Neuladen.
+- **`viewModel(factory = …)` in der Route:** Der ViewModel hängt am Back-Stack-Eintrag. Bei einer Drehung wird derselbe ViewModel wiederverwendet, die Liste muss nicht neu geladen werden.
+- **`items(ads, key = { it.id })`:** Compose erkennt jede Anzeige an ihrer id wieder, wenn sich die Liste ändert.
+- **`AdListContent` statt `AdList`:** So heißt schon unsere Destination, das wäre beim Lesen verwirrend gewesen.
+- **Preis mit `Locale.GERMANY`:** Zuerst stand das Format in `strings.xml`. Auf dem Emulator (Sprache Englisch) kam dann „15.00 €“ heraus. Weil die ganze App deutsch ist, formatiert `formatPrice()` jetzt immer deutsch. Als reine Kotlin-Funktion ist sie leicht zu testen.
+- **Noch nicht drin:** Bild (Schritt 8), Status-Badge „verkauft“ (Schritt 12) und der FAB zum Erstellen (Schritt 7). Ein FAB ohne Ziel wäre toter Code.
+
+## Was ich auf dem Emulator getestet habe
+
+- Start: 6 Anzeigen, neueste zuerst, Preise als „15,00 €“.
+- „Taschenrechner TI-30X“ angetippt → „Anzeige Nr. 3“.
+- Gedreht → bleibt auf „Anzeige Nr. 3“. Zurück → Liste im Querformat.
+- Flugmodus an, App beendet und neu gestartet → Liste ist da, kein Absturz.
+- Logcat: keine Abstürze (`AndroidRuntime:E` leer).
+
+Hinweis: Für den Drehtest habe ich im Emulator „Automatisch drehen“ ausgeschaltet. Bei Bedarf in den Schnelleinstellungen wieder einschalten.
+
+## Testanleitung für euch
+
+- Build und Tests (Windows: `gradlew.bat`), Erwartung `BUILD SUCCESSFUL`:
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- **Liste:** App starten, 6 Anzeigen mit Titel, Übergabeort und Preis. Eine antippen → Detailseite mit passender Nummer.
+- **Rotation:** In der Liste nach unten scrollen und drehen. Die Liste bleibt da, ohne dass kurz der Spinner erscheint.
+- **Flugmodus und App-Neustart:** Liste erscheint wie gewohnt.
+- **Leere Liste:** Im Database Inspector alle Zeilen in `ads` löschen → „Noch keine Anzeigen vorhanden.“ erscheint sofort, ohne Neustart (der Flow meldet die Änderung).
+- **Previews:** In `AdListScreen.kt` müssen „Ready“ und „Error“ rendern.
+- Den Error-Zustand kann man im laufenden Betrieb kaum auslösen. Dafür ist die Error-Preview da.
+- Permission verweigert und ungültige Eingaben gibt es noch nicht.
+
+## Commit-Vorschläge
+
+Die `.gitignore`-Änderung (`.idea/`) ist von euch und gehört nicht zu Schritt 4. Am besten getrennt committen:
+
+```
+chore: .idea komplett ignorieren
+```
+
+(`.gitignore`)
+
+```
+feat: Anzeigenliste mit ViewModel, UiState und Preisformat
+```
+
+(`ui/adlist/*`, `ui/PriceFormat.kt`, `PriceFormatTest.kt`, gelöschte `ExampleUnitTest.kt`, `AppNavHost.kt`, `strings.xml`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Ganze Antwort
+- **Geändert:** Nichts geändert
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+App gebaut und getestet, keine Fehler
+
+#### Commits
+
+1. .idea komplett ignorieren
+2. Anzeigenliste mit ViewModel, UiState und Preisformat
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

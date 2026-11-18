@@ -6,7 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.campusmarket.ui.addetail.AdDetailScreen
-import com.example.campusmarket.ui.adlist.AdListScreen
+import com.example.campusmarket.ui.adlist.AdListRoute
 
 // Der einzige Ort, an dem navigiert wird. Die Screens bekommen nur Callbacks
 // und wissen nicht, wohin es danach geht.
@@ -17,7 +17,7 @@ fun AppNavHost() {
 
     NavHost(navController = navController, startDestination = AdList) {
         composable<AdList> {
-            AdListScreen(
+            AdListRoute(
                 onAdClick = { adId -> navController.navigate(AdDetail(adId)) }
             )
         }

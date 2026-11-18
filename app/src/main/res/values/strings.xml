@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">CampusMarket</string>
     <string name="back">Zurück</string>
-    <string name="ad_list_placeholder">Hier entsteht die Anzeigenliste.</string>
-    <string name="ad_list_open_sample">Beispielanzeige öffnen</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="ad_list_error">Die Anzeigen konnten nicht geladen werden.</string>
+    <string name="ad_list_empty">Noch keine Anzeigen vorhanden.</string>
     <string name="ad_detail_title">Details</string>
     <string name="ad_detail_placeholder">Anzeige Nr. %1$d</string>
 </resources>
