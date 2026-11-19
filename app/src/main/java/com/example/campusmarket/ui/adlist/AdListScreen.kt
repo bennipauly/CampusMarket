@@ -5,14 +5,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -20,7 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -40,7 +49,8 @@ fun AdListRoute(onAdClick: (Long) -> Unit) {
     AdListScreen(
         uiState = uiState,
         onAdClick = onAdClick,
-        onRetry = viewModel::loadAds
+        onRetry = viewModel::loadAds,
+        onQueryChange = viewModel::onQueryChange
     )
 }
 
@@ -50,7 +60,8 @@ fun AdListRoute(onAdClick: (Long) -> Unit) {
 fun AdListScreen(
     uiState: AdListUiState,
     onAdClick: (Long) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onQueryChange: (String) -> Unit
 ) {
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) }
@@ -61,10 +72,62 @@ fun AdListScreen(
         when {
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(onRetry, contentModifier)
-            uiState.ads.isEmpty() -> EmptyContent(contentModifier)
-            else -> AdListContent(uiState.ads, onAdClick, contentModifier)
+            uiState.ads.isEmpty() -> MessageContent(stringResource(R.string.ad_list_empty), contentModifier)
+            else -> ReadyContent(uiState, onAdClick, onQueryChange, contentModifier)
         }
     }
+}
+
+// Ready: Suchfeld oben, darunter die Treffer oder ein Hinweis, dass nichts passt.
+@Composable
+private fun ReadyContent(
+    uiState: AdListUiState,
+    onAdClick: (Long) -> Unit,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier
+) {
+    Column(modifier = modifier) {
+        SearchField(query = uiState.query, onQueryChange = onQueryChange)
+        val visibleAds = uiState.visibleAds
+        if (visibleAds.isEmpty()) {
+            MessageContent(
+                stringResource(R.string.ad_list_no_results, uiState.query.trim()),
+                Modifier.fillMaxSize()
+            )
+        } else {
+            AdListContent(visibleAds, onAdClick, Modifier.fillMaxSize())
+        }
+    }
+}
+
+@Composable
+private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
+    // Nur zum Schließen der Tastatur, kein fachlicher State.
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        placeholder = { Text(stringResource(R.string.search_hint)) },
+        leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
+        trailingIcon = {
+            // Das Kreuz erscheint nur, wenn etwas im Feld steht.
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(
+                        painterResource(R.drawable.ic_close),
+                        contentDescription = stringResource(R.string.search_clear)
+                    )
+                }
+            }
+        },
+        singleLine = true,
+        // Die Enter-Taste zeigt eine Lupe und schließt die Tastatur. Gesucht wird schon beim Tippen.
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
+    )
 }
 
 @Composable
@@ -88,10 +151,11 @@ private fun ErrorContent(onRetry: () -> Unit, modifier: Modifier) {
     }
 }
 
+// Zentrierter Hinweistext, z. B. für eine leere Liste oder keine Suchtreffer.
 @Composable
-private fun EmptyContent(modifier: Modifier) {
+private fun MessageContent(text: String, modifier: Modifier) {
     Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
-        Text(stringResource(R.string.ad_list_empty))
+        Text(text)
     }
 }
 
@@ -125,7 +189,22 @@ private fun AdListScreenReadyPreview() {
         AdListScreen(
             uiState = AdListUiState(isLoading = false, ads = ads),
             onAdClick = {},
-            onRetry = {}
+            onRetry = {},
+            onQueryChange = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AdListScreenNoResultsPreview() {
+    CampusMarketTheme {
+        val ads = sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L) }
+        AdListScreen(
+            uiState = AdListUiState(isLoading = false, ads = ads, query = "Fahrrad"),
+            onAdClick = {},
+            onRetry = {},
+            onQueryChange = {}
         )
     }
 }
@@ -137,7 +216,8 @@ private fun AdListScreenErrorPreview() {
         AdListScreen(
             uiState = AdListUiState(isLoading = false, hasError = true),
             onAdClick = {},
-            onRetry = {}
+            onRetry = {},
+            onQueryChange = {}
         )
     }
 }

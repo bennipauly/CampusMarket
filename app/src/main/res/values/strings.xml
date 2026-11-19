@@ -4,6 +4,9 @@
     <string name="retry">Erneut versuchen</string>
     <string name="ad_list_error">Die Anzeigen konnten nicht geladen werden.</string>
     <string name="ad_list_empty">Noch keine Anzeigen vorhanden.</string>
+    <string name="search_hint">Anzeigen durchsuchen</string>
+    <string name="search_clear">Suche löschen</string>
+    <string name="ad_list_no_results">Keine Treffer für „%1$s“.</string>
     <string name="ad_detail_title">Details</string>
     <string name="ad_detail_placeholder">Anzeige Nr. %1$d</string>
 </resources>

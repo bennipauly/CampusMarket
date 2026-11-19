@@ -42,6 +42,12 @@ class AdListViewModel(private val repository: AdRepository) : ViewModel() {
         }
     }
 
+    // Wird bei jeder Eingabe im Suchfeld aufgerufen. Weil der Suchtext im UiState liegt,
+    // bleibt er bei einer Drehung erhalten.
+    fun onQueryChange(query: String) {
+        _uiState.update { it.copy(query = query) }
+    }
+
     companion object {
         // Baut den ViewModel mit dem Repository aus der Application-Klasse.
         val Factory = viewModelFactory {

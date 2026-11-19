@@ -635,6 +635,116 @@ App gebaut und getestet, keine Fehler
 
 ---
 
+### Eintrag 6: Schritt 5 – Suche als reine Funktion mit JUnit-Tests und Suchfeld in der Liste
+
+- **Datum:** 19.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 5
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -4` und `git diff HEAD --stat` ausgeführt, `AdListScreen.kt` und das Ende von `AI_USAGE.md` gelesen. Ergebnis: Arbeitsverzeichnis sauber, Schritt 4 und die `.gitignore` sind committet (`b310001`, `ccd81aa`), die Felder in Eintrag 5 hat das Team ausgefüllt.
+2. `AI_USAGE.md`: Eintrag 6 mit dem Prompt angelegt.
+3. Neu angelegt: `logic/AdSearch.kt` (`searchAds()`), `app/src/test/java/com/example/campusmarket/logic/AdSearchTest.kt` (10 Tests), `res/drawable/ic_search.xml`, `res/drawable/ic_close.xml`.
+4. Geändert: `ui/adlist/AdListUiState.kt` (`query` und berechnete Eigenschaft `visibleAds`), `ui/adlist/AdListViewModel.kt` (`onQueryChange()`), `res/values/strings.xml` (3 neue Texte), `ui/adlist/AdListScreen.kt` per Python-Skript (Suchfeld, `ReadyContent`, `MessageContent` statt `EmptyContent`, neuer Parameter `onQueryChange`, Preview „Keine Treffer“).
+5. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen. `AdSearchTest` 10/10, `PriceFormatTest` 3/3 bestanden.
+6. Auf dem Emulator (`emulator-5554`) installiert und gestartet, Suchfeld per `uiautomator dump` gefunden, „RECHNER“ eingetippt. Ergebnis: Im Feld stand nur „RECH“, Treffer „Taschenrechner TI-30X“. Nach der Drehung kam die zweite Eingabe „Fahrrad“ nicht an.
+7. Ursache gesucht: schnelles und langsames Tippen verglichen, Screenshot gemacht. Ergebnis: Die Stylus-Einführung von Gboard („Try out your stylus“) hatte sich über die App gelegt und die Eingaben abgefangen. Kein Fehler der App. Dialog mit „Cancel“ geschlossen.
+8. Erneut getestet: „RECHNER“ kommt vollständig an → nur „Taschenrechner TI-30X“. Ins Querformat und zurück gedreht → Suchtext und Treffer bleiben. Kreuz angetippt → Feld leer, alle 6 Anzeigen. „Fahrrad“ → „Keine Treffer für „Fahrrad“.“. Drei Leerzeichen → alle 6 Anzeigen. Lupe auf der Tastatur angetippt → Tastatur geschlossen (`mInputShown=false`). `AndroidRuntime:E` leer, kein Absturz.
+9. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 5 ist umgesetzt: searchAds() durchsucht Titel, Beschreibung und Übergabeort, 10 JUnit-Tests sind grün, und die Liste hat ein Suchfeld mit Kreuz und „Keine Treffer“-Hinweis. Auf dem Emulator liefen Suche, Drehung, Kreuz und Tastatur ohne Fehler. Es ist nichts committet.“ Frage: „Soll ich mit Schritt 6 (Detail mit Löschen) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 5 ist fertig: Die Liste hat jetzt ein Suchfeld, und die Suchlogik ist eine reine Kotlin-Funktion mit 10 JUnit-Tests. Build und alle 13 Tests sind grün. Auf dem Emulator habe ich Suche, Drehung, Kreuz, „keine Treffer“ und die Tastatur getestet, alles ohne Absturz.
+
+## Neue und geänderte Dateien
+
+| Datei | Was sie tut |
+|---|---|
+| [logic/AdSearch.kt](app/src/main/java/com/example/campusmarket/logic/AdSearch.kt) | `searchAds(ads, query)`: sucht in Titel, Beschreibung und Übergabeort, ohne Rücksicht auf Groß-/Kleinschreibung. Leerer Suchtext → alle Anzeigen |
+| [AdSearchTest.kt](app/src/test/java/com/example/campusmarket/logic/AdSearchTest.kt) | 10 Tests: leer, nur Leerzeichen, Treffer in jedem Feld, Groß-/Kleinschreibung, Leerzeichen außen, kein Treffer, Reihenfolge, leere Liste |
+| [AdListUiState.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListUiState.kt) | Neues Feld `query` und die berechnete Eigenschaft `visibleAds` |
+| [AdListViewModel.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListViewModel.kt) | `onQueryChange(query)` schreibt den Suchtext in den State |
+| [AdListScreen.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListScreen.kt) | Suchfeld mit Lupe und Kreuz, Hinweis „Keine Treffer für …“, neue Preview dafür |
+| `ic_search.xml`, `ic_close.xml` | Lupe und Kreuz als Vector-Drawables |
+
+## Warum so
+
+- **Eigenes Paket `logic`:** Hier landen auch Filter (Schritt 13) und Sortierung (Schritt 14). Die Dateien darin importieren nichts von Android, deshalb laufen die Tests ohne Emulator in wenigen Millisekunden.
+- **`visibleAds` wird berechnet, nicht gespeichert:** Im State liegen nur die Anzeigen aus der Datenbank (`ads`) und der Suchtext (`query`). Die Trefferliste ergibt sich daraus mit `get() = searchAds(ads, query)`. So können die beiden Listen nie auseinanderlaufen. Wird z. B. eine Anzeige gelöscht, stimmt die Trefferliste sofort. Bei ein paar Dutzend Anzeigen kostet das Neuberechnen nichts Spürbares.
+- **Suchtext im ViewModel:** Er liegt im `UiState` und überlebt deshalb eine Drehung, wie es CLAUDE.md verlangt. Das Composable hält keinen eigenen Text-State.
+- **`trim()`:** Wer aus Versehen ein Leerzeichen vor oder nach dem Wort tippt, bekommt trotzdem Treffer. Nur Leerzeichen zählen als leere Suche.
+- **Zwei verschiedene „leer“-Hinweise:** Ist die Datenbank leer, steht wie bisher „Noch keine Anzeigen vorhanden.“ ohne Suchfeld. Gibt es Anzeigen, aber keine passt, bleibt das Suchfeld sichtbar und darunter steht „Keine Treffer für „…“.“. So kann man die Suche direkt ändern.
+- **`EmptyContent` heißt jetzt `MessageContent(text)`:** Dieselbe zentrierte Textanzeige wird für beide Hinweise benutzt.
+- **Kreuz nur bei Text, Lupe auf der Tastatur:** Das Kreuz leert das Feld über `onQueryChange("")`. `ImeAction.Search` zeigt auf der Tastatur eine Lupe, die nur die Tastatur schließt, weil schon beim Tippen gesucht wird. `LocalFocusManager` ist reiner UI-Zustand und gehört deshalb ins Composable, nicht in den ViewModel.
+
+## Ein Stolperstein beim Testen
+
+Beim ersten Versuch stand im Feld nur „RECH“ statt „RECHNER“, und nach der Drehung kam die nächste Eingabe nicht an. Ursache war nicht die App: Gboard hatte im Emulator seine Stylus-Einführung („Try out your stylus“) über die App gelegt und die Eingaben abgefangen. Nach dem Schließen kam „RECHNER“ vollständig an. Falls euch das im Emulator auch passiert: unten auf „Cancel“ tippen.
+
+## Was ich auf dem Emulator getestet habe
+
+- „RECHNER“ → nur „Taschenrechner TI-30X“ (Groß-/Kleinschreibung egal).
+- Ins Querformat und zurück gedreht → Suchtext und Treffer bleiben.
+- Kreuz → Feld leer, alle 6 Anzeigen.
+- „Fahrrad“ → „Keine Treffer für „Fahrrad“.“
+- Nur drei Leerzeichen → alle 6 Anzeigen, kein Absturz.
+- Lupe auf der Tastatur → Tastatur schließt sich.
+- Flugmodus habe ich diesmal nicht extra getestet. Die Suche läuft nur lokal im Speicher.
+
+## Testanleitung für euch
+
+- Build und Tests (Windows: `gradlew.bat`), Erwartung `BUILD SUCCESSFUL`:
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- Die Tests einzeln: In Android Studio `AdSearchTest.kt` öffnen und auf den grünen Pfeil neben `class AdSearchTest` klicken.
+- **Suche:** „bibliothek“ eingeben → „Analysis 1 – Lehrbuch“ und „Programmieren in Kotlin“ (Treffer im Übergabeort).
+- **Rotation:** Mit Suchtext drehen → Text und Treffer bleiben.
+- **Ungültige Eingaben:** nur Leerzeichen, Sonderzeichen wie `%` oder `"` → kein Absturz.
+- **Treffer antippen:** öffnet weiter die richtige Detailseite. Nach dem Zurück steht der Suchtext noch da, weil der ViewModel auf dem Back-Stack weiterlebt.
+- **App-Neustart:** Das Suchfeld ist wieder leer. Das ist gewollt: Der Suchtext ist kein gespeicherter Wert, nur die Anzeigen liegen in Room.
+- **Previews:** In `AdListScreen.kt` rendern „Ready“, „NoResults“ und „Error“.
+- Permission verweigert gibt es noch nicht.
+
+## Commit-Vorschlag
+
+```
+feat: Suche in der Anzeigenliste mit JUnit-Tests
+```
+
+(`logic/AdSearch.kt`, `AdSearchTest.kt`, `ui/adlist/*`, `ic_search.xml`, `ic_close.xml`, `strings.xml`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** alles
+- **Geändert:** nichts
+- **Abgelehnt:** nichts
+
+#### Geprüft / Getestet
+
+App gebaut, Suchfilter getestet
+
+#### Commits
+
+Suche in der Anzeigenliste mit JUnit-Tests
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._
