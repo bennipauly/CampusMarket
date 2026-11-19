@@ -745,6 +745,156 @@ Suche in der Anzeigenliste mit JUnit-Tests
 
 ---
 
+### Eintrag 7: Schritt 6 – Detailansicht mit Löschen, dazu Frage zum Paketnamen
+
+- **Datum:** 19.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 6. Wir haben außerdem noch gesehen, dass unser Package com.example.campusmarket heißt. Kann man das einfach ändern?
+````
+
+#### Rückfrage der KI und Antwort (Prompt 2)
+
+Die KI hat vor dem Start im Auswahldialog der App gefragt: „Schritt 5 (Suche) ist noch nicht committet. Schritt 6 ändert auch strings.xml, AI_USAGE.md und weitere Dateien, die Commits würden sich also vermischen. Wie wollt ihr vorgehen?“ Optionen: „Wir committen erst (Recommended)“ / „Trotzdem weitermachen“.
+
+Antwort im Dialog (Freitext):
+
+````text
+Jetzt ist der commit durch
+````
+
+#### Ergebnis der KI zu Prompt 1 und 2 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log`, `git diff HEAD~1 --stat` und `git diff --ignore-cr-at-eol` ausgeführt, das Ende von `AI_USAGE.md` gelesen und alle Gradle-/XML-Dateien nach `campusmarket` durchsucht. Ergebnis: Schritt 5 war noch nicht committet. Die Änderung an `AdListScreen.kt` waren nur Zeilenenden (CRLF/LF), inhaltlich identisch. Der Paketname steht in `app/build.gradle.kts` (`namespace`, `applicationId`).
+2. Rückfrage im Auswahldialog gestellt (siehe Prompt 2). Antwort: „Jetzt ist der commit durch“.
+3. `git status` und `git log --oneline -2` ausgeführt. Ergebnis: Commit `95459bf` „Suche in der Anzeigenliste mit JUnit-Tests“, Arbeitsverzeichnis sauber.
+4. `AI_USAGE.md`: Eintrag 7 mit beiden Prompts angelegt.
+5. Neu angelegt: `ui/StateContent.kt` (`LoadingContent`, `ErrorContent`, `MessageContent`), `ui/Labels.kt` (deutsche Texte für `Category` und `Condition`), `ui/addetail/AdDetailUiState.kt`, `ui/addetail/AdDetailViewModel.kt`, `res/drawable/ic_delete.xml`.
+6. Geändert: `ui/adlist/AdListScreen.kt` per Python-Skript (eigene Loading-/Error-/Message-Composables entfernt, nutzt jetzt die aus `StateContent.kt`), `ui/addetail/AdDetailScreen.kt` (Platzhalter ersetzt durch `AdDetailRoute`, stateless `AdDetailScreen`, Lösch-Dialog, zwei Previews), `res/values/strings.xml` per Python-Skript (`ad_detail_placeholder` entfernt, 23 Texte neu), `ui/navigation/AppNavHost.kt` (ruft `AdDetailRoute` auf).
+7. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen.
+8. Auf dem Emulator (`emulator-5554`) installiert, „Taschenrechner TI-30X“ geöffnet, Screenshot gemacht. Ergebnis: Titel, Preis, Kategorie „Taschenrechner“, Zustand „Gut“, Übergabeort, Status „Verfügbar“, Beschreibung, Mülleimer oben rechts.
+9. Mülleimer angetippt → Dialog „Anzeige löschen?“. Mit offenem Dialog ins Querformat gedreht → Dialog bleibt offen. Das Hilfsskript zum Antippen von „Abbrechen“ brach mit einem Bash-Rechenfehler ab (Fehler im Skript, nicht in der App) und wurde korrigiert.
+10. „Abbrechen“ → Anzeige bleibt. Zurück ins Hochformat, erneut Mülleimer, „Löschen“ → zurück in der Liste, nur noch 5 Anzeigen. App beendet und neu gestartet → weiter 5 Anzeigen. `AndroidRuntime:E` leer.
+11. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 6 ist umgesetzt: Die Detailseite lädt die Anzeige über AdDetailViewModel mit Loading/Error/Ready, und Löschen läuft über einen Bestätigungsdialog. Build und Emulator-Test (Dialog, Drehung, Abbrechen, Löschen, Neustart) liefen fehlerfrei. Der Paketname lässt sich ändern, das ist aber ein eigener Schritt. Es ist nichts committet.“ Frage: „Soll ich als Nächstes den Paketnamen ändern?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 6 ist fertig: Die Detailseite zeigt die echte Anzeige aus Room, und Löschen geht nur über einen Bestätigungsdialog. Auf dem Emulator habe ich Detail, Dialog, Drehung, Abbrechen, Löschen und Neustart getestet, alles ohne Absturz. Zum Paketnamen steht unten eine eigene Antwort.
+
+## Neue und geänderte Dateien (`app/src/main/java/com/example/campusmarket/`)
+
+| Datei | Was sie tut |
+|---|---|
+| [ui/addetail/AdDetailUiState.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailUiState.kt) | `isLoading`, `hasError`, `ad`, dazu `showDeleteDialog` und `isDeleted` |
+| [ui/addetail/AdDetailViewModel.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailViewModel.kt) | Beobachtet `repository.getAd(adId)`, steuert den Dialog und löscht |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailScreen.kt) | `AdDetailRoute` + stateless `AdDetailScreen`: Titel, Preis, Kategorie, Zustand, Übergabeort, Status, Beschreibung, Mülleimer in der `TopAppBar`, Lösch-Dialog. Previews „Ready“ und „Dialog“ |
+| [ui/StateContent.kt](app/src/main/java/com/example/campusmarket/ui/StateContent.kt) | `LoadingContent`, `ErrorContent`, `MessageContent` für beide Screens. Vorher standen sie privat in `AdListScreen.kt` |
+| [ui/Labels.kt](app/src/main/java/com/example/campusmarket/ui/Labels.kt) | `Category.BOOKS` → „Bücher“, `Condition.LIKE_NEW` → „Wie neu“ usw. |
+
+Außerdem: `ic_delete.xml` (Mülleimer), neue Texte in `strings.xml` (der Platzhalter „Anzeige Nr. …“ ist raus), `AppNavHost.kt` ruft `AdDetailRoute` auf.
+
+## Warum so
+
+- **Nur die id kommt an:** `AdDetailViewModel.factory(adId)` baut den ViewModel mit der id aus der Navigation. Weil der ViewModel am Back-Stack-Eintrag hängt, wird er bei einer Drehung nicht neu gebaut.
+- **Vier Fälle im Screen:** lädt → Spinner, Fehler → Text + „Erneut versuchen“, `ad == null` → „Diese Anzeige gibt es nicht mehr.“, sonst die Anzeige. Der dritte Fall greift, wenn die id nicht (mehr) in der Datenbank ist.
+- **Dialog-Zustand im ViewModel:** `showDeleteDialog` liegt im UiState. Darum ist der Dialog nach einer Drehung noch offen. Ohne das würde er verschwinden, und man wüsste nicht, ob gelöscht wurde.
+- **Erst Beobachten stoppen, dann löschen:** Der Flow aus Room würde nach dem Löschen `null` schicken, und der Screen würde kurz „gibt es nicht mehr“ zeigen. Deshalb ruft `onDeleteConfirm()` vorher `loadJob?.cancel()` auf.
+- **Zurück nach dem Löschen:** Der ViewModel navigiert nicht selbst. Er setzt nur `isDeleted = true`. Die Route sieht das in einem `LaunchedEffect` und ruft `onBack()` auf, der NavHost macht dann `navigateUp()`. So bleibt die Regel „Nur der NavHost navigiert“ erfüllt.
+- **`try/catch` beim Löschen:** Schlägt das Löschen fehl, zeigt der Screen den Fehlerzustand, statt abzustürzen.
+- **Mülleimer nur bei geladener Anzeige:** Beim Laden oder bei „gibt es nicht mehr“ gibt es nichts zu löschen.
+- **`Labels.kt` mit `when` ohne `else`:** Kommt später eine neue Kategorie dazu, meldet der Compiler sofort, dass ihr Text fehlt. Die Funktionen nutzen wir auch für Filter (Schritt 13) und das Formular (Schritt 7).
+- **Status schon sichtbar:** `isSold` gibt es in der Datenbank seit Schritt 2. Umschalten kommt erst in Schritt 12, anzeigen kostet nur eine Zeile.
+- **Bild fehlt noch:** Das kommt mit Kamera und Coil in Schritt 8.
+
+## Was ich auf dem Emulator getestet habe
+
+- „Taschenrechner TI-30X“ öffnen → alle Felder korrekt, Kategorie und Zustand auf Deutsch.
+- Mülleimer → Dialog „Anzeige löschen?“ mit dem Titel.
+- Mit offenem Dialog drehen → Dialog bleibt offen.
+- „Abbrechen“ → Anzeige bleibt.
+- „Löschen“ → zurück zur Liste, 5 statt 6 Anzeigen.
+- App beenden und neu starten → weiter 5 Anzeigen.
+- Logcat: kein Absturz.
+
+Auf dem Emulator fehlt jetzt der Taschenrechner. Um die 6 Beispielanzeigen zurückzubekommen: Einstellungen → Apps → CampusMarket → Speicher → Speicher leeren.
+
+## Testanleitung für euch
+
+- Build und Tests (Windows: `gradlew.bat`):
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- **Detail:** „Programmieren in Kotlin“ öffnen → Status „Verkauft“.
+- **Rotation:** auf der Detailseite und mit offenem Dialog drehen.
+- **Abbrechen / außerhalb tippen / System-Zurück** bei offenem Dialog → Dialog zu, nichts gelöscht.
+- **Löschen** → Liste ohne die Anzeige. Mit aktiver Suche: Die Treffer aktualisieren sich ebenfalls.
+- **App-Neustart:** gelöschte Anzeige bleibt weg.
+- **Flugmodus:** kein Unterschied, alles lokal.
+- **Previews** in `AdDetailScreen.kt`: „Ready“ und „DeleteDialog“.
+
+## Commit-Vorschlag
+
+```
+feat: Detailansicht mit Löschen und Bestätigungsdialog
+```
+
+(`ui/addetail/*`, `ui/StateContent.kt`, `ui/Labels.kt`, `ui/adlist/AdListScreen.kt`, `ui/navigation/AppNavHost.kt`, `ic_delete.xml`, `strings.xml`, `AI_USAGE.md`)
+
+## Eure Frage: Kann man `com.example.campusmarket` einfach ändern?
+
+Ja, aber nicht „einfach“ mit einer Zeile. Es sind zwei Dinge, die gerade zufällig gleich heißen:
+
+| | Wo | Wofür |
+|---|---|---|
+| **applicationId** | `app/build.gradle.kts` | Die Kennung der App auf dem Gerät (und im Play Store) |
+| **namespace + Kotlin-Pakete** | `app/build.gradle.kts`, `package …` in jeder `.kt`-Datei, die Ordner `com/example/campusmarket` | Wo der Code liegt und wie die `R`-Klasse heißt |
+
+**Muss man es ändern?** Für die Abgabe nicht, die App baut und läuft so. `com.example` ist aber nur ein Platzhalter von Android Studio (Google Play lehnt es sogar ab), und ein eigener Name wirkt sauberer. Üblich ist eine umgedrehte Domain, z. B. `de.dhbw.campusmarket`.
+
+**So geht es in Android Studio:**
+
+1. Im Projektfenster oben auf die Ansicht „Project“ (nicht „Android“) umstellen.
+2. Unter `app/src/main/java` den Ordner `com.example.campusmarket` aufklappen, `example` markieren → Rechtsklick → **Refactor → Rename** (Shift+F6) → „Rename package“ wählen → neuen Namen eingeben. Für `com` dasselbe, falls auch das sich ändern soll. Android Studio passt alle `package`- und `import`-Zeilen und die Ordner an, auch unter `src/test` und `src/androidTest`.
+3. In `app/build.gradle.kts` `namespace` und `applicationId` von Hand ändern.
+4. „Sync Project with Gradle Files“, dann Build → Clean, danach neu bauen und die Tests laufen lassen.
+5. `CLAUDE.md` (Projektdaten) anpassen.
+
+**Was man wissen muss:**
+
+- Eine neue `applicationId` ist für Android eine **andere App**. Die alte bleibt auf dem Emulator installiert und sollte deinstalliert werden. Die neue startet mit leerer Datenbank, also wieder mit den 6 Beispielanzeigen.
+- `ExampleInstrumentedTest` prüft fest `"com.example.campusmarket"` und würde danach fehlschlagen. Er ist ohnehin noch Beispielcode und sollte bei der Gelegenheit raus.
+- Fast jede Datei ändert sich. Das gehört in einen **eigenen Commit**, getrennt von Schritt 6. Je früher, desto weniger Dateien sind betroffen. Git erkennt die verschobenen Dateien als Umbenennungen, die Historie geht nicht verloren.
+
+Ich habe noch nichts daran geändert. Wenn ihr wollt, mache ich das als eigenen Schritt, sobald Schritt 6 committet ist. Dafür brauche ich nur den gewünschten Namen.
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** alles
+- **Geändert:** nichts
+- **Abgelehnt:** nichts
+
+#### Geprüft / Getestet
+
+App gebaut, Löschfunktion getestet
+
+#### Commits
+
+Detailansicht mit Löschen und Bestätigungsdialog
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

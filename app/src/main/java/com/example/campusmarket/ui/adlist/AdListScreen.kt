@@ -1,8 +1,6 @@
 package com.example.campusmarket.ui.adlist
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,8 +9,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -37,6 +32,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.campusmarket.R
 import com.example.campusmarket.data.Ad
 import com.example.campusmarket.data.sampleAds
+import com.example.campusmarket.ui.ErrorContent
+import com.example.campusmarket.ui.LoadingContent
+import com.example.campusmarket.ui.MessageContent
 import com.example.campusmarket.ui.formatPrice
 import com.example.campusmarket.ui.theme.CampusMarketTheme
 
@@ -71,7 +69,7 @@ fun AdListScreen(
             .padding(innerPadding)
         when {
             uiState.isLoading -> LoadingContent(contentModifier)
-            uiState.hasError -> ErrorContent(onRetry, contentModifier)
+            uiState.hasError -> ErrorContent(stringResource(R.string.ad_list_error), onRetry, contentModifier)
             uiState.ads.isEmpty() -> MessageContent(stringResource(R.string.ad_list_empty), contentModifier)
             else -> ReadyContent(uiState, onAdClick, onQueryChange, contentModifier)
         }
@@ -128,35 +126,6 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
     )
-}
-
-@Composable
-private fun LoadingContent(modifier: Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-private fun ErrorContent(onRetry: () -> Unit, modifier: Modifier) {
-    Column(
-        modifier = modifier.padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(stringResource(R.string.ad_list_error))
-        Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) {
-            Text(stringResource(R.string.retry))
-        }
-    }
-}
-
-// Zentrierter Hinweistext, z. B. für eine leere Liste oder keine Suchtreffer.
-@Composable
-private fun MessageContent(text: String, modifier: Modifier) {
-    Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {
-        Text(text)
-    }
 }
 
 @Composable

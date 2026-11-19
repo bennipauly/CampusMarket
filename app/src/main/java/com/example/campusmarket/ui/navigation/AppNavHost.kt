@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.campusmarket.ui.addetail.AdDetailScreen
+import com.example.campusmarket.ui.addetail.AdDetailRoute
 import com.example.campusmarket.ui.adlist.AdListRoute
 
 // Der einzige Ort, an dem navigiert wird. Die Screens bekommen nur Callbacks
@@ -24,7 +24,7 @@ fun AppNavHost() {
         composable<AdDetail> { backStackEntry ->
             // toRoute() baut aus dem Back-Stack-Eintrag wieder unser AdDetail-Objekt.
             val detail: AdDetail = backStackEntry.toRoute()
-            AdDetailScreen(
+            AdDetailRoute(
                 adId = detail.adId,
                 // navigateUp statt popBackStack: Ein doppelter Tipp auf "Zurück"
                 // kann so nie die Startseite vom Stack werfen.
