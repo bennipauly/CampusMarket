@@ -6,19 +6,17 @@ plugins {
 }
 
 android {
-    namespace = "com.example.campusmarket"
+    namespace = "de.dhbw.campusmarket"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.campusmarket"
+        applicationId = "de.dhbw.campusmarket"
         minSdk = 26
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -54,10 +52,5 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.coil.compose)
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

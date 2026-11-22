@@ -895,6 +895,54 @@ Detailansicht mit Löschen und Bestätigungsdialog
 
 ---
 
+### Eintrag 8: Paketname auf `de.dhbw.campusmarket` ändern, Frage zum Projektfortschritt
+
+- **Datum:** 22.11.2026
+- **Autor:** eintragen
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja ändere den Paketnamen, dann Schritt 7. Wie viel Prozent vom Projekt sind momentan schon fertig?
+````
+
+Hinweis: Der Paketname `de.dhbw.campusmarket` stammt aus dem Vorschlag der KI in Eintrag 7 (Antwort-Button „Ja, de.dhbw.campusmarket“). Der Teil „dann Schritt 7“ wird in Eintrag 9 bearbeitet.
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen (Paketname):**
+
+1. `git status`, `git log --oneline -3`, `git diff HEAD --ignore-cr-at-eol --stat` ausgeführt, Ende von `AI_USAGE.md` gelesen, alle `.kt`-Dateien aufgelistet. Ergebnis: Schritt 6 ist committet (`ebec4e4`), Arbeitsverzeichnis sauber.
+2. `AI_USAGE.md`: Eintrag 8 mit dem Prompt angelegt.
+3. Ordner verschoben (`mv`, kein `git mv`): `app/src/main/java/com/example/campusmarket` → `app/src/main/java/de/dhbw/campusmarket`, ebenso unter `app/src/test`. Leere Ordner `com/example` gelöscht.
+4. `app/src/androidTest/java/com/example/campusmarket/ExampleInstrumentedTest.kt` gelöscht (Beispielcode, prüfte fest auf `com.example.campusmarket`), der leere Ordner `app/src/androidTest` ist damit weg.
+5. Per `sed` in allen 26 `.kt`-Dateien und in `app/build.gradle.kts` `com.example.campusmarket` durch `de.dhbw.campusmarket` ersetzt (`package`, `import`, `namespace`, `applicationId`). Danach `grep` nach `com.example`: keine Treffer mehr.
+6. Nicht mehr gebrauchte Test-Bibliotheken entfernt: in `app/build.gradle.kts` `testInstrumentationRunner`, alle `androidTestImplementation`-Zeilen und `debugImplementation(libs.androidx.compose.ui.test.manifest)`; in `gradle/libs.versions.toml` `junitVersion`, `espressoCore`, `androidx-junit`, `androidx-espresso-core`, `androidx-compose-ui-test-manifest`, `androidx-compose-ui-test-junit4`. Leere Zeile in `defaultConfig` per Python entfernt.
+7. `CLAUDE.md` geändert: Paketname `de.dhbw.campusmarket`; Regel zum Beispielcode ersetzt durch „Beispielcode ist entfernt, keine Instrumented Tests und keine Espresso-/Compose-Test-Bibliotheken“.
+8. `gradlew.bat clean assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL** (8 Minuten wegen `clean`), keine Warnungen, `de.dhbw.campusmarket.logic.AdSearchTest` 10/10 und `de.dhbw.campusmarket.ui.PriceFormatTest` 3/3 bestanden.
+9. Auf dem Emulator `com.example.campusmarket` deinstalliert, neue APK installiert, gestartet. Erster Start: Emulator meldete „System UI isn't responding“ (Problem des Emulators). „Wait“ angetippt, App neu gestartet: Liste mit allen 6 Beispielanzeigen (neue, leere Datenbank), kein Absturz in Logcat.
+
+Ältere Einträge in diesem Logbuch verlinken noch auf Pfade mit `com/example/campusmarket`. Sie bleiben so, weil sie den damaligen Stand dokumentieren.
+
+**Antwort der KI:** Die Antwort auf diesen Prompt (Paketname, Prozentfrage und Schritt 7) steht vollständig in Eintrag 9, weil eine einzige Antwort alle drei Teile abdeckt.
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** eintragen
+- **Geändert:** eintragen
+- **Abgelehnt:** eintragen
+
+#### Geprüft / Getestet
+
+eintragen
+
+#### Commits
+
+eintragen
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

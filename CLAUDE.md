@@ -6,7 +6,7 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 
 ## Projektdaten
 
-- Paket / applicationId: `com.example.campusmarket`
+- Paket / namespace / applicationId: `de.dhbw.campusmarket` (bis Eintrag 8 im Logbuch hieß es `com.example.campusmarket`)
 - Compose-Theme: `CampusMarketTheme` (`ui/theme/Theme.kt`), XML-Theme: `Theme.CampusMarket`
 - Build: Gradle 9.6.0, AGP 9.4.1, Kotlin 2.2.10, Version Catalog in `gradle/libs.versions.toml`
 - compileSdk / targetSdk 37, **minSdk 26**
@@ -30,7 +30,7 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - Einfacher, gut lesbarer Kotlin-Code auf Studierenden-Niveau. Keine unnötigen Abstraktionen (keine Interfaces mit nur einer Implementierung, keine generischen Basisklassen, kein UseCase-Layer).
 - Nur Bibliotheken, die wirklich gebraucht werden: Compose/Material 3, Lifecycle-ViewModel, Navigation Compose, kotlinx-serialization, Room + KSP, Coil, JUnit (+ kotlinx-coroutines-test, falls nötig).
 - **Kein Hilt, kein Koin**, keine anderen DI-Frameworks.
-- Kein toter Code: keine ungenutzten Funktionen, Imports, Ressourcen oder auskommentierten Blöcke. Der Android-Studio-Beispielcode (`Greeting`, `ExampleUnitTest`, `ExampleInstrumentedTest`) wird entfernt, sobald er ersetzt ist.
+- Kein toter Code: keine ungenutzten Funktionen, Imports, Ressourcen oder auskommentierten Blöcke. Der Android-Studio-Beispielcode ist entfernt. Es gibt keine Instrumented Tests (`src/androidTest`) und deshalb auch keine Espresso-/Compose-Test-Bibliotheken.
 - Kleine Einheiten: eine Datei pro Screen-Teil (Route/Screen, ViewModel, UiState), Funktionen kurz halten.
 - Alle für Nutzer sichtbaren Texte stehen in `res/values/strings.xml` (Deutsch).
 
