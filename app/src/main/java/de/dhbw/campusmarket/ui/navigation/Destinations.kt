@@ -12,3 +12,7 @@ object AdList
 // Detailseite. Übergeben wird nur die id, die Anzeige selbst lädt der Screen aus der Datenbank.
 @Serializable
 data class AdDetail(val adId: Long)
+
+// Formular zum Erstellen einer neuen Anzeige.
+@Serializable
+object AdForm

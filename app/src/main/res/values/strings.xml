@@ -31,4 +31,13 @@
     <string name="condition_like_new">Wie neu</string>
     <string name="condition_good">Gut</string>
     <string name="condition_used">Gebraucht</string>
+    <string name="add_ad">Anzeige erstellen</string>
+    <string name="ad_form_title_create">Neue Anzeige</string>
+    <string name="label_title">Titel</string>
+    <string name="label_price">Preis in €</string>
+    <string name="save">Speichern</string>
+    <string name="error_title">Bitte einen Titel eingeben (höchstens %1$d Zeichen).</string>
+    <string name="error_price">Bitte einen Preis wie 12,50 eingeben (höchstens 99999,99).</string>
+    <string name="error_location">Bitte einen Übergabeort eingeben.</string>
+    <string name="error_save">Speichern hat nicht geklappt. Bitte erneut versuchen.</string>
 </resources>

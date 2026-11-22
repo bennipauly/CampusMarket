@@ -2,6 +2,7 @@ package de.dhbw.campusmarket.ui.adlist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,13 +42,14 @@ import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
 // Route: holt den ViewModel und reicht State und Callbacks an den Screen weiter.
 @Composable
-fun AdListRoute(onAdClick: (Long) -> Unit) {
+fun AdListRoute(onAdClick: (Long) -> Unit, onAddClick: () -> Unit) {
     val viewModel: AdListViewModel = viewModel(factory = AdListViewModel.Factory)
     // Sammelt nur, solange der Screen sichtbar ist.
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     AdListScreen(
         uiState = uiState,
         onAdClick = onAdClick,
+        onAddClick = onAddClick,
         onRetry = viewModel::loadAds,
         onQueryChange = viewModel::onQueryChange
     )
@@ -58,11 +61,18 @@ fun AdListRoute(onAdClick: (Long) -> Unit) {
 fun AdListScreen(
     uiState: AdListUiState,
     onAdClick: (Long) -> Unit,
+    onAddClick: () -> Unit,
     onRetry: () -> Unit,
     onQueryChange: (String) -> Unit
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) }
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
+        // FAB unten rechts: Material-Konvention für "Neues anlegen".
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddClick) {
+                Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.add_ad))
+            }
+        }
     ) { innerPadding ->
         val contentModifier = Modifier
             .fillMaxSize()
@@ -130,7 +140,8 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
 
 @Composable
 private fun AdListContent(ads: List<Ad>, onAdClick: (Long) -> Unit, modifier: Modifier) {
-    LazyColumn(modifier = modifier) {
+    // Unten Platz lassen, damit der FAB die letzte Anzeige nicht verdeckt.
+    LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = 88.dp)) {
         // key = id: Compose erkennt dieselbe Anzeige wieder, wenn sich die Liste ändert.
         items(ads, key = { it.id }) { ad ->
             AdListItem(ad = ad, onClick = { onAdClick(ad.id) })
@@ -158,6 +169,7 @@ private fun AdListScreenReadyPreview() {
         AdListScreen(
             uiState = AdListUiState(isLoading = false, ads = ads),
             onAdClick = {},
+            onAddClick = {},
             onRetry = {},
             onQueryChange = {}
         )
@@ -172,6 +184,7 @@ private fun AdListScreenNoResultsPreview() {
         AdListScreen(
             uiState = AdListUiState(isLoading = false, ads = ads, query = "Fahrrad"),
             onAdClick = {},
+            onAddClick = {},
             onRetry = {},
             onQueryChange = {}
         )
@@ -185,6 +198,7 @@ private fun AdListScreenErrorPreview() {
         AdListScreen(
             uiState = AdListUiState(isLoading = false, hasError = true),
             onAdClick = {},
+            onAddClick = {},
             onRetry = {},
             onQueryChange = {}
         )

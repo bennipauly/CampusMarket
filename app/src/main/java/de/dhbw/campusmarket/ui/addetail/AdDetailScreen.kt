@@ -134,12 +134,15 @@ private fun AdDetailContent(ad: Ad, modifier: Modifier) {
         DetailRow(stringResource(R.string.label_location), ad.location)
         val status = if (ad.isSold) R.string.status_sold else R.string.status_available
         DetailRow(stringResource(R.string.label_status), stringResource(status))
-        Text(
-            stringResource(R.string.label_description),
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
-        )
-        Text(ad.description, style = MaterialTheme.typography.bodyLarge)
+        // Die Beschreibung ist im Formular optional. Ohne Text keine leere Überschrift zeigen.
+        if (ad.description.isNotBlank()) {
+            Text(
+                stringResource(R.string.label_description),
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+            )
+            Text(ad.description, style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }
 

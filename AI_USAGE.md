@@ -943,6 +943,160 @@ eintragen
 
 ---
 
+### Eintrag 9: Schritt 7 – Anzeige erstellen (Formular mit Validierung, ohne Foto)
+
+- **Datum:** 22.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+Derselbe Prompt wie Eintrag 8, Prompt 1 (dort wortwörtlich). Der Teil „dann Schritt 7“ hat diesen Eintrag ausgelöst.
+
+#### Rückfrage der KI und Antwort (Prompt 2)
+
+Die KI hat nach der Umbenennung im Auswahldialog der App gefragt: „Die Umbenennung auf de.dhbw.campusmarket ist fertig: Clean Build und 13 Tests sind grün, und die App läuft auf dem Emulator. Damit sie ein eigener Commit bleibt, solltet ihr sie jetzt committen (Vorschlag: "refactor: Paketname de.dhbw.campusmarket, Beispieltest entfernt"). Sagt mir Bescheid, wenn der Commit durch ist, dann starte ich Schritt 7.“ Optionen: „Commit ist durch“ / „Ohne Commit weiter“.
+
+Antwort im Dialog (gewählte Option):
+
+````text
+Commit ist durch
+````
+
+#### Ergebnis der KI zu Prompt 1 und 2 (vollständig)
+
+**Ausgeführte Aktionen (Schritt 7):**
+
+1. `git status`, `git log --oneline -2`, `git show --stat HEAD` ausgeführt. Ergebnis: Umbenennung committet (`db9f6a0`), Git erkennt die verschobenen Dateien als Umbenennungen.
+2. `AI_USAGE.md`: Eintrag 9 mit Verweis auf den Prompt und der Rückfrage angelegt.
+3. Neu angelegt (unter `app/src/main/java/de/dhbw/campusmarket/`): `logic/AdValidation.kt` (`isValidTitle`, `isValidLocation`, `parsePrice`), `ui/adform/AdFormUiState.kt`, `ui/adform/AdFormViewModel.kt`, `ui/adform/AdFormScreen.kt`; außerdem `app/src/test/java/de/dhbw/campusmarket/logic/AdValidationTest.kt` (11 Tests) und `res/drawable/ic_add.xml`.
+4. Per Python-Skript geändert: `ui/navigation/Destinations.kt` (neues Ziel `AdForm`), `ui/navigation/AppNavHost.kt` (`composable<AdForm>`, `onAddClick`), `ui/adlist/AdListScreen.kt` (FAB, Parameter `onAddClick`, auch in den 3 Previews), `res/values/strings.xml` (9 neue Texte).
+5. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen; `AdValidationTest` 11/11, `AdSearchTest` 10/10, `PriceFormatTest` 3/3.
+6. Emulator: App installiert, FAB angetippt → Formular „Neue Anzeige“. Leer gespeichert → drei Fehlertexte (Titel, Preis, Übergabeort), Screenshot. Der Titel-Fehler „Bitte einen Titel mit höchstens 60 Zeichen eingeben.“ passte nicht zu einem leeren Feld und wurde per `sed` in „Bitte einen Titel eingeben (höchstens %1$d Zeichen).“ geändert.
+7. Titel „Mathe Formelsammlung“, Preis „1e3“, Übergabeort „Mensa“, Kategorie „Skripte“, Zustand „Wie neu“ eingegeben und gespeichert → nur der Preisfehler erscheint.
+8. Drehen per `user_rotation 1` hatte zuerst keine Wirkung, weil „Automatisch drehen“ im Emulator wieder an war. `accelerometer_rotation 0` gesetzt, danach Querformat (2400×1080): alle Eingaben, Chips und der Preisfehler bleiben erhalten.
+9. Hochformat, Preis auf „7,50“ geändert, gespeichert → zurück in der Liste, „Mathe Formelsammlung · Mensa · 7,50 €“ steht oben. App beendet und neu gestartet → Anzeige ist noch da. Detail geöffnet → Kategorie „Skripte“, Zustand „Wie neu“. `AndroidRuntime:E` leer.
+10. Dabei aufgefallen und behoben: Die Detailseite zeigte bei leerer Beschreibung die Überschrift „Beschreibung“ über leerem Text (`AdDetailScreen.kt`: jetzt nur bei `isNotBlank()`), und der FAB konnte den Preis der letzten Zeile verdecken (`AdListScreen.kt`: `contentPadding = PaddingValues(bottom = 88.dp)`).
+11. `gradlew.bat assembleDebug testDebugUnitTest` erneut ausgeführt: **BUILD SUCCESSFUL**. Auf dem Emulator geprüft: Liste mit 7 Anzeigen und FAB, Detail ohne leere Überschrift.
+12. `AI_USAGE.md`: Ergebnis in Eintrag 8 und hier eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Der Paketname ist jetzt de.dhbw.campusmarket (von euch committet), und Schritt 7 ist umgesetzt: FAB, Formular mit Validierung im ViewModel, 11 neue Tests. Build, 24 Tests und der Emulator-Test (Fehler, Drehung, Speichern, Neustart) liefen fehlerfrei. Das Projekt ist grob zu 45 % fertig. Schritt 7 ist nicht committet.“ Frage: „Soll ich mit Schritt 8 (Kamera) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Paketname und Schritt 7 sind fertig. Die Umbenennung habt ihr schon committet (`db9f6a0`), Schritt 7 ist noch offen. Build und alle 24 Tests laufen durch, und auf dem Emulator lief alles ohne Absturz.
+
+## Teil 1: Paketname `de.dhbw.campusmarket`
+
+- Alle Ordner liegen jetzt unter `de/dhbw/campusmarket`, alle `package`/`import`-Zeilen und `namespace`/`applicationId` sind angepasst.
+- `ExampleInstrumentedTest` ist gelöscht. Damit hatten die Bibliotheken für Instrumented Tests (Espresso, `androidx.test.ext:junit`, Compose-UI-Test) keine Aufgabe mehr. Ich habe sie aus `app/build.gradle.kts` und `libs.versions.toml` entfernt, wie CLAUDE.md es verlangt („Keine Bibliothek ohne Aufgabe“).
+- CLAUDE.md nennt jetzt den neuen Paketnamen.
+- Auf dem Emulator habe ich die alte App `com.example.campusmarket` deinstalliert. Die neue startet mit frischer Datenbank und den 6 Beispielanzeigen.
+- Ältere Logbuch-Einträge verlinken noch auf `com/example/...`. Das bleibt so, weil sie den damaligen Stand zeigen.
+
+## Teil 2: Schritt 7 – Anzeige erstellen
+
+| Datei (`app/src/main/java/de/dhbw/campusmarket/`) | Was sie tut |
+|---|---|
+| [logic/AdValidation.kt](app/src/main/java/de/dhbw/campusmarket/logic/AdValidation.kt) | `isValidTitle` (1–60 Zeichen), `isValidLocation`, `parsePrice` („12,50“ → 12.5, Ungültiges → `null`) |
+| [AdValidationTest.kt](app/src/test/java/de/dhbw/campusmarket/logic/AdValidationTest.kt) | 11 Tests, u. a. leer, nur Leerzeichen, genau 60 / 61 Zeichen, „-5“, „1e3“, „NaN“, „12,505“, „123456“ |
+| [ui/adform/AdFormUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormUiState.kt) | Alle Eingaben als Text, `showErrors`, `isSaving`, `saveFailed`, `isSaved`; Fehler werden aus den Eingaben berechnet |
+| [ui/adform/AdFormViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormViewModel.kt) | Eine `on…Change`-Funktion pro Feld, `onSaveClick()` prüft und speichert |
+| [ui/adform/AdFormScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormScreen.kt) | Route + stateless Screen: Titel, Preis, Übergabeort, Beschreibung, Kategorie- und Zustand-Chips, „Speichern“. Previews „leer“ und „mit Fehlern“ |
+
+Außerdem: FAB (+) unten rechts in der Liste, neues Ziel `AdForm` im NavHost, `ic_add.xml`, 9 neue Texte in `strings.xml`.
+
+### Warum so
+
+- **Eingaben im ViewModel:** Jeder Tastendruck geht über `onTitleChange` usw. in den `UiState`. Darum überlebt alles eine Drehung, auch die gewählten Chips und die Fehlertexte.
+- **Preis bleibt im State ein Text:** Sonst könnte man „12,“ nicht tippen, weil das kein gültiger `Double` ist. Umgewandelt wird erst beim Speichern mit `parsePrice()`.
+- **Muster statt `toDoubleOrNull()`:** `"1e3".toDoubleOrNull()` ergibt 1000.0, `"NaN"` und `"-5"` gehen auch durch. Das Muster `\d{1,5}([.,]\d{1,2})?` lässt nur Zahlen wie „5“, „12,5“, „12.50“ bis 99999,99 zu. Komma und Punkt gehen beide.
+- **Fehler erst nach dem ersten „Speichern“:** Ein leeres Formular soll beim Öffnen nicht rot sein. `titleError` usw. sind berechnete Eigenschaften (`showErrors && !isValidTitle(title)`), so verschwindet ein Fehler, sobald man ihn korrigiert.
+- **Prüfung als reine Funktionen in `logic/`:** Dieselben Funktionen nutzen `UiState` (Anzeige) und `ViewModel` (Speichern). Sie sind ohne Android testbar.
+- **Doppelklick:** `onSaveClick()` bricht ab, solange `isSaving` true ist, und der Button ist dann deaktiviert. So entstehen keine doppelten Anzeigen.
+- **Nach dem Speichern zurück:** wie beim Löschen. Der ViewModel setzt `isSaved`, die Route ruft `onSaved()`, navigiert wird im NavHost. In der Liste steht die neue Anzeige oben, weil das DAO nach `createdAt` absteigend sortiert.
+- **Chips statt Dropdown:** Alle Möglichkeiten sind auf einen Blick sichtbar, und es gibt keinen zusätzlichen „Menü offen“-Zustand. `ChipGroup<T>` ist eine generische Funktion, damit Kategorie und Zustand denselben Code nutzen.
+- **`imePadding()` + `verticalScroll`:** Bei offener Tastatur kann man bis zum Button scrollen.
+- **Zwei kleine Korrekturen beim Testen:** Die Detailseite blendet „Beschreibung“ aus, wenn keine da ist (sie ist im Formular optional). Die Liste hat unten 88 dp Platz, damit der FAB die letzte Anzeige nicht verdeckt.
+- **Noch nicht drin:** Foto (Schritt 8) und Bearbeiten (Schritt 10, dafür wird dieses Formular wiederverwendet). Eine Rückfrage „Eingaben verwerfen?“ beim Zurück-Pfeil gibt es nicht. Das wäre eine Idee für den Feinschliff.
+
+### Was ich auf dem Emulator getestet habe
+
+- FAB → „Neue Anzeige“.
+- Leer speichern → drei Fehler, nichts gespeichert.
+- Preis „1e3“ → nur der Preisfehler.
+- Querformat → alle Eingaben, Chips „Skripte“ / „Wie neu“ und der Fehler bleiben.
+- Preis „7,50“ → gespeichert, Anzeige steht oben in der Liste.
+- App-Neustart → Anzeige noch da, Detail zeigt „Skripte“ und „Wie neu“.
+- Logcat: kein Absturz.
+
+Hinweis: „Automatisch drehen“ war im Emulator wieder an. Für den Test habe ich es ausgeschaltet.
+
+### Testanleitung für euch
+
+- Build und Tests (Windows: `gradlew.bat`):
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- **Ungültige Eingaben:** leeres Formular, Titel nur aus Leerzeichen, 61 Zeichen Titel, Preis „-5“, „abc“, „12,505“, „100000“ → jeweils Fehler, kein Absturz.
+- **Gültig:** Preis „0“ (verschenken), „12.5“, „12,50“.
+- **Rotation:** mitten im Ausfüllen und mit sichtbaren Fehlern.
+- **Zurück-Pfeil ohne Speichern:** Es wird nichts angelegt.
+- **Doppelt auf „Speichern“ tippen:** nur eine neue Anzeige.
+- **App-Neustart und Flugmodus:** Anzeige bleibt, kein Absturz.
+- **Previews** in `AdFormScreen.kt`: „Empty“ und „Errors“.
+- Permission verweigert gibt es erst mit der Kamera in Schritt 8.
+
+### Commit-Vorschlag
+
+```
+feat: Anzeige erstellen mit Formular und Validierung
+```
+
+(`logic/AdValidation.kt`, `AdValidationTest.kt`, `ui/adform/*`, `ui/adlist/AdListScreen.kt`, `ui/addetail/AdDetailScreen.kt`, `ui/navigation/*`, `ic_add.xml`, `strings.xml`, `AI_USAGE.md`)
+
+## Teil 3: Wie viel ist fertig?
+
+Grob geschätzt **etwa 45 % des ganzen Projekts** und **etwa 75 % der Mindestanforderungen**. Die Zahl ist eine Schätzung nach Aufwand, nicht nach Anzahl der Schritte, weil die Schritte unterschiedlich groß sind:
+
+| Bereich | Stand |
+|---|---|
+| Schritte 1–7 (Setup, Room, Navigation, Liste, Suche, Detail/Löschen, Erstellen) | ✅ fertig |
+| Schritt 8: Kamera mit Permission und FileProvider | offen, **größter einzelner Brocken** |
+| Schritt 9: README | offen, klein |
+| Schritte 10–15: Bearbeiten, Favoriten, Status, Filter, Sortierung, Galerie | offen, mittel; vieles baut auf Vorhandenem auf (Formular, Labels, `logic/`) |
+| Feinschliff, Reflexion in AI_USAGE.md | offen |
+
+Die 5 Mindestanforderungen im Einzelnen:
+
+1. Baut aus sauberem Checkout → baut ✅, aber das **README fehlt** noch.
+2. Zwei Screens mit Navigation, State überlebt Drehung → ✅ (sogar drei).
+3. Echte Daten aus Room → ✅
+4. Gerätefunktion hinter Permission → ❌ **Kamera fehlt** (Schritt 8).
+5. Flugmodus ohne Absturz → ✅ bisher.
+
+Bis zur Abgabe am 08.12. sind es noch 16 Tage. Wenn Schritt 8 und 9 als Nächstes kommen, sind alle Mindestanforderungen erfüllt, und der Rest ist „nur noch“ Bewertungspunkte.
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Neue Funktionen getestet, keine Fehler
+
+#### Commits
+
+Anzeige erstellen mit Formular und Validierung
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._
