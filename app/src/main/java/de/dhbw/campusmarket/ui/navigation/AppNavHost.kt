@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import de.dhbw.campusmarket.ui.addetail.AdDetailRoute
 import de.dhbw.campusmarket.ui.adform.AdFormRoute
 import de.dhbw.campusmarket.ui.adlist.AdListRoute
+import de.dhbw.campusmarket.ui.photoviewer.PhotoViewerRoute
 
 // Der einzige Ort, an dem navigiert wird. Die Screens bekommen nur Callbacks
 // und wissen nicht, wohin es danach geht.
@@ -30,6 +31,14 @@ fun AppNavHost() {
                 adId = detail.adId,
                 // navigateUp statt popBackStack: Ein doppelter Tipp auf "Zurück"
                 // kann so nie die Startseite vom Stack werfen.
+                onBack = { navController.navigateUp() },
+                onPhotoClick = { navController.navigate(PhotoViewer(detail.adId)) }
+            )
+        }
+        composable<PhotoViewer> { backStackEntry ->
+            val photo: PhotoViewer = backStackEntry.toRoute()
+            PhotoViewerRoute(
+                adId = photo.adId,
                 onBack = { navController.navigateUp() }
             )
         }

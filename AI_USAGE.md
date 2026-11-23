@@ -1489,6 +1489,109 @@ README mit Build- und Startschritten
 
 ---
 
+### Eintrag 13: Schritt 9a – Foto im Vollbild
+
+- **Datum:** 23.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 9a
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -2` ausgeführt, Ende von `AI_USAGE.md`, `README.md` (Gruppe), `Destinations.kt`, `AppNavHost.kt` und `AdDetailScreen.kt` gelesen. Ergebnis: README committet (`ecc3b9d`), Arbeitsverzeichnis sauber.
+2. `AI_USAGE.md`: Eintrag 13 mit dem Prompt angelegt.
+3. Neu angelegt: `ui/photoviewer/PhotoViewerUiState.kt`, `ui/photoviewer/PhotoViewerViewModel.kt`, `ui/photoviewer/PhotoViewerScreen.kt` (unter `app/src/main/java/de/dhbw/campusmarket/`).
+4. Python-Skript `step9a.py` im Scratchpad der Sitzung geschrieben und mit `python -I` ausgeführt. Geändert: `ui/navigation/Destinations.kt` (neues Ziel `PhotoViewer(adId)`), `ui/navigation/AppNavHost.kt` (`composable<PhotoViewer>`, `onPhotoClick`), `ui/addetail/AdDetailScreen.kt` (Parameter `onPhotoClick` in Route, Screen, Content und beiden Previews; Foto mit `clickable`), `res/values/strings.xml` (4 neue Texte).
+5. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen.
+6. Emulator: App installiert, Anzeige „foto“ (Testanzeige des Teams mit Foto) geöffnet, Foto angetippt → Screen „Foto“, Testbild vollständig sichtbar (Screenshot). Ins Querformat gedreht → Foto bleibt, passt ganz auf den Bildschirm (Screenshot). Zurück ins Hochformat, zweimal Zurück-Pfeil → Detail, dann Liste. `AndroidRuntime:E` leer.
+7. `README.md`: Funktion „Foto im Vollbild“ und Ordner `photoviewer/` ergänzt.
+8. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 9a ist umgesetzt: Ein Tipp auf das Foto in der Detailansicht öffnet es im Vollbild, mit eigenem ViewModel und Loading/Error/Ready. Build und Emulator-Test (Antippen, Drehung, Zurück) liefen fehlerfrei, das README ist ergänzt. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 10 (Bearbeiten) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 9a ist fertig: In der Detailansicht öffnet ein Tipp auf das Foto einen eigenen Screen „Foto“, auf dem das ganze Bild so groß wie möglich zu sehen ist. Build und Test auf dem Emulator liefen ohne Fehler.
+
+## Neue und geänderte Dateien (`app/src/main/java/de/dhbw/campusmarket/`)
+
+| Datei | Was sie tut |
+|---|---|
+| [ui/photoviewer/PhotoViewerUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerUiState.kt) | `isLoading`, `hasError`, `imageUri` |
+| [ui/photoviewer/PhotoViewerViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerViewModel.kt) | Lädt über die id die Anzeige aus Room und übernimmt nur die Foto-Uri |
+| [ui/photoviewer/PhotoViewerScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerScreen.kt) | Route + stateless Screen: `TopAppBar` „Foto“ mit Zurück-Pfeil, darunter das Foto mit `ContentScale.Fit`, Preview |
+| [ui/navigation/Destinations.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/Destinations.kt) | Neues Ziel `PhotoViewer(adId)` |
+| [ui/navigation/AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt) | `composable<PhotoViewer>`, und die Detailseite bekommt `onPhotoClick` |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt) | Das Foto ist jetzt antippbar (`clickable`) |
+
+Dazu 4 neue Texte in `strings.xml` und im [README](README.md) die neue Funktion und der Ordner `photoviewer/`.
+
+## Warum so
+
+- **Eigener Screen statt Dialog:** So gilt dasselbe Muster wie überall (Route, Screen, ViewModel, UiState), der System-Zurück-Knopf funktioniert von selbst, und die Ansicht überlebt eine Drehung, weil der NavHost den Back-Stack speichert.
+- **Nur die id wird übergeben,** nicht die Uri. Das verlangt CLAUDE.md, und es hat einen Vorteil: Der Screen liest immer den aktuellen Stand aus Room. Wird die Anzeige inzwischen gelöscht, zeigt er „Zu dieser Anzeige gibt es kein Foto.“ statt eines kaputten Bildes.
+- **Eigener ViewModel,** obwohl er dem Detail-ViewModel ähnelt: CLAUDE.md sieht einen ViewModel pro Screen vor, und jeder Screen braucht seinen eigenen Loading/Error/Ready-Zustand.
+- **`ContentScale.Fit`:** Das ganze Foto ist sichtbar, nichts wird abgeschnitten, im Hoch- wie im Querformat. In der Detailansicht bleibt `Crop`, damit der 240-dp-Streifen ausgefüllt ist.
+- **Normaler heller Hintergrund statt Schwarz:** Bei schwarzem Hintergrund wären die dunklen Symbole der Statusleiste (Uhrzeit, Akku) im hellen Theme nicht mehr zu sehen. Das zu ändern bräuchte zusätzlichen Code für die Systemleisten. So bleibt die App einheitlich.
+- **`onClickLabel = "Foto vergrößern"`:** TalkBack liest das vor, damit man weiß, was der Tipp bewirkt.
+- **Zoom mit zwei Fingern** ist noch nicht drin. Wenn ihr das wollt, wäre es eine kleine Ergänzung im Screen (`Modifier.transformable`), ohne neue Bibliothek.
+- **Im Formular** ist die Vorschau nicht antippbar, weil die Anzeige dort noch keine id hat. Vor dem Speichern sieht man das Foto ja schon groß genug.
+
+## Was ich auf dem Emulator getestet habe
+
+- Anzeige „foto“ öffnen → Foto antippen → Screen „Foto“, Testbild vollständig sichtbar.
+- Querformat → Foto bleibt, passt ganz auf den Bildschirm.
+- Zurück-Pfeil → Detail, nochmal → Liste.
+- Logcat: kein Absturz.
+
+## Testanleitung für euch
+
+- Build und Tests:
+
+```bash
+./gradlew assembleDebug testDebugUnitTest
+```
+
+- Anzeige **mit** Foto öffnen → Foto antippen → Vollbild. Mit Zurück-Pfeil und System-Zurück zurück.
+- Anzeige **ohne** Foto öffnen → es gibt kein Foto zum Antippen, nichts passiert.
+- **Rotation** im Vollbild: Foto bleibt sichtbar.
+- **App-Neustart** und **Flugmodus**: kein Unterschied, alles lokal.
+- **Preview** in `PhotoViewerScreen.kt` zeigt den Fall „kein Foto“ (eine echte Bilddatei gibt es in der Preview nicht).
+- Permission und ungültige Eingaben sind von diesem Schritt nicht betroffen.
+
+## Commit-Vorschlag
+
+```
+feat: Foto der Anzeige im Vollbild ansehen
+```
+
+(`ui/photoviewer/*`, `ui/navigation/*`, `ui/addetail/AdDetailScreen.kt`, `strings.xml`, `README.md`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Vollbild getestet
+
+#### Commits
+
+Foto der Anzeige im Vollbild ansehen
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

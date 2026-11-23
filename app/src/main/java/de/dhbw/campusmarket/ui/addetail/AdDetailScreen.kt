@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.addetail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +42,7 @@ import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
 // Route: holt den ViewModel für genau diese id und reicht State und Callbacks weiter.
 @Composable
-fun AdDetailRoute(adId: Long, onBack: () -> Unit) {
+fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit) {
     val viewModel: AdDetailViewModel = viewModel(factory = AdDetailViewModel.factory(adId))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -55,6 +56,7 @@ fun AdDetailRoute(adId: Long, onBack: () -> Unit) {
     AdDetailScreen(
         uiState = uiState,
         onBack = onBack,
+        onPhotoClick = onPhotoClick,
         onRetry = viewModel::loadAd,
         onDeleteClick = viewModel::onDeleteClick,
         onDeleteConfirm = viewModel::onDeleteConfirm,
@@ -68,6 +70,7 @@ fun AdDetailRoute(adId: Long, onBack: () -> Unit) {
 fun AdDetailScreen(
     uiState: AdDetailUiState,
     onBack: () -> Unit,
+    onPhotoClick: () -> Unit,
     onRetry: () -> Unit,
     onDeleteClick: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -106,7 +109,7 @@ fun AdDetailScreen(
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(stringResource(R.string.ad_detail_error), onRetry, contentModifier)
             uiState.ad == null -> MessageContent(stringResource(R.string.ad_detail_not_found), contentModifier)
-            else -> AdDetailContent(uiState.ad, contentModifier)
+            else -> AdDetailContent(uiState.ad, onPhotoClick, contentModifier)
         }
     }
 
@@ -116,7 +119,7 @@ fun AdDetailScreen(
 }
 
 @Composable
-private fun AdDetailContent(ad: Ad, modifier: Modifier) {
+private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, modifier: Modifier) {
     // verticalScroll: Bei langer Beschreibung oder im Querformat kann man scrollen.
     Column(
         modifier = modifier
@@ -127,10 +130,12 @@ private fun AdDetailContent(ad: Ad, modifier: Modifier) {
             AdImage(
                 imageUri = ad.imageUri,
                 contentDescription = stringResource(R.string.ad_photo),
+                // Antippen öffnet das Foto im Vollbild. onClickLabel wird von TalkBack vorgelesen.
                 modifier = Modifier
+                    .padding(bottom = 16.dp)
                     .fillMaxWidth()
                     .height(240.dp)
-                    .padding(bottom = 16.dp)
+                    .clickable(onClickLabel = stringResource(R.string.photo_enlarge), onClick = onPhotoClick)
             )
         }
         Text(ad.title, style = MaterialTheme.typography.headlineSmall)
@@ -197,6 +202,7 @@ private fun AdDetailScreenReadyPreview() {
         AdDetailScreen(
             uiState = AdDetailUiState(isLoading = false, ad = sampleAds(now = 0L).first().copy(id = 1L)),
             onBack = {},
+            onPhotoClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},
@@ -216,6 +222,7 @@ private fun AdDetailScreenDeleteDialogPreview() {
                 showDeleteDialog = true
             ),
             onBack = {},
+            onPhotoClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},

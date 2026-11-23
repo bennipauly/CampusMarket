@@ -13,6 +13,10 @@ object AdList
 @Serializable
 data class AdDetail(val adId: Long)
 
+// Foto einer Anzeige im Vollbild. Auch hier nur die id, die Foto-Uri holt der Screen selbst.
+@Serializable
+data class PhotoViewer(val adId: Long)
+
 // Formular zum Erstellen einer neuen Anzeige.
 @Serializable
 object AdForm

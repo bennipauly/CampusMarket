@@ -14,6 +14,7 @@ Die App arbeitet **rein lokal**: Es gibt kein Backend, keinen Login und keine Ne
 - Anzeige erstellen mit Prüfung der Eingaben (leerer Titel, ungültiger Preis, fehlender Übergabeort)
 - Anzeige löschen mit Bestätigungsdialog
 - Produktfoto mit der Gerätekamera (mit Kamera-Berechtigung; ohne Berechtigung lässt sich die Anzeige trotzdem speichern)
+- Foto im Vollbild: In der Detailansicht auf das Foto tippen
 - Lokale Speicherung: Die Daten bleiben nach einem Neustart erhalten. Beim ersten Start werden sechs Beispielanzeigen angelegt.
 
 ## Voraussetzungen
@@ -86,6 +87,7 @@ app/src/main/java/de/dhbw/campusmarket/
     ├── adlist/                  Anzeigenliste mit Suche
     ├── addetail/                Detailansicht mit Löschen
     ├── adform/                  Formular zum Erstellen, Kamera
+    ├── photoviewer/             Foto im Vollbild
     └── theme/                   Farben, Schrift, Theme
 ```
 

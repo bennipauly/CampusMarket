@@ -1,0 +1,55 @@
+package de.dhbw.campusmarket.ui.photoviewer
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import de.dhbw.campusmarket.CampusMarketApplication
+import de.dhbw.campusmarket.data.AdRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+// Besitzer des Vollbild-States. Holt über die id die Anzeige und merkt sich nur die Foto-Uri.
+class PhotoViewerViewModel(
+    private val repository: AdRepository,
+    private val adId: Long
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(PhotoViewerUiState())
+    val uiState: StateFlow<PhotoViewerUiState> = _uiState.asStateFlow()
+
+    private var loadJob: Job? = null
+
+    init {
+        loadPhoto()
+    }
+
+    fun loadPhoto() {
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = true, hasError = false) }
+        loadJob = viewModelScope.launch {
+            repository.getAd(adId)
+                .catch { _uiState.update { it.copy(isLoading = false, hasError = true) } }
+                .collect { ad ->
+                    // ad kann null sein, wenn die Anzeige inzwischen gelöscht wurde.
+                    _uiState.update { it.copy(isLoading = false, hasError = false, imageUri = ad?.imageUri) }
+                }
+        }
+    }
+
+    companion object {
+        fun factory(adId: Long): ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = this[APPLICATION_KEY] as CampusMarketApplication
+                PhotoViewerViewModel(application.repository, adId)
+            }
+        }
+    }
+}
