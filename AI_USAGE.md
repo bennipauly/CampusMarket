@@ -4,6 +4,8 @@ Dieses Dokument legt die gesamte KI-Nutzung beider Gruppenmitglieder offen.
 Alle Prompts stehen wortwörtlich, in Originalsprache und in der Reihenfolge, in der sie gesendet wurden.
 Geheimnisse und personenbezogene Daten sind durch `[REDACTED]` ersetzt. Angehängte Dateien werden nur mit Namen genannt.
 
+Hinweis zu den Links: Nach der Umbenennung des Pakets (Eintrag 8) zeigten Datei-Links in älteren Einträgen auf Ordner, die es nicht mehr gibt. In Eintrag 11 wurde deshalb nur das Linkziel (der Teil in runden Klammern) von `com/example/campusmarket` auf `de/dhbw/campusmarket` umgestellt. Der sichtbare Text aller Einträge ist unverändert.
+
 ---
 
 ## 1. Setup
@@ -344,14 +346,14 @@ Schritt 2 ist fertig: Die Room-Datenschicht steht, und der Build läuft durch. K
 
 | Datei | Was sie tut |
 |---|---|
-| [data/Category.kt](app/src/main/java/com/example/campusmarket/data/Category.kt) | Enum mit den Kategorien (Bücher, Skripte, Taschenrechner, Technik, Möbel, Sonstiges) |
-| [data/Condition.kt](app/src/main/java/com/example/campusmarket/data/Condition.kt) | Enum für den Zustand (neu, wie neu, gut, gebraucht) |
-| [data/Ad.kt](app/src/main/java/com/example/campusmarket/data/Ad.kt) | `@Entity`: eine Anzeige = eine Zeile in der Tabelle `ads` |
-| [data/AdDao.kt](app/src/main/java/com/example/campusmarket/data/AdDao.kt) | Alle SQL-Zugriffe. Lesen liefert `Flow`, Schreiben ist `suspend` |
-| [data/AppDatabase.kt](app/src/main/java/com/example/campusmarket/data/AppDatabase.kt) | `@Database` mit der Tabelle `ads`, Version 1 |
-| [data/AdRepository.kt](app/src/main/java/com/example/campusmarket/data/AdRepository.kt) | Einziger Zugang der ViewModels zu den Daten, reicht an das DAO weiter |
-| [data/SampleData.kt](app/src/main/java/com/example/campusmarket/data/SampleData.kt) | Sechs Beispielanzeigen, eine davon schon „verkauft“ |
-| [CampusMarketApplication.kt](app/src/main/java/com/example/campusmarket/CampusMarketApplication.kt) | Baut Datenbank und Repository genau einmal und fügt beim Start die Beispieldaten ein |
+| [data/Category.kt](app/src/main/java/de/dhbw/campusmarket/data/Category.kt) | Enum mit den Kategorien (Bücher, Skripte, Taschenrechner, Technik, Möbel, Sonstiges) |
+| [data/Condition.kt](app/src/main/java/de/dhbw/campusmarket/data/Condition.kt) | Enum für den Zustand (neu, wie neu, gut, gebraucht) |
+| [data/Ad.kt](app/src/main/java/de/dhbw/campusmarket/data/Ad.kt) | `@Entity`: eine Anzeige = eine Zeile in der Tabelle `ads` |
+| [data/AdDao.kt](app/src/main/java/de/dhbw/campusmarket/data/AdDao.kt) | Alle SQL-Zugriffe. Lesen liefert `Flow`, Schreiben ist `suspend` |
+| [data/AppDatabase.kt](app/src/main/java/de/dhbw/campusmarket/data/AppDatabase.kt) | `@Database` mit der Tabelle `ads`, Version 1 |
+| [data/AdRepository.kt](app/src/main/java/de/dhbw/campusmarket/data/AdRepository.kt) | Einziger Zugang der ViewModels zu den Daten, reicht an das DAO weiter |
+| [data/SampleData.kt](app/src/main/java/de/dhbw/campusmarket/data/SampleData.kt) | Sechs Beispielanzeigen, eine davon schon „verkauft“ |
+| [CampusMarketApplication.kt](app/src/main/java/de/dhbw/campusmarket/CampusMarketApplication.kt) | Baut Datenbank und Repository genau einmal und fügt beim Start die Beispieldaten ein |
 
 Außerdem steht in [AndroidManifest.xml](app/src/main/AndroidManifest.xml) jetzt `android:name=".CampusMarketApplication"`. Ohne diese Zeile würde Android unsere Klasse nie erzeugen.
 
@@ -452,13 +454,13 @@ Schritt 3 ist fertig: Die App startet jetzt über einen NavHost, und man kann vo
 
 | Datei | Was sie tut |
 |---|---|
-| [ui/navigation/Destinations.kt](app/src/main/java/com/example/campusmarket/ui/navigation/Destinations.kt) | Die zwei Ziele: `AdList` (Startseite) und `AdDetail(adId)` (nur die id) |
-| [ui/navigation/AppNavHost.kt](app/src/main/java/com/example/campusmarket/ui/navigation/AppNavHost.kt) | Der `NavHost`. Einziger Ort mit `navController` |
-| [ui/adlist/AdListScreen.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListScreen.kt) | Platzhalter mit `TopAppBar` und Button „Beispielanzeige öffnen“, plus Preview |
-| [ui/addetail/AdDetailScreen.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailScreen.kt) | Platzhalter mit Zurück-Pfeil, zeigt die übergebene id, plus Preview |
+| [ui/navigation/Destinations.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/Destinations.kt) | Die zwei Ziele: `AdList` (Startseite) und `AdDetail(adId)` (nur die id) |
+| [ui/navigation/AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt) | Der `NavHost`. Einziger Ort mit `navController` |
+| [ui/adlist/AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt) | Platzhalter mit `TopAppBar` und Button „Beispielanzeige öffnen“, plus Preview |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt) | Platzhalter mit Zurück-Pfeil, zeigt die übergebene id, plus Preview |
 | [res/drawable/ic_arrow_back.xml](app/src/main/res/drawable/ic_arrow_back.xml) | Zurück-Pfeil als Vector-Drawable |
 
-Geändert: [MainActivity.kt](app/src/main/java/com/example/campusmarket/MainActivity.kt) (Beispielcode `Greeting` raus, ruft nur noch `AppNavHost()` auf) und [strings.xml](app/src/main/res/values/strings.xml) (Texte der Platzhalter, „Zurück“, „Details“). In [CLAUDE.md](CLAUDE.md) steht eine neue Regel zu Icons.
+Geändert: [MainActivity.kt](app/src/main/java/de/dhbw/campusmarket/MainActivity.kt) (Beispielcode `Greeting` raus, ruft nur noch `AppNavHost()` auf) und [strings.xml](app/src/main/res/values/strings.xml) (Texte der Platzhalter, „Zurück“, „Details“). In [CLAUDE.md](CLAUDE.md) steht eine neue Regel zu Icons.
 
 ## Warum so
 
@@ -554,13 +556,13 @@ Schritt 4 ist fertig: Die Startseite zeigt jetzt die echten Anzeigen aus Room. D
 
 | Datei | Was sie tut |
 |---|---|
-| [ui/adlist/AdListUiState.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListUiState.kt) | `isLoading`, `hasError`, `ads`: damit sind Loading, Error und Ready abgebildet |
-| [ui/adlist/AdListViewModel.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListViewModel.kt) | Sammelt `repository.getAllAds()` und schreibt das Ergebnis über `_uiState.update { … }` in den State. Die `Factory` holt das Repository aus `CampusMarketApplication` |
-| [ui/adlist/AdListScreen.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListScreen.kt) | `AdListRoute` (ViewModel + `collectAsStateWithLifecycle`) und der stateless `AdListScreen`, plus Previews für „Ready“ und „Error“ |
-| [ui/PriceFormat.kt](app/src/main/java/com/example/campusmarket/ui/PriceFormat.kt) | `formatPrice(12.5)` → „12,50 €“ |
-| [PriceFormatTest.kt](app/src/test/java/com/example/campusmarket/ui/PriceFormatTest.kt) | 3 JUnit-Tests für `formatPrice` |
+| [ui/adlist/AdListUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListUiState.kt) | `isLoading`, `hasError`, `ads`: damit sind Loading, Error und Ready abgebildet |
+| [ui/adlist/AdListViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListViewModel.kt) | Sammelt `repository.getAllAds()` und schreibt das Ergebnis über `_uiState.update { … }` in den State. Die `Factory` holt das Repository aus `CampusMarketApplication` |
+| [ui/adlist/AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt) | `AdListRoute` (ViewModel + `collectAsStateWithLifecycle`) und der stateless `AdListScreen`, plus Previews für „Ready“ und „Error“ |
+| [ui/PriceFormat.kt](app/src/main/java/de/dhbw/campusmarket/ui/PriceFormat.kt) | `formatPrice(12.5)` → „12,50 €“ |
+| [PriceFormatTest.kt](app/src/test/java/de/dhbw/campusmarket/ui/PriceFormatTest.kt) | 3 JUnit-Tests für `formatPrice` |
 
-Außerdem: [AppNavHost.kt](app/src/main/java/com/example/campusmarket/ui/navigation/AppNavHost.kt) ruft jetzt `AdListRoute` statt des Platzhalters auf. In [strings.xml](app/src/main/res/values/strings.xml) sind die Platzhalter-Texte raus, die Texte für den Fehlerfall und die leere Liste sind neu. `ExampleUnitTest.kt` ist gelöscht, weil es jetzt einen echten Test gibt.
+Außerdem: [AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt) ruft jetzt `AdListRoute` statt des Platzhalters auf. In [strings.xml](app/src/main/res/values/strings.xml) sind die Platzhalter-Texte raus, die Texte für den Fehlerfall und die leere Liste sind neu. `ExampleUnitTest.kt` ist gelöscht, weil es jetzt einen echten Test gibt.
 
 ## Warum so
 
@@ -672,11 +674,11 @@ Schritt 5 ist fertig: Die Liste hat jetzt ein Suchfeld, und die Suchlogik ist ei
 
 | Datei | Was sie tut |
 |---|---|
-| [logic/AdSearch.kt](app/src/main/java/com/example/campusmarket/logic/AdSearch.kt) | `searchAds(ads, query)`: sucht in Titel, Beschreibung und Übergabeort, ohne Rücksicht auf Groß-/Kleinschreibung. Leerer Suchtext → alle Anzeigen |
-| [AdSearchTest.kt](app/src/test/java/com/example/campusmarket/logic/AdSearchTest.kt) | 10 Tests: leer, nur Leerzeichen, Treffer in jedem Feld, Groß-/Kleinschreibung, Leerzeichen außen, kein Treffer, Reihenfolge, leere Liste |
-| [AdListUiState.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListUiState.kt) | Neues Feld `query` und die berechnete Eigenschaft `visibleAds` |
-| [AdListViewModel.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListViewModel.kt) | `onQueryChange(query)` schreibt den Suchtext in den State |
-| [AdListScreen.kt](app/src/main/java/com/example/campusmarket/ui/adlist/AdListScreen.kt) | Suchfeld mit Lupe und Kreuz, Hinweis „Keine Treffer für …“, neue Preview dafür |
+| [logic/AdSearch.kt](app/src/main/java/de/dhbw/campusmarket/logic/AdSearch.kt) | `searchAds(ads, query)`: sucht in Titel, Beschreibung und Übergabeort, ohne Rücksicht auf Groß-/Kleinschreibung. Leerer Suchtext → alle Anzeigen |
+| [AdSearchTest.kt](app/src/test/java/de/dhbw/campusmarket/logic/AdSearchTest.kt) | 10 Tests: leer, nur Leerzeichen, Treffer in jedem Feld, Groß-/Kleinschreibung, Leerzeichen außen, kein Treffer, Reihenfolge, leere Liste |
+| [AdListUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListUiState.kt) | Neues Feld `query` und die berechnete Eigenschaft `visibleAds` |
+| [AdListViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListViewModel.kt) | `onQueryChange(query)` schreibt den Suchtext in den State |
+| [AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt) | Suchfeld mit Lupe und Kreuz, Hinweis „Keine Treffer für …“, neue Preview dafür |
 | `ic_search.xml`, `ic_close.xml` | Lupe und Kreuz als Vector-Drawables |
 
 ## Warum so
@@ -794,11 +796,11 @@ Schritt 6 ist fertig: Die Detailseite zeigt die echte Anzeige aus Room, und Lös
 
 | Datei | Was sie tut |
 |---|---|
-| [ui/addetail/AdDetailUiState.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailUiState.kt) | `isLoading`, `hasError`, `ad`, dazu `showDeleteDialog` und `isDeleted` |
-| [ui/addetail/AdDetailViewModel.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailViewModel.kt) | Beobachtet `repository.getAd(adId)`, steuert den Dialog und löscht |
-| [ui/addetail/AdDetailScreen.kt](app/src/main/java/com/example/campusmarket/ui/addetail/AdDetailScreen.kt) | `AdDetailRoute` + stateless `AdDetailScreen`: Titel, Preis, Kategorie, Zustand, Übergabeort, Status, Beschreibung, Mülleimer in der `TopAppBar`, Lösch-Dialog. Previews „Ready“ und „Dialog“ |
-| [ui/StateContent.kt](app/src/main/java/com/example/campusmarket/ui/StateContent.kt) | `LoadingContent`, `ErrorContent`, `MessageContent` für beide Screens. Vorher standen sie privat in `AdListScreen.kt` |
-| [ui/Labels.kt](app/src/main/java/com/example/campusmarket/ui/Labels.kt) | `Category.BOOKS` → „Bücher“, `Condition.LIKE_NEW` → „Wie neu“ usw. |
+| [ui/addetail/AdDetailUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailUiState.kt) | `isLoading`, `hasError`, `ad`, dazu `showDeleteDialog` und `isDeleted` |
+| [ui/addetail/AdDetailViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailViewModel.kt) | Beobachtet `repository.getAd(adId)`, steuert den Dialog und löscht |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt) | `AdDetailRoute` + stateless `AdDetailScreen`: Titel, Preis, Kategorie, Zustand, Übergabeort, Status, Beschreibung, Mülleimer in der `TopAppBar`, Lösch-Dialog. Previews „Ready“ und „Dialog“ |
+| [ui/StateContent.kt](app/src/main/java/de/dhbw/campusmarket/ui/StateContent.kt) | `LoadingContent`, `ErrorContent`, `MessageContent` für beide Screens. Vorher standen sie privat in `AdListScreen.kt` |
+| [ui/Labels.kt](app/src/main/java/de/dhbw/campusmarket/ui/Labels.kt) | `Category.BOOKS` → „Bücher“, `Condition.LIKE_NEW` → „Wie neu“ usw. |
 
 Außerdem: `ic_delete.xml` (Mülleimer), neue Texte in `strings.xml` (der Platzhalter „Anzeige Nr. …“ ist raus), `AppNavHost.kt` ruft `AdDetailRoute` auf.
 
@@ -1282,6 +1284,114 @@ Fotoaufnahme getestet und Edgecases geprüft, keine Fehler
 #### Commits
 
 Produktfoto mit Kamera, Permission und FileProvider
+
+---
+
+### Eintrag 11: Warnungen in AI_USAGE.md nach der Paket-Umbenennung
+
+- **Datum:** 23.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Mir ist aufgefallen, dass durch die Änderung von com.exmaple zu de.dhbw in der AI_USAGE.md sehr viele Warnungen aufgetreten sind. Die sind zwar nicht kritisch, aber trotzdem werden sie bei jedem Commit angezeigt
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -2`, Ende von `AI_USAGE.md` gelesen. Ergebnis: Schritt 8 ist committet (`08036d4`), Arbeitsverzeichnis sauber.
+2. Alle relativen Links in `AI_USAGE.md` mit einem Shell-Skript geprüft (existiert das Ziel?). Ergebnis: 29 Links auf 23 verschiedene Dateien unter `app/src/main/java/com/example/…` und `app/src/test/java/com/example/…` zeigen ins Leere; alle anderen Links sind gültig. Der sichtbare Linktext enthält nie `com/example`. Erwähnungen in Backticks (z. B. `com.example.campusmarket`) sind kein Link und erzeugen keine Warnung.
+3. `git config core.autocrlf` → `true`, keine `.gitattributes`. `git ls-files --eol` → 55 Dateien haben im Arbeitsverzeichnis LF-Zeilenenden, `AI_USAGE.md` hatte CRLF.
+4. `AI_USAGE.md`: Eintrag 11 mit dem Prompt angelegt.
+5. Sicherungskopie `AI_USAGE.vorher.md` im Scratchpad der Sitzung angelegt. Dann per `sed -E` nur in Linkzielen `app/src/main/java/com/example/campusmarket/` → `app/src/main/java/de/dhbw/campusmarket/` ersetzt (ebenso für `app/src/test`). Ergebnis: 0 Links mit `com/example`, 0 tote Links. Vergleich von vorher/nachher, bei dem alle Linkziele ausgeblendet sind: kein Unterschied, der sichtbare Text ist also unverändert. `sed` hat dabei die Zeilenenden von `AI_USAGE.md` auf LF umgestellt (wie bei den meisten anderen Dateien).
+6. `AI_USAGE.md`: Hinweis zu den Links oben im Dokument ergänzt, dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Die Warnungen kamen von 29 toten Links in AI_USAGE.md, die noch auf die alten com/example-Ordner zeigten. Ich habe nur die Linkziele umgestellt, der sichtbare Text ist gleich, und oben steht ein Hinweis dazu. Daneben gibt es noch Git-Hinweise zu Zeilenenden, die ich nicht angefasst habe. Es ist nichts committet.“ Frage: „Soll ich die Zeilenenden mit einer .gitattributes einheitlich machen?“
+
+**Antwort der KI:**
+
+````markdown
+Gefunden und behoben: Die Warnungen kamen von **29 toten Links** in `AI_USAGE.md`.
+
+## Ursache
+
+In den Einträgen 3 bis 7 stehen Links mit dem Text `data/Ad.kt` und dem Ziel `app/src/main/java/com/example/campusmarket/data/Ad.kt`. Seit der Umbenennung liegen die Dateien unter `de/dhbw/campusmarket`, die Linkziele zeigten also ins Leere (23 verschiedene Dateien, 29 Links). Android Studio prüft beim Commit auch Markdown-Dateien und meldet jedes nicht auffindbare Linkziel als Warnung. Bei der Umbenennung hatte ich die Links bewusst stehen lassen, weil sie den damaligen Stand zeigen. Die Warnungen hatte ich dabei nicht bedacht.
+
+## Was ich geändert habe
+
+- **Nur die Linkziele**, also der Teil in den runden Klammern, zeigen jetzt auf `de/dhbw/campusmarket`. Danach gibt es keinen toten Link mehr in der Datei.
+- **Der sichtbare Text ist unverändert.** Ich habe die Datei vorher und nachher verglichen, mit ausgeblendeten Linkzielen: kein Unterschied. Die Regel „Antworten wortwörtlich“ bleibt also erfüllt, auch Stellen wie `com.example.campusmarket` in Backticks oder in eurem Prompt bleiben so, wie sie waren.
+- **Oben in `AI_USAGE.md` steht ein Hinweis**, dass und warum die Linkziele geändert wurden. Damit ist es für den Prüfer nachvollziehbar.
+
+## Mögliche zweite Quelle: Zeilenenden
+
+Falls ihr beim Commit zusätzlich Meldungen wie `LF will be replaced by CRLF` seht: Die kommen nicht von der Umbenennung, sondern von Git-Einstellungen. Bei euch ist `core.autocrlf=true` (Windows-Standard), aber 55 Dateien haben LF-Zeilenenden (meist die, die ich geschrieben habe). Git meldet bei jeder solchen Datei, dass es sie beim nächsten Mal umwandelt. Im Repository selbst ist alles einheitlich LF, es ist also nur ein Hinweis.
+
+Beheben ließe sich das mit einer Datei `.gitattributes` im Root:
+
+```
+* text=auto eol=lf
+```
+
+Dann gilt für alle Dateien LF, egal wie Git auf dem jeweiligen Rechner eingestellt ist, und die Hinweise verschwinden. Android Studio kommt mit LF problemlos zurecht. Das ist eine Einstellung für das ganze Repo, deshalb habe ich sie nicht ohne euch angelegt.
+
+## Testen
+
+- In Android Studio `AI_USAGE.md` öffnen: Die Links sind nicht mehr unterstrichen bzw. markiert. Ein Klick auf z. B. `data/Ad.kt` in Eintrag 3 öffnet die Datei.
+- Beim Commit (mit „Analyze code“) sollten keine Warnungen zu `AI_USAGE.md` mehr kommen.
+
+## Commit-Vorschlag
+
+```
+docs: tote Links in AI_USAGE.md nach Paket-Umbenennung korrigiert
+```
+
+(`AI_USAGE.md`)
+````
+
+#### Prompt 2
+
+Antwort auf die Frage der KI im Antwortfeld der App („Soll ich die Zeilenenden mit einer .gitattributes einheitlich machen?“, Buttons „Ja, anlegen“ / „Nein, so lassen“):
+
+````text
+Nein, so lassen
+````
+
+#### Ergebnis der KI zu Prompt 2 (vollständig)
+
+**Ausgeführte Aktionen:** `git status`, `git log --oneline -1` ausgeführt und den Aufbau von Eintrag 11 gelesen. Ergebnis: Nur `AI_USAGE.md` ist geändert, nichts committet. Prompt 2 und dieses Ergebnis in `AI_USAGE.md` eingetragen. Keine `.gitattributes` angelegt, am Code nichts geändert.
+
+**Kurzfazit im Antwortfeld der App:** „Die Zeilenenden bleiben, wie sie sind, es gibt keine .gitattributes. Geändert ist nur AI_USAGE.md (Linkziele und Logbuch), noch nicht committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 9 (README) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Alles klar, die Zeilenenden bleiben, wie sie sind. Ich lege keine `.gitattributes` an. Die Meldungen `LF will be replaced by CRLF` sind nur Hinweise von Git und ändern nichts am Inhalt des Repositorys.
+
+Geändert ist damit nur `AI_USAGE.md` (die korrigierten Linkziele und das Logbuch). Commit-Vorschlag wie zuvor:
+
+```
+docs: tote Links in AI_USAGE.md nach Paket-Umbenennung korrigiert
+```
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+-
+
+#### Commits
+
+Tote Links in AI_USAGE.md nach Paket-Umbenennung korrigiert
 
 ---
 
