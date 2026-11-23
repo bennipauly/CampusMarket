@@ -56,6 +56,18 @@ class AdDetailViewModel(
         }
     }
 
+    // Knopf unter den Details: wechselt zwischen "verfügbar" und "verkauft".
+    fun onSoldClick() {
+        val ad = _uiState.value.ad ?: return
+        viewModelScope.launch {
+            try {
+                repository.setSold(ad.id, !ad.isSold)
+            } catch (e: Exception) {
+                // Speichern hat nicht geklappt: Der Status bleibt wie vorher, die App stürzt nicht ab.
+            }
+        }
+    }
+
     fun onDeleteClick() {
         _uiState.update { it.copy(showDeleteDialog = true) }
     }

@@ -18,6 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -171,7 +172,19 @@ private fun AdListItem(ad: Ad, onClick: () -> Unit, onFavoriteClick: () -> Unit)
             AdImage(imageUri = ad.imageUri, contentDescription = null, modifier = Modifier.size(56.dp))
         },
         headlineContent = { Text(ad.title) },
-        supportingContent = { Text(ad.location) },
+        // Unter dem Ort steht "Verkauft", damit man verkaufte Anzeigen schon in der Liste erkennt.
+        supportingContent = {
+            Column {
+                Text(ad.location)
+                if (ad.isSold) {
+                    Text(
+                        stringResource(R.string.status_sold),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+        },
         // Rechts der Preis und das Herz. Das Herz hat einen eigenen Klick und öffnet nicht die Details.
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -188,8 +201,10 @@ private fun AdListItem(ad: Ad, onClick: () -> Unit, onFavoriteClick: () -> Unit)
 private fun AdListScreenReadyPreview() {
     CampusMarketTheme {
         // Die Beispieldaten bekommen hier ids, weil Room sie sonst erst beim Einfügen vergibt.
-        // Die erste Anzeige ist Favorit, damit man beide Herzen sieht.
-        val ads = sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L, isFavorite = index == 0) }
+        // Die erste Anzeige ist Favorit und die zweite verkauft, damit man beides sieht.
+        val ads = sampleAds(now = 0L).mapIndexed { index, ad ->
+            ad.copy(id = index + 1L, isFavorite = index == 0, isSold = index == 1)
+        }
         AdListScreen(
             uiState = AdListUiState(isLoading = false, ads = ads),
             onAdClick = {},

@@ -1854,6 +1854,112 @@ Anzeigen als Favorit merken
 
 ---
 
+### Eintrag 16: Schritt 12 – Status verfügbar/verkauft
+
+- **Datum:** 23.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 12
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -2` ausgeführt. Ergebnis: Schritt 11 committet (`313bdcf`), aber `AI_USAGE.md` war bereits ohne Commit geändert.
+2. `AI_USAGE.md`: Eintrag 16 mit dem Prompt angelegt (Skript `log16.py` im Scratchpad, mit `sed` aus `log15.py` erzeugt).
+3. Dabei aufgefallen: Eintrag 15 stand zweimal in der Datei. `git diff` und ein Vergleich mit dem Skript `dup15.py` zeigten: Die zweite Kopie ist der alte, ungeänderte Text der KI (alte Tabellenformatierung, Team-Felder „eintragen“), die erste ist der committete Stand des Teams. Die zweite Kopie wurde mit `dup15.py` entfernt.
+4. Gelesen: `strings.xml` (Status-Texte) und `AdDetailScreen.kt` (Detail-Inhalt).
+5. Skript `step12.py` im Scratchpad angelegt und mit `python -I` ausgeführt. Geändert: `data/AdDao.kt`, `data/AdRepository.kt`, `ui/addetail/AdDetailViewModel.kt`, `ui/addetail/AdDetailScreen.kt`, `ui/adlist/AdListScreen.kt`, `res/values/strings.xml`.
+6. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen, 26/26 Tests grün.
+7. Emulator: App installiert. „Taschenrechner TI-30X“ als verkauft markiert → Status „Verkauft“, Knopftext gewechselt. Mit `adb emu rotate` ins Querformat und zurück → bleibt. Liste zeigt rot „Verkauft“ (Screenshot). Bearbeiten und Speichern → bleibt verkauft. App neu gestartet → bleibt verkauft. „Wieder als verfügbar markieren“ → „Verfügbar“. Absturz-Log leer.
+8. `README.md`: Funktion „Status“ ergänzt.
+9. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 12 ist umgesetzt: In der Detailansicht lässt sich eine Anzeige als verkauft markieren und wieder freigeben, die Liste zeigt dann „Verkauft“. Build, 26 Tests und der Emulator-Test liefen fehlerfrei. Außerdem habe ich eine doppelte, veraltete Kopie von Eintrag 15 aus AI_USAGE.md entfernt. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 13 (Filter) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 12 ist fertig: Eine Anzeige lässt sich jetzt als verkauft markieren und wieder freigeben. In der Detailansicht steht dafür unter dem Status ein Knopf, und in der Liste steht unter dem Ort ein rotes „Verkauft“. Build und Tests liefen ohne Fehler, und auf dem Emulator gab es keinen Absturz.
+
+**Vorher noch ein Hinweis zu AI_USAGE.md:** Bevor ich angefangen habe, war die Datei schon geändert, ohne Commit. Unter eurem fertigen Eintrag 15 stand eine zweite, ältere Kopie davon: mein ursprünglicher Text mit den alten Tabellen und leeren Team-Feldern. Das kommt vermutlich von einem Editor, der die Datei noch im alten Stand offen hatte und wieder gespeichert hat. Ich habe die Kopie entfernt. Euer committeter Eintrag 15 ist unverändert. Falls AI_USAGE.md bei euch in Android Studio offen ist, ladet sie bitte neu, bevor ihr sie bearbeitet.
+
+## Was sich geändert hat (`app/src/main/…/campusmarket/`)
+
+| Datei                              | Änderung                                                                                      |
+|------------------------------------|-----------------------------------------------------------------------------------------------|
+| `data/AdDao.kt`                    | Neue Abfrage `setSold(id, isSold)`, ändert nur die Spalte `isSold`                            |
+| `data/AdRepository.kt`             | Reicht `setSold` an das DAO weiter                                                            |
+| `ui/addetail/AdDetailViewModel.kt` | `onSoldClick()` schaltet zwischen verfügbar und verkauft um                                   |
+| `ui/addetail/AdDetailScreen.kt`    | Knopf „Als verkauft markieren“ bzw. „Wieder als verfügbar markieren“ unter der Zeile „Status“ |
+| `ui/adlist/AdListScreen.kt`        | Rotes „Verkauft“ unter dem Ort. Die Preview zeigt eine verkaufte Anzeige                      |
+| `res/values/strings.xml`           | 2 neue Texte                                                                                  |
+
+Die Datenbank musste nicht geändert werden: Die Spalte `isSold` und die Zeile „Status“ in der Detailansicht gibt es seit Schritt 2 bzw. 5.
+
+## Warum so
+
+- **Gleiches Muster wie bei den Favoriten:** Eine Abfrage ändert nur die eine Spalte. Der ViewModel schreibt nur in Room, und der neue Stand kommt über den Flow in Liste und Detail an.
+- **Ein Knopf im Inhalt statt eines Symbols oben:** Oben rechts stehen schon Herz, Stift und Mülleimer. Ein vierter Knopf ohne Text wäre schwer zu verstehen. Ein Knopf mit Text erklärt sich selbst.
+- **Der Knopftext beschreibt die Aktion:** Der aktuelle Zustand steht schon in der Zeile darüber („Status: Verkauft“). Der Knopf sagt, was beim Tippen passiert („Wieder als verfügbar markieren“).
+- **Kein Bestätigungsdialog:** Anders als beim Löschen geht nichts verloren, ein zweiter Tipp macht es rückgängig.
+- **Verkaufte Anzeigen bleiben in der Liste:** Ein Filter „nur verfügbare“ passt zu Schritt 13 und kommt dort zusammen mit „nur Favoriten“ dazu.
+- **Bearbeiten behält den Status:** Das war schon in Schritt 10 vorbereitet (`originalAd`).
+
+## Auf dem Emulator getestet
+
+- **„Taschenrechner TI-30X“:** „Als verkauft markieren“ angetippt. Der Status wechselt auf „Verkauft“, der Knopf auf „Wieder als verfügbar markieren“.
+- **Querformat:** Der Status bleibt „Verkauft“.
+- **Liste:** Unter „Haupteingang“ steht rot „Verkauft“ (Screenshot).
+- **Bearbeiten:** Nach dem Speichern bleibt die Anzeige verkauft.
+- **App-Neustart:** Die Anzeige ist noch verkauft.
+- **Zurücksetzen:** „Wieder als verfügbar markieren“ ändert den Status zurück auf „Verfügbar“.
+- Absturz-Log leer.
+
+## Testanleitung für euch
+
+```powershell
+.\gradlew.bat assembleDebug testDebugUnitTest
+```
+
+- **Umschalten:** Eine Anzeige öffnen, „Als verkauft markieren“ antippen, zurück zur Liste. Dort steht „Verkauft“. Wieder öffnen und auf „verfügbar“ zurückstellen.
+- **Rotation:** Der Status bleibt beim Drehen erhalten.
+- **App-Neustart:** Der Status bleibt erhalten.
+- **Flugmodus:** kein Unterschied, alles ist lokal.
+- **Ungültige Eingaben, Permission verweigert:** nicht betroffen. Formular und Kamera funktionieren wie vorher.
+
+Prompt und Antwort stehen als Eintrag 16 in AI_USAGE.md.
+
+## Commit-Vorschlag
+
+```
+feat: Anzeige als verkauft markieren
+```
+
+(`data/AdDao.kt`, `data/AdRepository.kt`, `ui/addetail/*`, `ui/adlist/AdListScreen.kt`, `strings.xml`, `README.md`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Neuer Button (Verkauft) getestet
+
+#### Commits
+
+Anzeige als verkauft markieren
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

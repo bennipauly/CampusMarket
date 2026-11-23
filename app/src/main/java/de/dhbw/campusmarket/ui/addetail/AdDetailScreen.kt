@@ -15,6 +15,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,6 +61,7 @@ fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit, onEd
         onPhotoClick = onPhotoClick,
         onEditClick = onEditClick,
         onFavoriteClick = viewModel::onFavoriteClick,
+        onSoldClick = viewModel::onSoldClick,
         onRetry = viewModel::loadAd,
         onDeleteClick = viewModel::onDeleteClick,
         onDeleteConfirm = viewModel::onDeleteConfirm,
@@ -76,6 +78,7 @@ fun AdDetailScreen(
     onPhotoClick: () -> Unit,
     onEditClick: () -> Unit,
     onFavoriteClick: () -> Unit,
+    onSoldClick: () -> Unit,
     onRetry: () -> Unit,
     onDeleteClick: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -121,7 +124,7 @@ fun AdDetailScreen(
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(stringResource(R.string.ad_detail_error), onRetry, contentModifier)
             uiState.ad == null -> MessageContent(stringResource(R.string.ad_detail_not_found), contentModifier)
-            else -> AdDetailContent(uiState.ad, onPhotoClick, contentModifier)
+            else -> AdDetailContent(uiState.ad, onPhotoClick, onSoldClick, contentModifier)
         }
     }
 
@@ -131,7 +134,7 @@ fun AdDetailScreen(
 }
 
 @Composable
-private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, modifier: Modifier) {
+private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, onSoldClick: () -> Unit, modifier: Modifier) {
     // verticalScroll: Bei langer Beschreibung oder im Querformat kann man scrollen.
     Column(
         modifier = modifier
@@ -163,6 +166,16 @@ private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, modifier: Modifier
         DetailRow(stringResource(R.string.label_location), ad.location)
         val status = if (ad.isSold) R.string.status_sold else R.string.status_available
         DetailRow(stringResource(R.string.label_status), stringResource(status))
+        // Der Knopf beschreibt, was beim Tippen passiert, nicht den aktuellen Zustand.
+        OutlinedButton(
+            onClick = onSoldClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        ) {
+            val text = if (ad.isSold) R.string.mark_available else R.string.mark_sold
+            Text(stringResource(text))
+        }
         // Die Beschreibung ist im Formular optional. Ohne Text keine leere Überschrift zeigen.
         if (ad.description.isNotBlank()) {
             Text(
@@ -217,6 +230,7 @@ private fun AdDetailScreenReadyPreview() {
             onPhotoClick = {},
             onEditClick = {},
             onFavoriteClick = {},
+            onSoldClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},
@@ -239,6 +253,7 @@ private fun AdDetailScreenDeleteDialogPreview() {
             onPhotoClick = {},
             onEditClick = {},
             onFavoriteClick = {},
+            onSoldClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},

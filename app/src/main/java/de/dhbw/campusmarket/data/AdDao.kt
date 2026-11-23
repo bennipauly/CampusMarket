@@ -36,6 +36,10 @@ interface AdDao {
     @Query("UPDATE ads SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun setFavorite(id: Long, isFavorite: Boolean)
 
+    // Wie setFavorite: ändert nur die Spalte isSold.
+    @Query("UPDATE ads SET isSold = :isSold WHERE id = :id")
+    suspend fun setSold(id: Long, isSold: Boolean)
+
     @Delete
     suspend fun delete(ad: Ad)
 }

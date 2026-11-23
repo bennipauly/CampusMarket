@@ -15,6 +15,7 @@ Die App arbeitet **rein lokal**: Es gibt kein Backend, keinen Login und keine Ne
 - Anzeige bearbeiten (Stift-Symbol in der Detailansicht), mit derselben Prüfung wie beim Erstellen
 - Anzeige löschen mit Bestätigungsdialog
 - Favoriten: Anzeigen mit dem Herz in der Liste oder in der Detailansicht merken
+- Status: Anzeige in der Detailansicht als verkauft markieren (und wieder freigeben), in der Liste steht dann „Verkauft“
 - Produktfoto mit der Gerätekamera (mit Kamera-Berechtigung; ohne Berechtigung lässt sich die Anzeige trotzdem speichern)
 - Foto im Vollbild: In der Detailansicht auf das Foto tippen
 - Lokale Speicherung: Die Daten bleiben nach einem Neustart erhalten. Beim ersten Start werden sechs Beispielanzeigen angelegt.
