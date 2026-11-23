@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Kamera für Produktfotos. required="false": Die App lässt sich auch ohne Kamera installieren. -->
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:name=".CampusMarketApplication"
         android:allowBackup="true"
@@ -24,6 +31,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Gibt der Kamera-App eine content://-Uri, unter der sie das Foto in unseren
+             internen Speicher schreiben darf. Die erlaubten Ordner stehen in file_paths.xml. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

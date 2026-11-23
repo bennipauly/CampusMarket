@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.dhbw.campusmarket.R
 import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.sampleAds
+import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
 import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
@@ -121,6 +123,16 @@ private fun AdDetailContent(ad: Ad, modifier: Modifier) {
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        if (ad.imageUri != null) {
+            AdImage(
+                imageUri = ad.imageUri,
+                contentDescription = stringResource(R.string.ad_photo),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .padding(bottom = 16.dp)
+            )
+        }
         Text(ad.title, style = MaterialTheme.typography.headlineSmall)
         Text(
             formatPrice(ad.price),

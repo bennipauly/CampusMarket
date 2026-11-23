@@ -49,6 +49,33 @@ class AdFormViewModel(private val repository: AdRepository) : ViewModel() {
         _uiState.update { it.copy(location = location) }
     }
 
+    // Die Route hat eine leere Foto-Datei angelegt und startet gleich die Kamera.
+    fun onPhotoUriCreated(uri: String) {
+        _uiState.update {
+            it.copy(pendingPhotoUri = uri, showPermissionHint = false, showNoCameraHint = false)
+        }
+    }
+
+    // Ergebnis der Kamera: success = false heißt abgebrochen, dann bleibt das alte Foto.
+    fun onPhotoResult(success: Boolean) {
+        _uiState.update {
+            val newImage = if (success) it.pendingPhotoUri else it.imageUri
+            it.copy(imageUri = newImage, pendingPhotoUri = null)
+        }
+    }
+
+    fun onCameraPermissionDenied() {
+        _uiState.update { it.copy(showPermissionHint = true) }
+    }
+
+    fun onCameraUnavailable() {
+        _uiState.update { it.copy(showNoCameraHint = true, pendingPhotoUri = null) }
+    }
+
+    fun onRemovePhotoClick() {
+        _uiState.update { it.copy(imageUri = null) }
+    }
+
     fun onSaveClick() {
         val state = _uiState.value
         // Doppelklick auf "Speichern" soll nicht zwei Anzeigen anlegen.
@@ -69,6 +96,7 @@ class AdFormViewModel(private val repository: AdRepository) : ViewModel() {
             category = state.category,
             condition = state.condition,
             location = state.location.trim(),
+            imageUri = state.imageUri,
             createdAt = System.currentTimeMillis()
         )
         viewModelScope.launch {

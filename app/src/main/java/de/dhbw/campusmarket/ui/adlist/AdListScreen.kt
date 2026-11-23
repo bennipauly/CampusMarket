@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.dhbw.campusmarket.R
 import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.sampleAds
+import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
 import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
@@ -153,6 +155,10 @@ private fun AdListContent(ads: List<Ad>, onAdClick: (Long) -> Unit, modifier: Mo
 @Composable
 private fun AdListItem(ad: Ad, onClick: () -> Unit) {
     ListItem(
+        // Links ein kleines Vorschaubild oder der Platzhalter, wenn es kein Foto gibt.
+        leadingContent = {
+            AdImage(imageUri = ad.imageUri, contentDescription = null, modifier = Modifier.size(56.dp))
+        },
         headlineContent = { Text(ad.title) },
         supportingContent = { Text(ad.location) },
         trailingContent = { Text(formatPrice(ad.price)) },

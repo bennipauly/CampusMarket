@@ -40,4 +40,10 @@
     <string name="error_price">Bitte einen Preis wie 12,50 eingeben (höchstens 99999,99).</string>
     <string name="error_location">Bitte einen Übergabeort eingeben.</string>
     <string name="error_save">Speichern hat nicht geklappt. Bitte erneut versuchen.</string>
+    <string name="ad_photo">Foto der Anzeige</string>
+    <string name="photo_take">Foto aufnehmen</string>
+    <string name="photo_retake">Neues Foto</string>
+    <string name="photo_remove">Foto entfernen</string>
+    <string name="photo_permission_denied">Ohne Kamera-Berechtigung kann kein Foto aufgenommen werden. Die Anzeige lässt sich trotzdem ohne Foto speichern. Die Berechtigung kann in den Einstellungen der App erteilt werden.</string>
+    <string name="photo_no_camera">Auf diesem Gerät ist keine Kamera-App verfügbar. Die Anzeige lässt sich trotzdem ohne Foto speichern.</string>
 </resources>

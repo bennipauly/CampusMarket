@@ -15,6 +15,14 @@ data class AdFormUiState(
     val category: Category = Category.BOOKS,
     val condition: Condition = Condition.GOOD,
     val location: String = "",
+    // content://-Uri des aufgenommenen Fotos als Text; null = kein Foto.
+    val imageUri: String? = null,
+    // Uri der Datei, in die die Kamera gerade schreibt. Liegt hier und nicht im Composable,
+    // damit sie erhalten bleibt, falls die Activity während der Aufnahme neu erzeugt wird.
+    val pendingPhotoUri: String? = null,
+    // Hinweise, wenn die Kamera-Berechtigung verweigert wurde oder es keine Kamera gibt.
+    val showPermissionHint: Boolean = false,
+    val showNoCameraHint: Boolean = false,
     // Fehler erst nach dem ersten Klick auf "Speichern" zeigen, nicht schon beim Öffnen.
     val showErrors: Boolean = false,
     val isSaving: Boolean = false,

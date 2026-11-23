@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nur der Ordner "photos" im internen App-Speicher (filesDir) wird über den FileProvider freigegeben. -->
+<paths>
+    <files-path
+        name="photos"
+        path="photos/" />
+</paths>

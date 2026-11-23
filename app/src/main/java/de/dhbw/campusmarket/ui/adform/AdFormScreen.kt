@@ -1,10 +1,16 @@
 package de.dhbw.campusmarket.ui.adform
 
+import android.Manifest
+import android.content.ActivityNotFoundException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +22,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -36,6 +44,7 @@ import de.dhbw.campusmarket.R
 import de.dhbw.campusmarket.data.Category
 import de.dhbw.campusmarket.data.Condition
 import de.dhbw.campusmarket.logic.MAX_TITLE_LENGTH
+import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
@@ -44,6 +53,35 @@ import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 fun AdFormRoute(onBack: () -> Unit, onSaved: () -> Unit) {
     val viewModel: AdFormViewModel = viewModel(factory = AdFormViewModel.Factory)
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    // Startet die Kamera-App. Sie schreibt das Foto in die Datei hinter der Uri.
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success -> viewModel.onPhotoResult(success) }
+
+    fun launchCamera() {
+        val uri = createPhotoUri(context)
+        viewModel.onPhotoUriCreated(uri.toString())
+        try {
+            cameraLauncher.launch(uri)
+        } catch (e: ActivityNotFoundException) {
+            // Ohne Kamera-App: Hinweis zeigen statt abstürzen.
+            viewModel.onCameraUnavailable()
+        }
+    }
+
+    // Schritt 1: nach der Kamera-Berechtigung fragen. Ist sie schon erteilt,
+    // kommt sofort "true" zurück, ohne dass ein Dialog erscheint.
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            launchCamera()
+        } else {
+            viewModel.onCameraPermissionDenied()
+        }
+    }
 
     // Sobald die Anzeige gespeichert ist, einmal zurück.
     LaunchedEffect(uiState.isSaved) {
@@ -61,6 +99,8 @@ fun AdFormRoute(onBack: () -> Unit, onSaved: () -> Unit) {
         onCategoryChange = viewModel::onCategoryChange,
         onConditionChange = viewModel::onConditionChange,
         onLocationChange = viewModel::onLocationChange,
+        onTakePhotoClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+        onRemovePhotoClick = viewModel::onRemovePhotoClick,
         onSaveClick = viewModel::onSaveClick
     )
 }
@@ -77,6 +117,8 @@ fun AdFormScreen(
     onCategoryChange: (Category) -> Unit,
     onConditionChange: (Condition) -> Unit,
     onLocationChange: (String) -> Unit,
+    onTakePhotoClick: () -> Unit,
+    onRemovePhotoClick: () -> Unit,
     onSaveClick: () -> Unit
 ) {
     Scaffold(
@@ -104,6 +146,11 @@ fun AdFormScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            PhotoSection(
+                uiState = uiState,
+                onTakePhotoClick = onTakePhotoClick,
+                onRemovePhotoClick = onRemovePhotoClick
+            )
             FormTextField(
                 value = uiState.title,
                 onValueChange = onTitleChange,
@@ -158,6 +205,41 @@ fun AdFormScreen(
             ) {
                 Text(stringResource(R.string.save))
             }
+        }
+    }
+}
+
+// Foto-Vorschau, Knöpfe zum Aufnehmen/Entfernen und die Hinweise, wenn es nicht geht.
+@Composable
+private fun PhotoSection(
+    uiState: AdFormUiState,
+    onTakePhotoClick: () -> Unit,
+    onRemovePhotoClick: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        AdImage(
+            imageUri = uiState.imageUri,
+            contentDescription = stringResource(R.string.ad_photo),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = onTakePhotoClick) {
+                val text = if (uiState.imageUri == null) R.string.photo_take else R.string.photo_retake
+                Text(stringResource(text))
+            }
+            if (uiState.imageUri != null) {
+                OutlinedButton(onClick = onRemovePhotoClick) {
+                    Text(stringResource(R.string.photo_remove))
+                }
+            }
+        }
+        if (uiState.showPermissionHint) {
+            Text(stringResource(R.string.photo_permission_denied), color = MaterialTheme.colorScheme.error)
+        }
+        if (uiState.showNoCameraHint) {
+            Text(stringResource(R.string.photo_no_camera), color = MaterialTheme.colorScheme.error)
         }
     }
 }
@@ -221,6 +303,8 @@ private fun AdFormScreenEmptyPreview() {
             onCategoryChange = {},
             onConditionChange = {},
             onLocationChange = {},
+            onTakePhotoClick = {},
+            onRemovePhotoClick = {},
             onSaveClick = {}
         )
     }
@@ -231,7 +315,7 @@ private fun AdFormScreenEmptyPreview() {
 private fun AdFormScreenErrorsPreview() {
     CampusMarketTheme {
         AdFormScreen(
-            uiState = AdFormUiState(price = "12,505", showErrors = true),
+            uiState = AdFormUiState(price = "12,505", showErrors = true, showPermissionHint = true),
             onBack = {},
             onTitleChange = {},
             onDescriptionChange = {},
@@ -239,6 +323,8 @@ private fun AdFormScreenErrorsPreview() {
             onCategoryChange = {},
             onConditionChange = {},
             onLocationChange = {},
+            onTakePhotoClick = {},
+            onRemovePhotoClick = {},
             onSaveClick = {}
         )
     }
