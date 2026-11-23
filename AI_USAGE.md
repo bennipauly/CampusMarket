@@ -10,13 +10,13 @@ Hinweis zu den Links: Nach der Umbenennung des Pakets (Eintrag 8) zeigten Datei-
 
 ## 1. Setup
 
-| Punkt | Angabe |
-|---|---|
-| IDE und Umgebung | Android Studio (Gradle 9.6.0, Android Gradle Plugin 9.4.1, Kotlin 2.2.10), Windows 11 |
-| Assistenten und Modelle | Claude Code (Desktop-App, Code-Tab), Modell Claude Opus 5.5 (`claude-opus-5-5`) |
-| Tools und Erweiterungen | eintragen (z. B. weitere Plugins in Android Studio, falls genutzt) |
-| Instruction-File | [`CLAUDE.md`](CLAUDE.md) im Root des Repos |
-| Teamregeln | Jeder Prompt wird sofort und wortwörtlich hier eingetragen. Die KI committet und pusht nie selbst; Commits machen wir, damit beide Mitglieder sinnvolle Commits haben. Jede Änderung wird von uns gelesen, verstanden und getestet, bevor sie committet wird. Jedes Mitglied muss jede Zeile ohne KI erklären können. |
+| Punkt                   | Angabe                                                                                                                                                                                                                                                                                                                |
+|-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| IDE und Umgebung        | Android Studio (Gradle 9.6.0, Android Gradle Plugin 9.4.1, Kotlin 2.2.10), Windows 11                                                                                                                                                                                                                                 |
+| Assistenten und Modelle | Claude Code (Desktop-App, Code-Tab), Modell Claude Opus 5.5 (`claude-opus-5-5`)                                                                                                                                                                                                                                       |
+| Tools und Erweiterungen | eintragen (z. B. weitere Plugins in Android Studio, falls genutzt)                                                                                                                                                                                                                                                    |
+| Instruction-File        | [`CLAUDE.md`](CLAUDE.md) im Root des Repos                                                                                                                                                                                                                                                                            |
+| Teamregeln              | Jeder Prompt wird sofort und wortwörtlich hier eingetragen. Die KI committet und pusht nie selbst; Commits machen wir, damit beide Mitglieder sinnvolle Commits haben. Jede Änderung wird von uns gelesen, verstanden und getestet, bevor sie committet wird. Jedes Mitglied muss jede Zeile ohne KI erklären können. |
 
 ---
 
@@ -128,14 +128,14 @@ Ich habe das Projekt angesehen und die beiden Dateien angelegt. Am App-Code habe
 
 ## Was im Projekt steht
 
-| | |
-|---|---|
-| Paket / applicationId | `com.example.campusmarket` |
-| Theme | `CampusMarketTheme` (Compose), `Theme.CampusMarket` (XML) |
-| Gradle / AGP / Kotlin | 9.6.0 / 9.4.1 / 2.2.10, Versionen in `gradle/libs.versions.toml` |
-| Compose BOM | 2026.02.01 |
-| compileSdk / targetSdk | 37 |
-| **minSdk** | **24**, muss laut Vorgabe auf **26**. Das ändere ich in Schritt 1. |
+|                        |                                                                    |
+|------------------------|--------------------------------------------------------------------|
+| Paket / applicationId  | `com.example.campusmarket`                                         |
+| Theme                  | `CampusMarketTheme` (Compose), `Theme.CampusMarket` (XML)          |
+| Gradle / AGP / Kotlin  | 9.6.0 / 9.4.1 / 2.2.10, Versionen in `gradle/libs.versions.toml`   |
+| Compose BOM            | 2026.02.01                                                         |
+| compileSdk / targetSdk | 37                                                                 |
+| **minSdk**             | **24**, muss laut Vorgabe auf **26**. Das ändere ich in Schritt 1. |
 
 Außerdem gibt es noch den Beispielcode von Android Studio (`Greeting`, `ExampleUnitTest`, `ExampleInstrumentedTest`). Der fliegt raus, sobald wir ihn ersetzen, damit kein toter Code bleibt. AGP 9 bringt Kotlin schon mit, deshalb brauchen wir kein extra `kotlin-android`-Plugin.
 
@@ -243,12 +243,12 @@ Die Regel „Komplettes KI-Ergebnis ins Logbuch“ steht als Punkt 2 in [CLAUDE.
 
 ## Was sich geändert hat
 
-| Datei | Änderung | Warum |
-|---|---|---|
-| [app/build.gradle.kts](app/build.gradle.kts) | `minSdk` 24 → 26 | Vorgabe der Aufgabe |
-| [app/build.gradle.kts](app/build.gradle.kts) | Plugins `kotlin.serialization` und `ksp`, neue `implementation`-Zeilen, `ksp(room.compiler)` | Die App nutzt die Bibliotheken ab Schritt 2 |
-| [build.gradle.kts](build.gradle.kts) | Die zwei Plugins mit `apply false` | Gradle lädt die Plugin-Version einmal zentral, angewendet werden sie erst im App-Modul |
-| [gradle/libs.versions.toml](gradle/libs.versions.toml) | Versionen und Einträge für alle neuen Bibliotheken | Alle Versionen stehen an einer Stelle |
+| Datei                                                  | Änderung                                                                                     | Warum                                                                                  |
+|--------------------------------------------------------|----------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| [app/build.gradle.kts](app/build.gradle.kts)           | `minSdk` 24 → 26                                                                             | Vorgabe der Aufgabe                                                                    |
+| [app/build.gradle.kts](app/build.gradle.kts)           | Plugins `kotlin.serialization` und `ksp`, neue `implementation`-Zeilen, `ksp(room.compiler)` | Die App nutzt die Bibliotheken ab Schritt 2                                            |
+| [build.gradle.kts](build.gradle.kts)                   | Die zwei Plugins mit `apply false`                                                           | Gradle lädt die Plugin-Version einmal zentral, angewendet werden sie erst im App-Modul |
+| [gradle/libs.versions.toml](gradle/libs.versions.toml) | Versionen und Einträge für alle neuen Bibliotheken                                           | Alle Versionen stehen an einer Stelle                                                  |
 
 **Neue Bibliotheken und wofür wir sie brauchen:**
 
@@ -344,15 +344,15 @@ Schritt 2 ist fertig: Die Room-Datenschicht steht, und der Build läuft durch. K
 
 ## Neue Dateien (`app/src/main/java/com/example/campusmarket/`)
 
-| Datei | Was sie tut |
-|---|---|
-| [data/Category.kt](app/src/main/java/de/dhbw/campusmarket/data/Category.kt) | Enum mit den Kategorien (Bücher, Skripte, Taschenrechner, Technik, Möbel, Sonstiges) |
-| [data/Condition.kt](app/src/main/java/de/dhbw/campusmarket/data/Condition.kt) | Enum für den Zustand (neu, wie neu, gut, gebraucht) |
-| [data/Ad.kt](app/src/main/java/de/dhbw/campusmarket/data/Ad.kt) | `@Entity`: eine Anzeige = eine Zeile in der Tabelle `ads` |
-| [data/AdDao.kt](app/src/main/java/de/dhbw/campusmarket/data/AdDao.kt) | Alle SQL-Zugriffe. Lesen liefert `Flow`, Schreiben ist `suspend` |
-| [data/AppDatabase.kt](app/src/main/java/de/dhbw/campusmarket/data/AppDatabase.kt) | `@Database` mit der Tabelle `ads`, Version 1 |
-| [data/AdRepository.kt](app/src/main/java/de/dhbw/campusmarket/data/AdRepository.kt) | Einziger Zugang der ViewModels zu den Daten, reicht an das DAO weiter |
-| [data/SampleData.kt](app/src/main/java/de/dhbw/campusmarket/data/SampleData.kt) | Sechs Beispielanzeigen, eine davon schon „verkauft“ |
+| Datei                                                                                           | Was sie tut                                                                          |
+|-------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [data/Category.kt](app/src/main/java/de/dhbw/campusmarket/data/Category.kt)                     | Enum mit den Kategorien (Bücher, Skripte, Taschenrechner, Technik, Möbel, Sonstiges) |
+| [data/Condition.kt](app/src/main/java/de/dhbw/campusmarket/data/Condition.kt)                   | Enum für den Zustand (neu, wie neu, gut, gebraucht)                                  |
+| [data/Ad.kt](app/src/main/java/de/dhbw/campusmarket/data/Ad.kt)                                 | `@Entity`: eine Anzeige = eine Zeile in der Tabelle `ads`                            |
+| [data/AdDao.kt](app/src/main/java/de/dhbw/campusmarket/data/AdDao.kt)                           | Alle SQL-Zugriffe. Lesen liefert `Flow`, Schreiben ist `suspend`                     |
+| [data/AppDatabase.kt](app/src/main/java/de/dhbw/campusmarket/data/AppDatabase.kt)               | `@Database` mit der Tabelle `ads`, Version 1                                         |
+| [data/AdRepository.kt](app/src/main/java/de/dhbw/campusmarket/data/AdRepository.kt)             | Einziger Zugang der ViewModels zu den Daten, reicht an das DAO weiter                |
+| [data/SampleData.kt](app/src/main/java/de/dhbw/campusmarket/data/SampleData.kt)                 | Sechs Beispielanzeigen, eine davon schon „verkauft“                                  |
 | [CampusMarketApplication.kt](app/src/main/java/de/dhbw/campusmarket/CampusMarketApplication.kt) | Baut Datenbank und Repository genau einmal und fügt beim Start die Beispieldaten ein |
 
 Außerdem steht in [AndroidManifest.xml](app/src/main/AndroidManifest.xml) jetzt `android:name=".CampusMarketApplication"`. Ohne diese Zeile würde Android unsere Klasse nie erzeugen.
@@ -452,13 +452,13 @@ Schritt 3 ist fertig: Die App startet jetzt über einen NavHost, und man kann vo
 
 ## Neue Dateien (`app/src/main/java/com/example/campusmarket/`)
 
-| Datei | Was sie tut |
-|---|---|
-| [ui/navigation/Destinations.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/Destinations.kt) | Die zwei Ziele: `AdList` (Startseite) und `AdDetail(adId)` (nur die id) |
-| [ui/navigation/AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt) | Der `NavHost`. Einziger Ort mit `navController` |
-| [ui/adlist/AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt) | Platzhalter mit `TopAppBar` und Button „Beispielanzeige öffnen“, plus Preview |
-| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt) | Platzhalter mit Zurück-Pfeil, zeigt die übergebene id, plus Preview |
-| [res/drawable/ic_arrow_back.xml](app/src/main/res/drawable/ic_arrow_back.xml) | Zurück-Pfeil als Vector-Drawable |
+| Datei                                                                                                 | Was sie tut                                                                   |
+|-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
+| [ui/navigation/Destinations.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/Destinations.kt) | Die zwei Ziele: `AdList` (Startseite) und `AdDetail(adId)` (nur die id)       |
+| [ui/navigation/AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt)     | Der `NavHost`. Einziger Ort mit `navController`                               |
+| [ui/adlist/AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt)         | Platzhalter mit `TopAppBar` und Button „Beispielanzeige öffnen“, plus Preview |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt) | Platzhalter mit Zurück-Pfeil, zeigt die übergebene id, plus Preview           |
+| [res/drawable/ic_arrow_back.xml](app/src/main/res/drawable/ic_arrow_back.xml)                         | Zurück-Pfeil als Vector-Drawable                                              |
 
 Geändert: [MainActivity.kt](app/src/main/java/de/dhbw/campusmarket/MainActivity.kt) (Beispielcode `Greeting` raus, ruft nur noch `AppNavHost()` auf) und [strings.xml](app/src/main/res/values/strings.xml) (Texte der Platzhalter, „Zurück“, „Details“). In [CLAUDE.md](CLAUDE.md) steht eine neue Regel zu Icons.
 
@@ -554,13 +554,13 @@ Schritt 4 ist fertig: Die Startseite zeigt jetzt die echten Anzeigen aus Room. D
 
 ## Neue und geänderte Dateien (`app/src/main/java/com/example/campusmarket/`)
 
-| Datei | Was sie tut |
-|---|---|
-| [ui/adlist/AdListUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListUiState.kt) | `isLoading`, `hasError`, `ads`: damit sind Loading, Error und Ready abgebildet |
+| Datei                                                                                               | Was sie tut                                                                                                                                                           |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [ui/adlist/AdListUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListUiState.kt)     | `isLoading`, `hasError`, `ads`: damit sind Loading, Error und Ready abgebildet                                                                                        |
 | [ui/adlist/AdListViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListViewModel.kt) | Sammelt `repository.getAllAds()` und schreibt das Ergebnis über `_uiState.update { … }` in den State. Die `Factory` holt das Repository aus `CampusMarketApplication` |
-| [ui/adlist/AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt) | `AdListRoute` (ViewModel + `collectAsStateWithLifecycle`) und der stateless `AdListScreen`, plus Previews für „Ready“ und „Error“ |
-| [ui/PriceFormat.kt](app/src/main/java/de/dhbw/campusmarket/ui/PriceFormat.kt) | `formatPrice(12.5)` → „12,50 €“ |
-| [PriceFormatTest.kt](app/src/test/java/de/dhbw/campusmarket/ui/PriceFormatTest.kt) | 3 JUnit-Tests für `formatPrice` |
+| [ui/adlist/AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt)       | `AdListRoute` (ViewModel + `collectAsStateWithLifecycle`) und der stateless `AdListScreen`, plus Previews für „Ready“ und „Error“                                     |
+| [ui/PriceFormat.kt](app/src/main/java/de/dhbw/campusmarket/ui/PriceFormat.kt)                       | `formatPrice(12.5)` → „12,50 €“                                                                                                                                       |
+| [PriceFormatTest.kt](app/src/test/java/de/dhbw/campusmarket/ui/PriceFormatTest.kt)                  | 3 JUnit-Tests für `formatPrice`                                                                                                                                       |
 
 Außerdem: [AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt) ruft jetzt `AdListRoute` statt des Platzhalters auf. In [strings.xml](app/src/main/res/values/strings.xml) sind die Platzhalter-Texte raus, die Texte für den Fehlerfall und die leere Liste sind neu. `ExampleUnitTest.kt` ist gelöscht, weil es jetzt einen echten Test gibt.
 
@@ -672,14 +672,14 @@ Schritt 5 ist fertig: Die Liste hat jetzt ein Suchfeld, und die Suchlogik ist ei
 
 ## Neue und geänderte Dateien
 
-| Datei | Was sie tut |
-|---|---|
-| [logic/AdSearch.kt](app/src/main/java/de/dhbw/campusmarket/logic/AdSearch.kt) | `searchAds(ads, query)`: sucht in Titel, Beschreibung und Übergabeort, ohne Rücksicht auf Groß-/Kleinschreibung. Leerer Suchtext → alle Anzeigen |
-| [AdSearchTest.kt](app/src/test/java/de/dhbw/campusmarket/logic/AdSearchTest.kt) | 10 Tests: leer, nur Leerzeichen, Treffer in jedem Feld, Groß-/Kleinschreibung, Leerzeichen außen, kein Treffer, Reihenfolge, leere Liste |
-| [AdListUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListUiState.kt) | Neues Feld `query` und die berechnete Eigenschaft `visibleAds` |
-| [AdListViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListViewModel.kt) | `onQueryChange(query)` schreibt den Suchtext in den State |
-| [AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt) | Suchfeld mit Lupe und Kreuz, Hinweis „Keine Treffer für …“, neue Preview dafür |
-| `ic_search.xml`, `ic_close.xml` | Lupe und Kreuz als Vector-Drawables |
+| Datei                                                                                     | Was sie tut                                                                                                                                      |
+|-------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| [logic/AdSearch.kt](app/src/main/java/de/dhbw/campusmarket/logic/AdSearch.kt)             | `searchAds(ads, query)`: sucht in Titel, Beschreibung und Übergabeort, ohne Rücksicht auf Groß-/Kleinschreibung. Leerer Suchtext → alle Anzeigen |
+| [AdSearchTest.kt](app/src/test/java/de/dhbw/campusmarket/logic/AdSearchTest.kt)           | 10 Tests: leer, nur Leerzeichen, Treffer in jedem Feld, Groß-/Kleinschreibung, Leerzeichen außen, kein Treffer, Reihenfolge, leere Liste         |
+| [AdListUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListUiState.kt)     | Neues Feld `query` und die berechnete Eigenschaft `visibleAds`                                                                                   |
+| [AdListViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListViewModel.kt) | `onQueryChange(query)` schreibt den Suchtext in den State                                                                                        |
+| [AdListScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adlist/AdListScreen.kt)       | Suchfeld mit Lupe und Kreuz, Hinweis „Keine Treffer für …“, neue Preview dafür                                                                   |
+| `ic_search.xml`, `ic_close.xml`                                                           | Lupe und Kreuz als Vector-Drawables                                                                                                              |
 
 ## Warum so
 
@@ -794,13 +794,13 @@ Schritt 6 ist fertig: Die Detailseite zeigt die echte Anzeige aus Room, und Lös
 
 ## Neue und geänderte Dateien (`app/src/main/java/com/example/campusmarket/`)
 
-| Datei | Was sie tut |
-|---|---|
-| [ui/addetail/AdDetailUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailUiState.kt) | `isLoading`, `hasError`, `ad`, dazu `showDeleteDialog` und `isDeleted` |
-| [ui/addetail/AdDetailViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailViewModel.kt) | Beobachtet `repository.getAd(adId)`, steuert den Dialog und löscht |
-| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt) | `AdDetailRoute` + stateless `AdDetailScreen`: Titel, Preis, Kategorie, Zustand, Übergabeort, Status, Beschreibung, Mülleimer in der `TopAppBar`, Lösch-Dialog. Previews „Ready“ und „Dialog“ |
-| [ui/StateContent.kt](app/src/main/java/de/dhbw/campusmarket/ui/StateContent.kt) | `LoadingContent`, `ErrorContent`, `MessageContent` für beide Screens. Vorher standen sie privat in `AdListScreen.kt` |
-| [ui/Labels.kt](app/src/main/java/de/dhbw/campusmarket/ui/Labels.kt) | `Category.BOOKS` → „Bücher“, `Condition.LIKE_NEW` → „Wie neu“ usw. |
+| Datei                                                                                                       | Was sie tut                                                                                                                                                                                  |
+|-------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [ui/addetail/AdDetailUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailUiState.kt)     | `isLoading`, `hasError`, `ad`, dazu `showDeleteDialog` und `isDeleted`                                                                                                                       |
+| [ui/addetail/AdDetailViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailViewModel.kt) | Beobachtet `repository.getAd(adId)`, steuert den Dialog und löscht                                                                                                                           |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt)       | `AdDetailRoute` + stateless `AdDetailScreen`: Titel, Preis, Kategorie, Zustand, Übergabeort, Status, Beschreibung, Mülleimer in der `TopAppBar`, Lösch-Dialog. Previews „Ready“ und „Dialog“ |
+| [ui/StateContent.kt](app/src/main/java/de/dhbw/campusmarket/ui/StateContent.kt)                             | `LoadingContent`, `ErrorContent`, `MessageContent` für beide Screens. Vorher standen sie privat in `AdListScreen.kt`                                                                         |
+| [ui/Labels.kt](app/src/main/java/de/dhbw/campusmarket/ui/Labels.kt)                                         | `Category.BOOKS` → „Bücher“, `Condition.LIKE_NEW` → „Wie neu“ usw.                                                                                                                           |
 
 Außerdem: `ic_delete.xml` (Mülleimer), neue Texte in `strings.xml` (der Platzhalter „Anzeige Nr. …“ ist raus), `AppNavHost.kt` ruft `AdDetailRoute` auf.
 
@@ -857,10 +857,10 @@ feat: Detailansicht mit Löschen und Bestätigungsdialog
 
 Ja, aber nicht „einfach“ mit einer Zeile. Es sind zwei Dinge, die gerade zufällig gleich heißen:
 
-| | Wo | Wofür |
-|---|---|---|
-| **applicationId** | `app/build.gradle.kts` | Die Kennung der App auf dem Gerät (und im Play Store) |
-| **namespace + Kotlin-Pakete** | `app/build.gradle.kts`, `package …` in jeder `.kt`-Datei, die Ordner `com/example/campusmarket` | Wo der Code liegt und wie die `R`-Klasse heißt |
+|                               | Wo                                                                                              | Wofür                                                 |
+|-------------------------------|-------------------------------------------------------------------------------------------------|-------------------------------------------------------|
+| **applicationId**             | `app/build.gradle.kts`                                                                          | Die Kennung der App auf dem Gerät (und im Play Store) |
+| **namespace + Kotlin-Pakete** | `app/build.gradle.kts`, `package …` in jeder `.kt`-Datei, die Ordner `com/example/campusmarket` | Wo der Code liegt und wie die `R`-Klasse heißt        |
 
 **Muss man es ändern?** Für die Abgabe nicht, die App baut und läuft so. `com.example` ist aber nur ein Platzhalter von Android Studio (Google Play lehnt es sogar ab), und ein eigener Name wirkt sauberer. Üblich ist eine umgedrehte Domain, z. B. `de.dhbw.campusmarket`.
 
@@ -999,13 +999,13 @@ Paketname und Schritt 7 sind fertig. Die Umbenennung habt ihr schon committet (`
 
 ## Teil 2: Schritt 7 – Anzeige erstellen
 
-| Datei (`app/src/main/java/de/dhbw/campusmarket/`) | Was sie tut |
-|---|---|
-| [logic/AdValidation.kt](app/src/main/java/de/dhbw/campusmarket/logic/AdValidation.kt) | `isValidTitle` (1–60 Zeichen), `isValidLocation`, `parsePrice` („12,50“ → 12.5, Ungültiges → `null`) |
-| [AdValidationTest.kt](app/src/test/java/de/dhbw/campusmarket/logic/AdValidationTest.kt) | 11 Tests, u. a. leer, nur Leerzeichen, genau 60 / 61 Zeichen, „-5“, „1e3“, „NaN“, „12,505“, „123456“ |
-| [ui/adform/AdFormUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormUiState.kt) | Alle Eingaben als Text, `showErrors`, `isSaving`, `saveFailed`, `isSaved`; Fehler werden aus den Eingaben berechnet |
-| [ui/adform/AdFormViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormViewModel.kt) | Eine `on…Change`-Funktion pro Feld, `onSaveClick()` prüft und speichert |
-| [ui/adform/AdFormScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormScreen.kt) | Route + stateless Screen: Titel, Preis, Übergabeort, Beschreibung, Kategorie- und Zustand-Chips, „Speichern“. Previews „leer“ und „mit Fehlern“ |
+| Datei (`app/src/main/java/de/dhbw/campusmarket/`)                                                   | Was sie tut                                                                                                                                     |
+|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| [logic/AdValidation.kt](app/src/main/java/de/dhbw/campusmarket/logic/AdValidation.kt)               | `isValidTitle` (1–60 Zeichen), `isValidLocation`, `parsePrice` („12,50“ → 12.5, Ungültiges → `null`)                                            |
+| [AdValidationTest.kt](app/src/test/java/de/dhbw/campusmarket/logic/AdValidationTest.kt)             | 11 Tests, u. a. leer, nur Leerzeichen, genau 60 / 61 Zeichen, „-5“, „1e3“, „NaN“, „12,505“, „123456“                                            |
+| [ui/adform/AdFormUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormUiState.kt)     | Alle Eingaben als Text, `showErrors`, `isSaving`, `saveFailed`, `isSaved`; Fehler werden aus den Eingaben berechnet                             |
+| [ui/adform/AdFormViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormViewModel.kt) | Eine `on…Change`-Funktion pro Feld, `onSaveClick()` prüft und speichert                                                                         |
+| [ui/adform/AdFormScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormScreen.kt)       | Route + stateless Screen: Titel, Preis, Übergabeort, Beschreibung, Kategorie- und Zustand-Chips, „Speichern“. Previews „leer“ und „mit Fehlern“ |
 
 Außerdem: FAB (+) unten rechts in der Liste, neues Ziel `AdForm` im NavHost, `ic_add.xml`, 9 neue Texte in `strings.xml`.
 
@@ -1064,13 +1064,13 @@ feat: Anzeige erstellen mit Formular und Validierung
 
 Grob geschätzt **etwa 45 % des ganzen Projekts** und **etwa 75 % der Mindestanforderungen**. Die Zahl ist eine Schätzung nach Aufwand, nicht nach Anzahl der Schritte, weil die Schritte unterschiedlich groß sind:
 
-| Bereich | Stand |
-|---|---|
-| Schritte 1–7 (Setup, Room, Navigation, Liste, Suche, Detail/Löschen, Erstellen) | ✅ fertig |
-| Schritt 8: Kamera mit Permission und FileProvider | offen, **größter einzelner Brocken** |
-| Schritt 9: README | offen, klein |
-| Schritte 10–15: Bearbeiten, Favoriten, Status, Filter, Sortierung, Galerie | offen, mittel; vieles baut auf Vorhandenem auf (Formular, Labels, `logic/`) |
-| Feinschliff, Reflexion in AI_USAGE.md | offen |
+| Bereich                                                                         | Stand                                                                       |
+|---------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| Schritte 1–7 (Setup, Room, Navigation, Liste, Suche, Detail/Löschen, Erstellen) | ✅ fertig                                                                   |
+| Schritt 8: Kamera mit Permission und FileProvider                               | offen, **größter einzelner Brocken**                                        |
+| Schritt 9: README                                                               | offen, klein                                                                |
+| Schritte 10–15: Bearbeiten, Favoriten, Status, Filter, Sortierung, Galerie      | offen, mittel; vieles baut auf Vorhandenem auf (Formular, Labels, `logic/`) |
+| Feinschliff, Reflexion in AI_USAGE.md                                           | offen                                                                       |
 
 Die 5 Mindestanforderungen im Einzelnen:
 
@@ -1138,15 +1138,15 @@ Schritt 8 ist gebaut, aber **nur halb getestet**. Der Build läuft durch. Auf de
 
 ## Neue und geänderte Dateien
 
-| Datei | Was sie tut |
-|---|---|
-| [AndroidManifest.xml](app/src/main/AndroidManifest.xml) | `CAMERA`-Berechtigung, `uses-feature` mit `required="false"`, `FileProvider` |
-| [res/xml/file_paths.xml](app/src/main/res/xml/file_paths.xml) | Gibt nur den Ordner `photos` im internen Speicher frei |
-| [ui/adform/PhotoFile.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/PhotoFile.kt) | `createPhotoUri()`: legt `photos/photo_<Zeit>.jpg` an und liefert eine `content://`-Uri |
-| [ui/AdImage.kt](app/src/main/java/de/dhbw/campusmarket/ui/AdImage.kt) | Foto mit Coil (`AsyncImage`), dahinter ein grauer Platzhalter mit Bild-Symbol |
-| [ui/adform/AdFormScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormScreen.kt) | Route: die zwei Launcher (`RequestPermission`, `TakePicture`). Screen: Foto-Vorschau, „Foto aufnehmen“ / „Neues Foto“, „Foto entfernen“, Hinweise |
-| [AdFormUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormUiState.kt) / [AdFormViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormViewModel.kt) | `imageUri`, `pendingPhotoUri`, die zwei Hinweise und die passenden `on…`-Funktionen |
-| `AdListScreen.kt`, `AdDetailScreen.kt` | Vorschaubild (56 dp) in der Liste, großes Foto oben im Detail |
+| Datei                                                                                                                                                                             | Was sie tut                                                                                                                                       |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|
+| [AndroidManifest.xml](app/src/main/AndroidManifest.xml)                                                                                                                           | `CAMERA`-Berechtigung, `uses-feature` mit `required="false"`, `FileProvider`                                                                      |
+| [res/xml/file_paths.xml](app/src/main/res/xml/file_paths.xml)                                                                                                                     | Gibt nur den Ordner `photos` im internen Speicher frei                                                                                            |
+| [ui/adform/PhotoFile.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/PhotoFile.kt)                                                                                           | `createPhotoUri()`: legt `photos/photo_<Zeit>.jpg` an und liefert eine `content://`-Uri                                                           |
+| [ui/AdImage.kt](app/src/main/java/de/dhbw/campusmarket/ui/AdImage.kt)                                                                                                             | Foto mit Coil (`AsyncImage`), dahinter ein grauer Platzhalter mit Bild-Symbol                                                                     |
+| [ui/adform/AdFormScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormScreen.kt)                                                                                     | Route: die zwei Launcher (`RequestPermission`, `TakePicture`). Screen: Foto-Vorschau, „Foto aufnehmen“ / „Neues Foto“, „Foto entfernen“, Hinweise |
+| [AdFormUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormUiState.kt) / [AdFormViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/adform/AdFormViewModel.kt) | `imageUri`, `pendingPhotoUri`, die zwei Hinweise und die passenden `on…`-Funktionen                                                               |
+| `AdListScreen.kt`, `AdDetailScreen.kt`                                                                                                                                            | Vorschaubild (56 dp) in der Liste, großes Foto oben im Detail                                                                                     |
 
 ## So läuft es ab
 
@@ -1252,13 +1252,13 @@ Weil es klein ist und nichts Neues an Bibliotheken braucht, würde ich es **dire
 
 Aktualisierter Plan:
 
-| Nr. | Schritt | Stand |
-|---|---|---|
-| 1–7 | Setup bis Erstellen | ✅ committet |
-| 8 | Kamera | ✅ fertig, von euch getestet, **noch nicht committet** |
-| 9 | README | als Nächstes |
-| 9a | **Foto im Vollbild** | neu |
-| 10–15 | Bearbeiten, Favoriten, Status, Filter, Sortierung, Galerie | offen |
+| Nr.   | Schritt                                                    | Stand                                                  |
+|-------|------------------------------------------------------------|--------------------------------------------------------|
+| 1–7   | Setup bis Erstellen                                        | ✅ committet                                           |
+| 8     | Kamera                                                     | ✅ fertig, von euch getestet, **noch nicht committet** |
+| 9     | README                                                     | als Nächstes                                           |
+| 9a    | **Foto im Vollbild**                                       | neu                                                    |
+| 10–15 | Bearbeiten, Favoriten, Status, Filter, Sortierung, Galerie | offen                                                  |
 
 ## Commit
 
@@ -1449,11 +1449,11 @@ Schritt 9 ist fertig: [README.md](README.md) liegt im Root. Ich habe die Anleitu
 
 ## Was ich geprüft habe
 
-| Prüfung | Ergebnis |
-|---|---|
-| Frischer `git clone` (ohne `local.properties`, ohne `build`), nur `ANDROID_HOME` gesetzt, `assembleDebug testDebugUnitTest` | ✅ BUILD SUCCESSFUL, 24/24 Tests |
-| Derselbe Klon ohne `ANDROID_HOME` | ❌ „SDK location not found“, wie im README angekündigt |
-| `installDebug` aus dem Klon, App starten | ✅ Liste erscheint |
+| Prüfung                                                                                                                     | Ergebnis                                               |
+|-----------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
+| Frischer `git clone` (ohne `local.properties`, ohne `build`), nur `ANDROID_HOME` gesetzt, `assembleDebug testDebugUnitTest` | ✅ BUILD SUCCESSFUL, 24/24 Tests                       |
+| Derselbe Klon ohne `ANDROID_HOME`                                                                                           | ❌ „SDK location not found“, wie im README angekündigt |
+| `installDebug` aus dem Klon, App starten                                                                                    | ✅ Liste erscheint                                     |
 
 Nicht geprüft: der Weg über **Android Studio auf einem fremden Rechner** (öffnen, Sync, Run). Das wäre der Test, den ein Prüfer macht. Am besten klont einer von euch das Repo nach dem Push einmal in einen neuen Ordner und folgt dem README Schritt für Schritt.
 
@@ -1523,14 +1523,14 @@ Schritt 9a ist fertig: In der Detailansicht öffnet ein Tipp auf das Foto einen 
 
 ## Neue und geänderte Dateien (`app/src/main/java/de/dhbw/campusmarket/`)
 
-| Datei | Was sie tut |
-|---|---|
-| [ui/photoviewer/PhotoViewerUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerUiState.kt) | `isLoading`, `hasError`, `imageUri` |
-| [ui/photoviewer/PhotoViewerViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerViewModel.kt) | Lädt über die id die Anzeige aus Room und übernimmt nur die Foto-Uri |
-| [ui/photoviewer/PhotoViewerScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerScreen.kt) | Route + stateless Screen: `TopAppBar` „Foto“ mit Zurück-Pfeil, darunter das Foto mit `ContentScale.Fit`, Preview |
-| [ui/navigation/Destinations.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/Destinations.kt) | Neues Ziel `PhotoViewer(adId)` |
-| [ui/navigation/AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt) | `composable<PhotoViewer>`, und die Detailseite bekommt `onPhotoClick` |
-| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt) | Das Foto ist jetzt antippbar (`clickable`) |
+| Datei                                                                                                                   | Was sie tut                                                                                                      |
+|-------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| [ui/photoviewer/PhotoViewerUiState.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerUiState.kt)     | `isLoading`, `hasError`, `imageUri`                                                                              |
+| [ui/photoviewer/PhotoViewerViewModel.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerViewModel.kt) | Lädt über die id die Anzeige aus Room und übernimmt nur die Foto-Uri                                             |
+| [ui/photoviewer/PhotoViewerScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/photoviewer/PhotoViewerScreen.kt)       | Route + stateless Screen: `TopAppBar` „Foto“ mit Zurück-Pfeil, darunter das Foto mit `ContentScale.Fit`, Preview |
+| [ui/navigation/Destinations.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/Destinations.kt)                   | Neues Ziel `PhotoViewer(adId)`                                                                                   |
+| [ui/navigation/AppNavHost.kt](app/src/main/java/de/dhbw/campusmarket/ui/navigation/AppNavHost.kt)                       | `composable<PhotoViewer>`, und die Detailseite bekommt `onPhotoClick`                                            |
+| [ui/addetail/AdDetailScreen.kt](app/src/main/java/de/dhbw/campusmarket/ui/addetail/AdDetailScreen.kt)                   | Das Foto ist jetzt antippbar (`clickable`)                                                                       |
 
 Dazu 4 neue Texte in `strings.xml` und im [README](README.md) die neue Funktion und der Ordner `photoviewer/`.
 
@@ -1627,16 +1627,16 @@ Schritt 10 ist fertig: In der Detailansicht gibt es oben ein Stift-Symbol. Es ö
 
 ## Was sich geändert hat (`app/src/main/…/campusmarket/`)
 
-| Datei | Änderung |
-|---|---|
-| `ui/navigation/Destinations.kt` | Neues Ziel `AdEdit(adId)` |
-| `ui/navigation/AppNavHost.kt` | `composable<AdEdit>` nutzt dieselbe `AdFormRoute`, nur mit `adId` statt `null`. Die Detailseite bekommt `onEditClick` |
-| `ui/addetail/AdDetailScreen.kt` | Stift-Symbol vor dem Mülleimer, Parameter `onEditClick` |
-| `ui/adform/AdFormViewModel.kt` | Bekommt `adId: Long?`. `loadAd()` füllt das Formular, `onSaveClick` ruft `addAd` oder `updateAd` auf |
-| `ui/adform/AdFormUiState.kt` | Neue Felder `isEditing`, `isLoading`, `hasError`, `notFound` |
-| `ui/adform/AdFormScreen.kt` | Titel „Anzeige bearbeiten“, Zustände Laden/Fehler/nicht gefunden, Eingabefelder in `FormContent` ausgelagert, neue Preview „Edit“ |
-| `logic/AdValidation.kt` + Test | `priceToInput(12.5)` ergibt `"12,50"`, dazu 2 neue Tests (jetzt 26) |
-| `res/drawable/ic_edit.xml`, `strings.xml` | Stift-Icon und 2 neue Texte |
+| Datei                                     | Änderung                                                                                                                          |
+|-------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `ui/navigation/Destinations.kt`           | Neues Ziel `AdEdit(adId)`                                                                                                         |
+| `ui/navigation/AppNavHost.kt`             | `composable<AdEdit>` nutzt dieselbe `AdFormRoute`, nur mit `adId` statt `null`. Die Detailseite bekommt `onEditClick`             |
+| `ui/addetail/AdDetailScreen.kt`           | Stift-Symbol vor dem Mülleimer, Parameter `onEditClick`                                                                           |
+| `ui/adform/AdFormViewModel.kt`            | Bekommt `adId: Long?`. `loadAd()` füllt das Formular, `onSaveClick` ruft `addAd` oder `updateAd` auf                              |
+| `ui/adform/AdFormUiState.kt`              | Neue Felder `isEditing`, `isLoading`, `hasError`, `notFound`                                                                      |
+| `ui/adform/AdFormScreen.kt`               | Titel „Anzeige bearbeiten“, Zustände Laden/Fehler/nicht gefunden, Eingabefelder in `FormContent` ausgelagert, neue Preview „Edit“ |
+| `logic/AdValidation.kt` + Test            | `priceToInput(12.5)` ergibt `"12,50"`, dazu 2 neue Tests (jetzt 26)                                                               |
+| `res/drawable/ic_edit.xml`, `strings.xml` | Stift-Icon und 2 neue Texte                                                                                                       |
 
 ## Warum so
 
