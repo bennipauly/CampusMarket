@@ -1395,6 +1395,100 @@ Tote Links in AI_USAGE.md nach Paket-Umbenennung korrigiert
 
 ---
 
+### Eintrag 12: Schritt 9 – README mit Build- und Startschritten
+
+- **Datum:** 23.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 9
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -3`, `git remote -v` ausgeführt, Ende von `AI_USAGE.md` sowie `gradle-daemon-jvm.properties`, `gradle-wrapper.properties`, `gradle.properties` und `local.properties` gelesen, Umgebungsvariablen geprüft. Ergebnis: Link-Korrektur committet (`dbaef6f`), Remote `https://github.com/bennipauly/CampusMarket.git`, Daemon-JDK 25 per Foojay, `JAVA_HOME` zeigt auf ein Java-8-JRE, kein `ANDROID_HOME`.
+2. `gradlew.bat --version` ausgeführt. Ergebnis: Launcher-JVM 1.8, Daemon-JVM „Compatible with Java 25“. Android Studio bringt Java 25.0.3 (JBR) mit. `product-info.json` von Android Studio: Build `AI-262.9437.185`; im SDK ist `android-37.0` installiert.
+3. `AI_USAGE.md`: Eintrag 12 mit dem Prompt angelegt.
+4. Neu angelegt: `README.md`.
+5. **Sauberer Checkout:** Repo mit `git clone` in einen Ordner `clean` im Scratchpad geklont (Stand `dbaef6f`, ohne `local.properties` und ohne `build`), das neue `README.md` hineinkopiert, nur `ANDROID_HOME` gesetzt, `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL** in 1 min 44 s, APK `app-debug.apk` (12,7 MB), `AdSearchTest` 10/10, `AdValidationTest` 11/11, `PriceFormatTest` 3/3.
+6. Gegenprobe ohne `ANDROID_HOME`: **BUILD FAILED** mit „SDK location not found. Define a valid SDK location with an ANDROID_HOME environment variable or by setting the sdk.dir path in your project's local properties file …“, genau wie im README beschrieben.
+7. Im Klon `gradlew.bat installDebug` ausgeführt: „Installed on 1 device“, App gestartet. Die erste Bildschirm-Abfrage schlug fehl („null root node“) und lieferte eine alte Datei; beim zweiten Versuch: Liste mit Suchfeld und Anzeigen, `MainActivity` im Vordergrund.
+8. Test-Klon gelöscht.
+9. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Das README ist geschrieben, mit Build- und Startschritten und dem Pflichtsatz. Ein frischer Klon baut mit den Schritten aus dem README, alle 24 Tests laufen, und die App startet auf dem Emulator. Damit sind alle fünf Mindestanforderungen erfüllt. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 9a (Foto im Vollbild) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 9 ist fertig: [README.md](README.md) liegt im Root. Ich habe die Anleitung an einem frisch geklonten Repo geprüft, sie funktioniert. Damit sind **alle fünf Mindestanforderungen erfüllt**.
+
+## Inhalt des README
+
+- Kurzbeschreibung der App (rein lokal, kein Backend)
+- **Gruppe: eintragen.** Bitte eure Namen selbst eintragen, ich wollte nichts raten.
+- Funktionen nach aktuellem Stand (Liste, Suche, Detail, Erstellen, Löschen, Kamera, lokale Speicherung)
+- Voraussetzungen: Android Studio, SDK API 37, Gerät ab Android 8.0, Internet beim ersten Build
+- **Build und Start in Android Studio** in 5 Schritten (klonen → öffnen → Sync → Gerät → Run)
+- **Build über die Kommandozeile** (`assembleDebug`, `installDebug`, `testDebugUnitTest`)
+- Tabelle der Unit-Tests und wie man sie startet
+- Hinweise zum Emulator (Kamera-Testbild, Zurück aus der Kamera, Absturz der Emulator-Kamera, Beispieldaten zurücksetzen)
+- Aufbau des Codes (Schichten und Ordner) mit Verweis auf CLAUDE.md
+- KI-Nutzung mit Verweis auf AI_USAGE.md
+- Der Pflichtsatz: **„Die Gruppe verantwortet jede Zeile des Projekts.“**
+
+## Zwei Dinge, die ich beim Prüfen gelernt habe
+
+- **Java:** Bei euch zeigt `JAVA_HOME` auf ein altes Java 8. Trotzdem baut alles, weil `gradlew` nur zum Starten Java braucht. Den eigentlichen Build macht Gradle mit **Java 25**, das in `gradle/gradle-daemon-jvm.properties` festgelegt ist und automatisch geladen wird (Android Studio hat es ohnehin dabei). Deshalb steht im README „kein eigenes JDK nötig“.
+- **SDK-Pfad:** `local.properties` ist (richtig) nicht im Git. Ein frischer Klon kennt deshalb den SDK-Pfad nicht. Android Studio legt die Datei beim ersten Öffnen selbst an. Auf der Kommandozeile muss man `ANDROID_HOME` setzen. Ohne das kommt „SDK location not found“. Das habe ich nachgestellt und ins README geschrieben.
+
+## Was ich geprüft habe
+
+| Prüfung | Ergebnis |
+|---|---|
+| Frischer `git clone` (ohne `local.properties`, ohne `build`), nur `ANDROID_HOME` gesetzt, `assembleDebug testDebugUnitTest` | ✅ BUILD SUCCESSFUL, 24/24 Tests |
+| Derselbe Klon ohne `ANDROID_HOME` | ❌ „SDK location not found“, wie im README angekündigt |
+| `installDebug` aus dem Klon, App starten | ✅ Liste erscheint |
+
+Nicht geprüft: der Weg über **Android Studio auf einem fremden Rechner** (öffnen, Sync, Run). Das wäre der Test, den ein Prüfer macht. Am besten klont einer von euch das Repo nach dem Push einmal in einen neuen Ordner und folgt dem README Schritt für Schritt.
+
+## Testanleitung
+
+- README auf GitHub ansehen (nach dem Push): Tabellen und Codeblöcke müssen sauber dargestellt werden.
+- Den Pflichtsatz suchen: steht ganz unten.
+- Das README wächst mit den nächsten Schritten mit (Bearbeiten, Favoriten, Filter usw. kommen in die Funktionsliste).
+- Rotation, Permission, Flugmodus, Neustart, ungültige Eingaben: nicht betroffen, am App-Code ist nichts geändert.
+
+## Commit-Vorschlag
+
+```
+docs: README mit Build- und Startschritten
+```
+
+(`README.md`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Korrekturgelesen 
+
+#### Commits
+
+README mit Build- und Startschritten
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._
