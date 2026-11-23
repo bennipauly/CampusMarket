@@ -33,6 +33,8 @@
     <string name="condition_used">Gebraucht</string>
     <string name="add_ad">Anzeige erstellen</string>
     <string name="ad_form_title_create">Neue Anzeige</string>
+    <string name="ad_form_title_edit">Anzeige bearbeiten</string>
+    <string name="edit">Bearbeiten</string>
     <string name="label_title">Titel</string>
     <string name="label_price">Preis in €</string>
     <string name="save">Speichern</string>

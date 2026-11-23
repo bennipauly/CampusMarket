@@ -1592,6 +1592,162 @@ Foto der Anzeige im Vollbild ansehen
 
 ---
 
+### Eintrag 14: Schritt 10 – Anzeige bearbeiten
+
+- **Datum:** 23.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 10
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -3` ausgeführt und das Ende von `AI_USAGE.md` gelesen. Ergebnis: Schritt 9a committet (`bb8f9de`), Arbeitsverzeichnis sauber.
+2. `AI_USAGE.md`: Eintrag 14 mit dem Prompt angelegt.
+3. Gelesen: `AdFormUiState.kt`, `AdFormViewModel.kt`, `AdFormScreen.kt`, `AdDetailScreen.kt`, `Destinations.kt`, `AppNavHost.kt`, `AdRepository.kt`, `Ad.kt`, `AdValidation.kt`, `AdValidationTest.kt`, `strings.xml`, `ic_delete.xml`.
+4. Geändert (mit Python-Skripten im Scratchpad der Sitzung, Zeilenenden je Datei beibehalten): `logic/AdValidation.kt` (`priceToInput`), `AdValidationTest.kt` (2 Tests), `ui/adform/AdFormUiState.kt`, `ui/adform/AdFormViewModel.kt`, `ui/adform/AdFormScreen.kt`, `ui/navigation/Destinations.kt`, `ui/navigation/AppNavHost.kt`, `ui/addetail/AdDetailScreen.kt`, `res/values/strings.xml`. Neu: `res/drawable/ic_edit.xml`.
+5. Ein Bash-Befehl blieb hängen (ein `cat` wartete auf Eingabe) und wurde mit TaskStop beendet. Am Projekt hat er nichts geändert.
+6. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen, 26/26 Tests grün.
+7. Emulator: App installiert. „Mathe Formelsammlung“ bearbeitet (Formular ausgefüllt, Preis 7,50 → 8,00, Drehung, Speichern → Detail zeigt 8,00 €, Platz in der Liste gleich). „Analysis 1 – Lehrbuch“: Beschreibung geladen, leerer Titel → Fehlertext, Zurück → unverändert. App neu gestartet → 8,00 € bleibt. „foto“ bearbeitet und gespeichert → Foto bleibt. Absturz-Log leer.
+8. `README.md`: Funktion „Anzeige bearbeiten“, Testtabelle und Ordner `adform/` ergänzt.
+9. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 10 ist umgesetzt: Über das Stift-Symbol in der Detailansicht öffnet sich das Formular mit den gespeicherten Werten, Speichern überschreibt die Anzeige. Build, 26 Tests und der Emulator-Test liefen fehlerfrei. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 11 (Favoriten) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 10 ist fertig: In der Detailansicht gibt es oben ein Stift-Symbol. Es öffnet das bekannte Formular, schon ausgefüllt mit der gespeicherten Anzeige. „Speichern“ überschreibt die Anzeige, danach geht es zurück zur Detailseite, die sofort die neuen Werte zeigt.
+
+## Was sich geändert hat (`app/src/main/…/campusmarket/`)
+
+| Datei | Änderung |
+|---|---|
+| `ui/navigation/Destinations.kt` | Neues Ziel `AdEdit(adId)` |
+| `ui/navigation/AppNavHost.kt` | `composable<AdEdit>` nutzt dieselbe `AdFormRoute`, nur mit `adId` statt `null`. Die Detailseite bekommt `onEditClick` |
+| `ui/addetail/AdDetailScreen.kt` | Stift-Symbol vor dem Mülleimer, Parameter `onEditClick` |
+| `ui/adform/AdFormViewModel.kt` | Bekommt `adId: Long?`. `loadAd()` füllt das Formular, `onSaveClick` ruft `addAd` oder `updateAd` auf |
+| `ui/adform/AdFormUiState.kt` | Neue Felder `isEditing`, `isLoading`, `hasError`, `notFound` |
+| `ui/adform/AdFormScreen.kt` | Titel „Anzeige bearbeiten“, Zustände Laden/Fehler/nicht gefunden, Eingabefelder in `FormContent` ausgelagert, neue Preview „Edit“ |
+| `logic/AdValidation.kt` + Test | `priceToInput(12.5)` ergibt `"12,50"`, dazu 2 neue Tests (jetzt 26) |
+| `res/drawable/ic_edit.xml`, `strings.xml` | Stift-Icon und 2 neue Texte |
+
+## Warum so
+
+- **Ein Formular für beides:** Erstellen und Bearbeiten unterscheiden sich nur darin, ob am Anfang geladen wird und ob am Ende `addAd` oder `updateAd` aufgerufen wird. Ein zweiter Screen wäre fast eine Kopie.
+- **Eigenes Ziel `AdEdit(adId)`** statt `AdForm(adId: Long? = null)`: Beide Wege sind im NavHost sofort zu sehen, und die Route braucht keinen nullable Parameter.
+- **`first()` statt `collect`:** Das Formular wird nur einmal gefüllt. Mit `collect` würde jede Änderung in Room die gerade getippten Eingaben überschreiben. Weil `loadAd()` im `init` läuft, wird nach einer Drehung auch nicht neu geladen, eure Eingaben bleiben.
+- **`originalAd` im ViewModel:** Das Formular kennt Favorit, Status „verkauft“ und Erstellzeitpunkt nicht. Beim Speichern werden diese Werte aus der geladenen Anzeige übernommen. Sonst würde Bearbeiten später einen Favoriten oder den Status „verkauft“ zurücksetzen, und die Anzeige würde in der Liste nach oben springen.
+- **Laden, Fehler, nicht gefunden:** Beim Bearbeiten lädt der Screen etwas, darum braucht er diese Zustände (Regel aus CLAUDE.md). Die Texte „konnte nicht geladen werden“ und „gibt es nicht mehr“ sind dieselben wie in der Detailansicht, deshalb nutze ich deren Strings mit.
+- **`priceToInput` in `logic/`:** Aus 7.5 muss „7,50“ werden, damit `parsePrice` es wieder annimmt. Der neue Test prüft genau diesen Hin- und Rückweg.
+
+**Bekannte Einschränkung** (wie schon bei Schritt 8): Wer beim Bearbeiten ein neues Foto aufnimmt oder das Foto entfernt, lässt die alte Bilddatei im App-Speicher liegen. In der App sieht man davon nichts.
+
+## Auf dem Emulator getestet
+
+- „Mathe Formelsammlung“ → Stift: Das Formular ist ausgefüllt, der Titel lautet „Anzeige bearbeiten“.
+- Preis auf 8,00 geändert, ins Querformat und zurück gedreht: Die Eingabe bleibt 8,00.
+- Speichern: zurück zur Detailseite, sie zeigt 8,00 €. In der Liste steht die Anzeige an derselben Stelle.
+- „Analysis 1 – Lehrbuch“: Die Beschreibung wird mitgeladen. Titel geleert und gespeichert → Fehlertext, nichts gespeichert. Mit Zurück verlassen → Anzeige unverändert.
+- App beendet und neu gestartet: 8,00 € ist noch da.
+- Eure Anzeige „foto“ bearbeitet: Das Foto ist im Formular zu sehen und bleibt nach dem Speichern erhalten.
+- Absturz-Log leer.
+
+Achtung: Bei eurer Testanzeige „Mathe Formelsammlung“ steht jetzt 8,00 € statt 7,50 €.
+
+## Testanleitung für euch
+
+```powershell
+.\gradlew.bat assembleDebug testDebugUnitTest
+```
+
+- **Ungültige Eingaben:** Beim Bearbeiten den Titel leeren oder als Preis „abc“ eingeben → Fehlertext, kein Absturz.
+- **Rotation:** Im Formular etwas ändern und drehen → die Änderung bleibt.
+- **Permission verweigert:** Beim Bearbeiten „Neues Foto“ tippen und die Kamera verweigern → Hinweis erscheint, Speichern geht trotzdem, das alte Foto bleibt.
+- **Flugmodus:** kein Unterschied, alles ist lokal.
+- **App-Neustart:** Die geänderten Werte bleiben erhalten.
+- Zusätzlich: Etwas ändern und mit Zurück verlassen → nichts wird gespeichert.
+
+Prompt und Antwort stehen als Eintrag 14 in AI_USAGE.md.
+
+## Commit-Vorschlag
+
+```
+feat: Anzeige bearbeiten
+```
+
+(`logic/AdValidation.kt`, `ui/adform/*`, `ui/addetail/AdDetailScreen.kt`, `ui/navigation/*`, `ic_edit.xml`, `strings.xml`, `AdValidationTest.kt`, `README.md`, `AI_USAGE.md`)
+````
+
+#### Prompt 2
+
+````text
+Die Rotation funktioniert nicht mehr. Die Anzeige bleibt immer im Hochformat. Den Commit von vorhin habe ich noch nicht gemacht
+````
+
+#### Ergebnis der KI zu Prompt 2 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `AI_USAGE.md`: Prompt 2 in Eintrag 14 eingetragen.
+2. Im Projekt nach `screenOrientation`, `requestedOrientation` und `configChanges` gesucht. Ergebnis: nichts gefunden, das Manifest ist unverändert.
+3. Emulator-Einstellungen gelesen. Ergebnis: `accelerometer_rotation = 0` (Automatisch drehen aus, von der KI beim Drehtest in Prompt 1 gesetzt), `user_rotation = 0`.
+4. `adb shell settings put system accelerometer_rotation 1` ausgeführt, danach `adb emu rotate` (viermal). Ergebnis: Anzeige wechselt auf `ROTATION_270` (Querformat) und zurück auf `ROTATION_0`.
+5. `AI_USAGE.md`: dieses Ergebnis eingetragen. Am Code nichts geändert.
+
+**Kurzfazit im Antwortfeld der App:** „Die Rotation war im Emulator gesperrt, weil ich für den Drehtest „Automatisch drehen“ ausgeschaltet und danach nicht wieder eingeschaltet hatte. Die Einstellung ist zurückgesetzt, und der Emulator dreht wieder. Am Code ist nichts geändert, Schritt 10 ist weiterhin nicht committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 11 (Favoriten) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Das lag nicht an der App, sondern an einer Einstellung im Emulator, die ich selbst verstellt hatte.
+
+## Ursache
+
+Für den Drehtest in Schritt 10 habe ich im Emulator „Automatisch drehen“ ausgeschaltet (`accelerometer_rotation = 0`) und die Drehung per Befehl gesetzt. Danach habe ich vergessen, die Einstellung wieder einzuschalten. Ohne „Automatisch drehen“ bleibt Android im Hochformat, egal wie man den Emulator dreht. Das betrifft alle Apps, nicht nur CampusMarket.
+
+Im Code gibt es keine Sperre: Weder im Manifest noch im Code steht `screenOrientation` oder `requestedOrientation`.
+
+## Was ich gemacht habe
+
+- „Automatisch drehen“ im Emulator wieder eingeschaltet (`accelerometer_rotation = 1`).
+- Mit dem Drehbefehl des Emulators geprüft: Die Anzeige wechselt ins Querformat und wieder zurück ins Hochformat.
+- Am Projekt ist nichts geändert, nur dieser Eintrag im Logbuch.
+
+Falls es bei euch trotzdem noch hängt: Im Emulator von oben die Schnelleinstellungen herunterziehen und „Automatisch drehen“ antippen.
+
+## Zum Commit
+
+Der Commit-Vorschlag von Schritt 10 bleibt gleich. Diese Antwort steht als Prompt 2 in Eintrag 14 in AI_USAGE.md und kommt mit in denselben Commit:
+
+```
+feat: Anzeige bearbeiten
+```
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Bearbeiten getestet, Rotation geht nicht mehr
+-> Claude hat die automatische Rotation im Emulator ausgeschaltet
+
+#### Commits
+
+Anzeige bearbeiten
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

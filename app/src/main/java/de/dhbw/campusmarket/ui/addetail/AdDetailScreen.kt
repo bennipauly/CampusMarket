@@ -42,7 +42,7 @@ import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
 // Route: holt den ViewModel für genau diese id und reicht State und Callbacks weiter.
 @Composable
-fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit) {
+fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit, onEditClick: () -> Unit) {
     val viewModel: AdDetailViewModel = viewModel(factory = AdDetailViewModel.factory(adId))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -57,6 +57,7 @@ fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit) {
         uiState = uiState,
         onBack = onBack,
         onPhotoClick = onPhotoClick,
+        onEditClick = onEditClick,
         onRetry = viewModel::loadAd,
         onDeleteClick = viewModel::onDeleteClick,
         onDeleteConfirm = viewModel::onDeleteConfirm,
@@ -71,6 +72,7 @@ fun AdDetailScreen(
     uiState: AdDetailUiState,
     onBack: () -> Unit,
     onPhotoClick: () -> Unit,
+    onEditClick: () -> Unit,
     onRetry: () -> Unit,
     onDeleteClick: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -89,8 +91,14 @@ fun AdDetailScreen(
                     }
                 },
                 actions = {
-                    // Löschen gibt es nur, wenn wirklich eine Anzeige angezeigt wird.
+                    // Bearbeiten und Löschen gibt es nur, wenn wirklich eine Anzeige angezeigt wird.
                     if (uiState.ad != null) {
+                        IconButton(onClick = onEditClick) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_edit),
+                                contentDescription = stringResource(R.string.edit)
+                            )
+                        }
                         IconButton(onClick = onDeleteClick) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_delete),
@@ -203,6 +211,7 @@ private fun AdDetailScreenReadyPreview() {
             uiState = AdDetailUiState(isLoading = false, ad = sampleAds(now = 0L).first().copy(id = 1L)),
             onBack = {},
             onPhotoClick = {},
+            onEditClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},
@@ -223,6 +232,7 @@ private fun AdDetailScreenDeleteDialogPreview() {
             ),
             onBack = {},
             onPhotoClick = {},
+            onEditClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},

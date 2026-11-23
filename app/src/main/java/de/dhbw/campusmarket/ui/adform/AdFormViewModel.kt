@@ -1,6 +1,7 @@
 package de.dhbw.campusmarket.ui.adform
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -13,17 +14,66 @@ import de.dhbw.campusmarket.data.Condition
 import de.dhbw.campusmarket.logic.isValidLocation
 import de.dhbw.campusmarket.logic.isValidTitle
 import de.dhbw.campusmarket.logic.parsePrice
+import de.dhbw.campusmarket.logic.priceToInput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 // Besitzer der Formulareingaben. Jede Eingabe läuft über eine on...Change-Funktion.
-class AdFormViewModel(private val repository: AdRepository) : ViewModel() {
+// adId == null: neue Anzeige erstellen. Sonst: die Anzeige mit dieser id bearbeiten.
+class AdFormViewModel(
+    private val repository: AdRepository,
+    private val adId: Long?
+) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AdFormUiState())
+    private val _uiState = MutableStateFlow(
+        AdFormUiState(isEditing = adId != null, isLoading = adId != null)
+    )
     val uiState: StateFlow<AdFormUiState> = _uiState.asStateFlow()
+
+    // Beim Bearbeiten die Anzeige, wie sie in Room steht. Daraus übernimmt onSaveClick alles,
+    // was das Formular nicht kennt: id, Favorit, Status "verkauft" und Erstellzeitpunkt.
+    private var originalAd: Ad? = null
+
+    init {
+        loadAd()
+    }
+
+    // Füllt das Formular einmal mit der gespeicherten Anzeige. Beim Erstellen passiert nichts.
+    fun loadAd() {
+        if (adId == null) return
+        _uiState.update { it.copy(isLoading = true, hasError = false) }
+        viewModelScope.launch {
+            try {
+                // first() statt collect: nur einmal laden. Sonst würde jede spätere Änderung
+                // in Room die Eingaben überschreiben, die man gerade tippt.
+                val ad = repository.getAd(adId).first()
+                originalAd = ad
+                _uiState.update {
+                    if (ad == null) {
+                        // Anzeige wurde inzwischen gelöscht.
+                        it.copy(isLoading = false, notFound = true)
+                    } else {
+                        it.copy(
+                            isLoading = false,
+                            title = ad.title,
+                            description = ad.description,
+                            price = priceToInput(ad.price),
+                            category = ad.category,
+                            condition = ad.condition,
+                            location = ad.location,
+                            imageUri = ad.imageUri
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, hasError = true) }
+            }
+        }
+    }
 
     fun onTitleChange(title: String) {
         _uiState.update { it.copy(title = title) }
@@ -79,7 +129,8 @@ class AdFormViewModel(private val repository: AdRepository) : ViewModel() {
     fun onSaveClick() {
         val state = _uiState.value
         // Doppelklick auf "Speichern" soll nicht zwei Anzeigen anlegen.
-        if (state.isSaving) return
+        // Solange die Anzeige noch lädt, gibt es nichts zu speichern.
+        if (state.isSaving || state.isLoading) return
 
         val price = parsePrice(state.price)
         if (!isValidTitle(state.title) || price == null || !isValidLocation(state.location)) {
@@ -99,9 +150,23 @@ class AdFormViewModel(private val repository: AdRepository) : ViewModel() {
             imageUri = state.imageUri,
             createdAt = System.currentTimeMillis()
         )
+        val original = originalAd
         viewModelScope.launch {
             try {
-                repository.addAd(ad)
+                if (original == null) {
+                    repository.addAd(ad)
+                } else {
+                    // Gleiche id = Room überschreibt die Zeile. Erstellzeitpunkt bleibt,
+                    // damit die Anzeige in der Liste nicht nach oben springt.
+                    repository.updateAd(
+                        ad.copy(
+                            id = original.id,
+                            isFavorite = original.isFavorite,
+                            isSold = original.isSold,
+                            createdAt = original.createdAt
+                        )
+                    )
+                }
                 _uiState.update { it.copy(isSaving = false, isSaved = true) }
             } catch (e: Exception) {
                 // Speichern hat nicht geklappt: Hinweis zeigen, die Eingaben bleiben erhalten.
@@ -111,10 +176,10 @@ class AdFormViewModel(private val repository: AdRepository) : ViewModel() {
     }
 
     companion object {
-        val Factory = viewModelFactory {
+        fun factory(adId: Long?): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as CampusMarketApplication
-                AdFormViewModel(application.repository)
+                AdFormViewModel(application.repository, adId)
             }
         }
     }

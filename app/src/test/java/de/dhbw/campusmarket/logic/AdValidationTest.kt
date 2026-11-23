@@ -69,4 +69,17 @@ class AdValidationTest {
             assertNull("\"$input\" sollte ungültig sein", parsePrice(input))
         }
     }
+
+    @Test
+    fun priceToInput_usesCommaAndTwoDecimals() {
+        assertEquals("12,50", priceToInput(12.5))
+        assertEquals("0,00", priceToInput(0.0))
+    }
+
+    @Test
+    fun priceToInput_canBeParsedAgain() {
+        for (price in listOf(0.0, 3.0, 12.5, 99999.99)) {
+            assertEquals(price, parsePrice(priceToInput(price))!!, 0.0)
+        }
+    }
 }

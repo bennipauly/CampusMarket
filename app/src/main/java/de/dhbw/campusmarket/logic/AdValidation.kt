@@ -1,5 +1,7 @@
 package de.dhbw.campusmarket.logic
 
+import java.util.Locale
+
 // Reine Kotlin-Funktionen für die Prüfung der Formulareingaben, darum mit JUnit testbar.
 
 const val MAX_TITLE_LENGTH = 60
@@ -25,3 +27,7 @@ fun parsePrice(input: String): Double? {
     }
     return text.replace(',', '.').toDouble()
 }
+
+// Umgekehrter Weg zum Bearbeiten: Preis aus Room als Text fürs Formular, z. B. 12.5 → "12,50".
+// Locale.GERMANY sorgt für das Komma, egal welche Sprache das Gerät hat.
+fun priceToInput(price: Double): String = String.format(Locale.GERMANY, "%.2f", price)

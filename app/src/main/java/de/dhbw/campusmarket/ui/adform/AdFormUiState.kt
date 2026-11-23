@@ -9,6 +9,12 @@ import de.dhbw.campusmarket.logic.parsePrice
 // Alle Eingaben des Formulars. Weil sie im ViewModel liegen, überleben sie eine Drehung.
 // Der Preis bleibt hier Text, damit auch halbe Eingaben wie "12," im Feld stehen bleiben.
 data class AdFormUiState(
+    // true = bestehende Anzeige bearbeiten, false = neue Anzeige erstellen.
+    val isEditing: Boolean = false,
+    // Nur beim Bearbeiten wird geladen: Loading (isLoading), Error (hasError), nicht gefunden (notFound).
+    val isLoading: Boolean = false,
+    val hasError: Boolean = false,
+    val notFound: Boolean = false,
     val title: String = "",
     val description: String = "",
     val price: String = "",

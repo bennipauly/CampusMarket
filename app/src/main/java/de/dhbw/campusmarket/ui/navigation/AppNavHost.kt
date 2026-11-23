@@ -32,7 +32,8 @@ fun AppNavHost() {
                 // navigateUp statt popBackStack: Ein doppelter Tipp auf "Zurück"
                 // kann so nie die Startseite vom Stack werfen.
                 onBack = { navController.navigateUp() },
-                onPhotoClick = { navController.navigate(PhotoViewer(detail.adId)) }
+                onPhotoClick = { navController.navigate(PhotoViewer(detail.adId)) },
+                onEditClick = { navController.navigate(AdEdit(detail.adId)) }
             )
         }
         composable<PhotoViewer> { backStackEntry ->
@@ -45,6 +46,17 @@ fun AppNavHost() {
         composable<AdForm> {
             // Nach dem Speichern zurück zur Liste, dort steht die neue Anzeige oben.
             AdFormRoute(
+                adId = null,
+                onBack = { navController.navigateUp() },
+                onSaved = { navController.navigateUp() }
+            )
+        }
+        composable<AdEdit> { backStackEntry ->
+            val edit: AdEdit = backStackEntry.toRoute()
+            // Nach dem Speichern zurück zur Detailseite. Sie liest aus Room und zeigt sofort
+            // die geänderten Werte.
+            AdFormRoute(
+                adId = edit.adId,
                 onBack = { navController.navigateUp() },
                 onSaved = { navController.navigateUp() }
             )

@@ -20,3 +20,7 @@ data class PhotoViewer(val adId: Long)
 // Formular zum Erstellen einer neuen Anzeige.
 @Serializable
 object AdForm
+
+// Dasselbe Formular zum Bearbeiten einer bestehenden Anzeige. Übergeben wird nur die id.
+@Serializable
+data class AdEdit(val adId: Long)

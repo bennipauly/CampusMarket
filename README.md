@@ -12,6 +12,7 @@ Die App arbeitet **rein lokal**: Es gibt kein Backend, keinen Login und keine Ne
 - Anzeigenübersicht mit Suche (Titel, Beschreibung, Übergabeort)
 - Detailansicht mit Foto, Preis, Kategorie, Zustand, Übergabeort und Status
 - Anzeige erstellen mit Prüfung der Eingaben (leerer Titel, ungültiger Preis, fehlender Übergabeort)
+- Anzeige bearbeiten (Stift-Symbol in der Detailansicht), mit derselben Prüfung wie beim Erstellen
 - Anzeige löschen mit Bestätigungsdialog
 - Produktfoto mit der Gerätekamera (mit Kamera-Berechtigung; ohne Berechtigung lässt sich die Anzeige trotzdem speichern)
 - Foto im Vollbild: In der Detailansicht auf das Foto tippen
@@ -61,7 +62,7 @@ Die Logik ohne Android-Abhängigkeit ist mit JUnit getestet (`app/src/test`):
 | Testklasse | Prüft |
 |---|---|
 | `AdSearchTest` | Suche: leerer Suchtext, Groß-/Kleinschreibung, Treffer in Titel/Beschreibung/Ort, keine Treffer |
-| `AdValidationTest` | Eingabeprüfung: Titel, Übergabeort, Preis (z. B. „12,50“ gültig; „-5“, „1e3“, „12,505“ ungültig) |
+| `AdValidationTest` | Eingabeprüfung: Titel, Übergabeort, Preis (z. B. „12,50“ gültig; „-5“, „1e3“, „12,505“ ungültig) und Preis als Text fürs Bearbeiten |
 | `PriceFormatTest` | Preisanzeige im deutschen Format („12,50 €“) |
 
 In Android Studio: Rechtsklick auf `app/src/test/java` → **Run 'Tests in …'**.
@@ -86,7 +87,7 @@ app/src/main/java/de/dhbw/campusmarket/
     ├── navigation/              typsichere Ziele und NavHost
     ├── adlist/                  Anzeigenliste mit Suche
     ├── addetail/                Detailansicht mit Löschen
-    ├── adform/                  Formular zum Erstellen, Kamera
+    ├── adform/                  Formular zum Erstellen und Bearbeiten, Kamera
     ├── photoviewer/             Foto im Vollbild
     └── theme/                   Farben, Schrift, Theme
 ```

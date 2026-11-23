@@ -45,13 +45,17 @@ import de.dhbw.campusmarket.data.Category
 import de.dhbw.campusmarket.data.Condition
 import de.dhbw.campusmarket.logic.MAX_TITLE_LENGTH
 import de.dhbw.campusmarket.ui.AdImage
+import de.dhbw.campusmarket.ui.ErrorContent
+import de.dhbw.campusmarket.ui.LoadingContent
+import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
 // Route: holt den ViewModel, reicht State und Callbacks weiter und meldet "gespeichert" nach oben.
+// adId == null: neue Anzeige. Sonst wird die Anzeige mit dieser id bearbeitet.
 @Composable
-fun AdFormRoute(onBack: () -> Unit, onSaved: () -> Unit) {
-    val viewModel: AdFormViewModel = viewModel(factory = AdFormViewModel.Factory)
+fun AdFormRoute(adId: Long?, onBack: () -> Unit, onSaved: () -> Unit) {
+    val viewModel: AdFormViewModel = viewModel(factory = AdFormViewModel.factory(adId))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -93,6 +97,7 @@ fun AdFormRoute(onBack: () -> Unit, onSaved: () -> Unit) {
     AdFormScreen(
         uiState = uiState,
         onBack = onBack,
+        onRetry = viewModel::loadAd,
         onTitleChange = viewModel::onTitleChange,
         onDescriptionChange = viewModel::onDescriptionChange,
         onPriceChange = viewModel::onPriceChange,
@@ -111,6 +116,7 @@ fun AdFormRoute(onBack: () -> Unit, onSaved: () -> Unit) {
 fun AdFormScreen(
     uiState: AdFormUiState,
     onBack: () -> Unit,
+    onRetry: () -> Unit,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onPriceChange: (String) -> Unit,
@@ -124,7 +130,10 @@ fun AdFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.ad_form_title_create)) },
+                title = {
+                    val title = if (uiState.isEditing) R.string.ad_form_title_edit else R.string.ad_form_title_create
+                    Text(stringResource(title))
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -136,75 +145,112 @@ fun AdFormScreen(
             )
         }
     ) { innerPadding ->
-        // verticalScroll + imePadding: Bei offener Tastatur kann man bis zum Button scrollen.
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            PhotoSection(
+        val contentModifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+        // Loading/Error/nicht gefunden gibt es nur beim Bearbeiten. Beim Erstellen ist isLoading false.
+        when {
+            uiState.isLoading -> LoadingContent(contentModifier)
+            uiState.hasError -> ErrorContent(stringResource(R.string.ad_detail_error), onRetry, contentModifier)
+            uiState.notFound -> MessageContent(stringResource(R.string.ad_detail_not_found), contentModifier)
+            else -> FormContent(
                 uiState = uiState,
+                onTitleChange = onTitleChange,
+                onDescriptionChange = onDescriptionChange,
+                onPriceChange = onPriceChange,
+                onCategoryChange = onCategoryChange,
+                onConditionChange = onConditionChange,
+                onLocationChange = onLocationChange,
                 onTakePhotoClick = onTakePhotoClick,
-                onRemovePhotoClick = onRemovePhotoClick
+                onRemovePhotoClick = onRemovePhotoClick,
+                onSaveClick = onSaveClick,
+                modifier = contentModifier
             )
-            FormTextField(
-                value = uiState.title,
-                onValueChange = onTitleChange,
-                label = stringResource(R.string.label_title),
-                errorText = if (uiState.titleError) {
-                    stringResource(R.string.error_title, MAX_TITLE_LENGTH)
-                } else {
-                    null
-                }
-            )
-            FormTextField(
-                value = uiState.price,
-                onValueChange = onPriceChange,
-                label = stringResource(R.string.label_price),
-                errorText = if (uiState.priceError) stringResource(R.string.error_price) else null,
-                keyboardType = KeyboardType.Decimal
-            )
-            FormTextField(
-                value = uiState.location,
-                onValueChange = onLocationChange,
-                label = stringResource(R.string.label_location),
-                errorText = if (uiState.locationError) stringResource(R.string.error_location) else null
-            )
-            OutlinedTextField(
-                value = uiState.description,
-                onValueChange = onDescriptionChange,
-                label = { Text(stringResource(R.string.label_description)) },
-                minLines = 3,
-                modifier = Modifier.fillMaxWidth()
-            )
-            ChipGroup(
-                title = stringResource(R.string.label_category),
-                options = Category.entries,
-                selected = uiState.category,
-                labelRes = { it.labelRes() },
-                onSelect = onCategoryChange
-            )
-            ChipGroup(
-                title = stringResource(R.string.label_condition),
-                options = Condition.entries,
-                selected = uiState.condition,
-                labelRes = { it.labelRes() },
-                onSelect = onConditionChange
-            )
-            if (uiState.saveFailed) {
-                Text(stringResource(R.string.error_save), color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+// Die eigentlichen Eingabefelder, gleich für Erstellen und Bearbeiten.
+@Composable
+private fun FormContent(
+    uiState: AdFormUiState,
+    onTitleChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onPriceChange: (String) -> Unit,
+    onCategoryChange: (Category) -> Unit,
+    onConditionChange: (Condition) -> Unit,
+    onLocationChange: (String) -> Unit,
+    onTakePhotoClick: () -> Unit,
+    onRemovePhotoClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    modifier: Modifier
+) {
+    // verticalScroll + imePadding: Bei offener Tastatur kann man bis zum Button scrollen.
+    Column(
+        modifier = modifier
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        PhotoSection(
+            uiState = uiState,
+            onTakePhotoClick = onTakePhotoClick,
+            onRemovePhotoClick = onRemovePhotoClick
+        )
+        FormTextField(
+            value = uiState.title,
+            onValueChange = onTitleChange,
+            label = stringResource(R.string.label_title),
+            errorText = if (uiState.titleError) {
+                stringResource(R.string.error_title, MAX_TITLE_LENGTH)
+            } else {
+                null
             }
-            Button(
-                onClick = onSaveClick,
-                enabled = !uiState.isSaving,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.save))
-            }
+        )
+        FormTextField(
+            value = uiState.price,
+            onValueChange = onPriceChange,
+            label = stringResource(R.string.label_price),
+            errorText = if (uiState.priceError) stringResource(R.string.error_price) else null,
+            keyboardType = KeyboardType.Decimal
+        )
+        FormTextField(
+            value = uiState.location,
+            onValueChange = onLocationChange,
+            label = stringResource(R.string.label_location),
+            errorText = if (uiState.locationError) stringResource(R.string.error_location) else null
+        )
+        OutlinedTextField(
+            value = uiState.description,
+            onValueChange = onDescriptionChange,
+            label = { Text(stringResource(R.string.label_description)) },
+            minLines = 3,
+            modifier = Modifier.fillMaxWidth()
+        )
+        ChipGroup(
+            title = stringResource(R.string.label_category),
+            options = Category.entries,
+            selected = uiState.category,
+            labelRes = { it.labelRes() },
+            onSelect = onCategoryChange
+        )
+        ChipGroup(
+            title = stringResource(R.string.label_condition),
+            options = Condition.entries,
+            selected = uiState.condition,
+            labelRes = { it.labelRes() },
+            onSelect = onConditionChange
+        )
+        if (uiState.saveFailed) {
+            Text(stringResource(R.string.error_save), color = MaterialTheme.colorScheme.error)
+        }
+        Button(
+            onClick = onSaveClick,
+            enabled = !uiState.isSaving,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.save))
         }
     }
 }
@@ -297,6 +343,7 @@ private fun AdFormScreenEmptyPreview() {
         AdFormScreen(
             uiState = AdFormUiState(),
             onBack = {},
+            onRetry = {},
             onTitleChange = {},
             onDescriptionChange = {},
             onPriceChange = {},
@@ -317,6 +364,34 @@ private fun AdFormScreenErrorsPreview() {
         AdFormScreen(
             uiState = AdFormUiState(price = "12,505", showErrors = true, showPermissionHint = true),
             onBack = {},
+            onRetry = {},
+            onTitleChange = {},
+            onDescriptionChange = {},
+            onPriceChange = {},
+            onCategoryChange = {},
+            onConditionChange = {},
+            onLocationChange = {},
+            onTakePhotoClick = {},
+            onRemovePhotoClick = {},
+            onSaveClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AdFormScreenEditPreview() {
+    CampusMarketTheme {
+        AdFormScreen(
+            uiState = AdFormUiState(
+                isEditing = true,
+                title = "Analysis 1 Skript",
+                price = "8,00",
+                location = "Bibliothek",
+                category = Category.SCRIPTS
+            ),
+            onBack = {},
+            onRetry = {},
             onTitleChange = {},
             onDescriptionChange = {},
             onPriceChange = {},
