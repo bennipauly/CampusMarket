@@ -13,6 +13,8 @@ class AdRepository(private val adDao: AdDao) {
 
     suspend fun updateAd(ad: Ad) = adDao.update(ad)
 
+    suspend fun setFavorite(id: Long, isFavorite: Boolean) = adDao.setFavorite(id, isFavorite)
+
     suspend fun deleteAd(ad: Ad) = adDao.delete(ad)
 
     // Wird beim App-Start aufgerufen. Fügt die Beispieldaten nur ein, wenn die Tabelle leer ist,

@@ -3,6 +3,7 @@ package de.dhbw.campusmarket.ui.adlist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -37,6 +39,7 @@ import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.sampleAds
 import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
+import de.dhbw.campusmarket.ui.FavoriteButton
 import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.formatPrice
@@ -53,7 +56,8 @@ fun AdListRoute(onAdClick: (Long) -> Unit, onAddClick: () -> Unit) {
         onAdClick = onAdClick,
         onAddClick = onAddClick,
         onRetry = viewModel::loadAds,
-        onQueryChange = viewModel::onQueryChange
+        onQueryChange = viewModel::onQueryChange,
+        onFavoriteClick = viewModel::onFavoriteClick
     )
 }
 
@@ -65,7 +69,8 @@ fun AdListScreen(
     onAdClick: (Long) -> Unit,
     onAddClick: () -> Unit,
     onRetry: () -> Unit,
-    onQueryChange: (String) -> Unit
+    onQueryChange: (String) -> Unit,
+    onFavoriteClick: (Ad) -> Unit
 ) {
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
@@ -83,7 +88,7 @@ fun AdListScreen(
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(stringResource(R.string.ad_list_error), onRetry, contentModifier)
             uiState.ads.isEmpty() -> MessageContent(stringResource(R.string.ad_list_empty), contentModifier)
-            else -> ReadyContent(uiState, onAdClick, onQueryChange, contentModifier)
+            else -> ReadyContent(uiState, onAdClick, onQueryChange, onFavoriteClick, contentModifier)
         }
     }
 }
@@ -94,6 +99,7 @@ private fun ReadyContent(
     uiState: AdListUiState,
     onAdClick: (Long) -> Unit,
     onQueryChange: (String) -> Unit,
+    onFavoriteClick: (Ad) -> Unit,
     modifier: Modifier
 ) {
     Column(modifier = modifier) {
@@ -105,7 +111,7 @@ private fun ReadyContent(
                 Modifier.fillMaxSize()
             )
         } else {
-            AdListContent(visibleAds, onAdClick, Modifier.fillMaxSize())
+            AdListContent(visibleAds, onAdClick, onFavoriteClick, Modifier.fillMaxSize())
         }
     }
 }
@@ -141,19 +147,24 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
 }
 
 @Composable
-private fun AdListContent(ads: List<Ad>, onAdClick: (Long) -> Unit, modifier: Modifier) {
+private fun AdListContent(
+    ads: List<Ad>,
+    onAdClick: (Long) -> Unit,
+    onFavoriteClick: (Ad) -> Unit,
+    modifier: Modifier
+) {
     // Unten Platz lassen, damit der FAB die letzte Anzeige nicht verdeckt.
     LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = 88.dp)) {
         // key = id: Compose erkennt dieselbe Anzeige wieder, wenn sich die Liste ändert.
         items(ads, key = { it.id }) { ad ->
-            AdListItem(ad = ad, onClick = { onAdClick(ad.id) })
+            AdListItem(ad = ad, onClick = { onAdClick(ad.id) }, onFavoriteClick = { onFavoriteClick(ad) })
             HorizontalDivider()
         }
     }
 }
 
 @Composable
-private fun AdListItem(ad: Ad, onClick: () -> Unit) {
+private fun AdListItem(ad: Ad, onClick: () -> Unit, onFavoriteClick: () -> Unit) {
     ListItem(
         // Links ein kleines Vorschaubild oder der Platzhalter, wenn es kein Foto gibt.
         leadingContent = {
@@ -161,7 +172,13 @@ private fun AdListItem(ad: Ad, onClick: () -> Unit) {
         },
         headlineContent = { Text(ad.title) },
         supportingContent = { Text(ad.location) },
-        trailingContent = { Text(formatPrice(ad.price)) },
+        // Rechts der Preis und das Herz. Das Herz hat einen eigenen Klick und öffnet nicht die Details.
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(formatPrice(ad.price))
+                FavoriteButton(isFavorite = ad.isFavorite, onClick = onFavoriteClick)
+            }
+        },
         modifier = Modifier.clickable(onClick = onClick)
     )
 }
@@ -171,13 +188,15 @@ private fun AdListItem(ad: Ad, onClick: () -> Unit) {
 private fun AdListScreenReadyPreview() {
     CampusMarketTheme {
         // Die Beispieldaten bekommen hier ids, weil Room sie sonst erst beim Einfügen vergibt.
-        val ads = sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L) }
+        // Die erste Anzeige ist Favorit, damit man beide Herzen sieht.
+        val ads = sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L, isFavorite = index == 0) }
         AdListScreen(
             uiState = AdListUiState(isLoading = false, ads = ads),
             onAdClick = {},
             onAddClick = {},
             onRetry = {},
-            onQueryChange = {}
+            onQueryChange = {},
+            onFavoriteClick = {}
         )
     }
 }
@@ -192,7 +211,8 @@ private fun AdListScreenNoResultsPreview() {
             onAdClick = {},
             onAddClick = {},
             onRetry = {},
-            onQueryChange = {}
+            onQueryChange = {},
+            onFavoriteClick = {}
         )
     }
 }
@@ -206,7 +226,8 @@ private fun AdListScreenErrorPreview() {
             onAdClick = {},
             onAddClick = {},
             onRetry = {},
-            onQueryChange = {}
+            onQueryChange = {},
+            onFavoriteClick = {}
         )
     }
 }

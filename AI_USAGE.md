@@ -1748,6 +1748,112 @@ Anzeige bearbeiten
 
 ---
 
+### Eintrag 15: Schritt 11 – Favoriten
+
+- **Datum:** 23.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 11
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -2` ausgeführt. Ergebnis: Schritt 10 committet (`55650cf`), danach euer Commit `1d1fa34` (Tabellen in AI_USAGE.md), Arbeitsverzeichnis sauber.
+2. `AI_USAGE.md`: Eintrag 15 mit dem Prompt angelegt.
+3. Gelesen: `AdDao.kt`, `AdDetailUiState.kt`, `AdDetailViewModel.kt`, `AdListViewModel.kt`, `AdListScreen.kt`.
+4. Ein erster Bash-Befehl mit eingebettetem Python-Skript brach mit „unexpected EOF“ ab, bevor etwas geändert wurde. Das Skript `step11.py` wurde dann mit dem Write-Werkzeug im Scratchpad der Sitzung angelegt und mit `python -I` ausgeführt. Geändert: `data/AdDao.kt`, `data/AdRepository.kt`, `ui/adlist/AdListViewModel.kt`, `ui/adlist/AdListScreen.kt`, `ui/addetail/AdDetailViewModel.kt`, `ui/addetail/AdDetailScreen.kt`, `res/values/strings.xml`. Neu: `ui/FavoriteButton.kt`, `res/drawable/ic_favorite.xml`, `res/drawable/ic_favorite_border.xml`.
+5. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen, 26/26 Tests grün.
+6. Emulator: App installiert. Herz bei „Analysis 1 – Lehrbuch“ in der Liste angetippt → gefüllt, Liste bleibt offen (Screenshot). Detail: Herz gefüllt, zweimal umgeschaltet. Mit `adb emu rotate` ins Querformat und zurück → Herz bleibt. Bearbeiten und Speichern → bleibt Favorit. App neu gestartet → Herz in der Liste gefüllt. Absturz-Log leer.
+7. `README.md`: Funktion „Favoriten“ ergänzt.
+8. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 11 ist umgesetzt: Ein Herz in der Liste und in der Detailansicht merkt eine Anzeige als Favorit, gespeichert in Room. Build, 26 Tests und der Emulator-Test (Umschalten, Drehung, Bearbeiten, Neustart) liefen fehlerfrei. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 12 (Status verfügbar/verkauft) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 11 ist fertig: Jede Anzeige hat jetzt ein Herz. Ein Tipp darauf merkt sie als Favorit (gefülltes, farbiges Herz), ein zweiter Tipp nimmt sie wieder heraus. Das Herz gibt es in der Liste rechts neben dem Preis und in der Detailansicht oben rechts. Build und Tests liefen ohne Fehler, und auf dem Emulator gab es keinen Absturz.
+
+## Was sich geändert hat (`app/src/main/…/campusmarket/`)
+
+| Datei                                                                         | Änderung                                                                                                       |
+|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| `data/AdDao.kt`                                                               | Neue Abfrage `setFavorite(id, isFavorite)`, ändert nur die Spalte `isFavorite`                                 |
+| `data/AdRepository.kt`                                                        | Reicht `setFavorite` an das DAO weiter                                                                         |
+| `ui/FavoriteButton.kt` (neu)                                                  | Herz-Knopf, den Liste und Detailansicht gemeinsam nutzen                                                       |
+| `ui/adlist/AdListViewModel.kt`, `AdListScreen.kt`                             | `onFavoriteClick(ad)`. Rechts in jeder Zeile stehen Preis und Herz. Die Preview zeigt eine Anzeige als Favorit |
+| `ui/addetail/AdDetailViewModel.kt`, `AdDetailScreen.kt`                       | `onFavoriteClick()`, Herz vor Stift und Mülleimer                                                              |
+| `res/drawable/ic_favorite.xml`, `ic_favorite_border.xml` (neu), `strings.xml` | Gefülltes Herz, Herz-Umriss und 2 Texte                                                                        |
+
+Die Datenbank musste nicht geändert werden: Die Spalte `isFavorite` gibt es seit Schritt 2.
+
+## Warum so
+
+- **Eigene Abfrage `UPDATE … SET isFavorite` statt `updateAd(ad.copy(...))`:** Die Abfrage ändert nur die eine Spalte. Mit `updateAd` würde die ganze Zeile mit dem Stand geschrieben, den der Screen gerade kennt. Wäre dieser Stand veraltet, gingen andere Änderungen verloren.
+- **Der ViewModel setzt das Herz nicht selbst:** Er schreibt nur in Room. Weil Liste und Detail Room über einen Flow beobachten, kommt der neue Stand von selbst zurück. Room bleibt so die einzige Quelle der Wahrheit, und Liste und Detail zeigen immer dasselbe.
+- **Ein gemeinsamer `FavoriteButton`:** Das Herz sieht an beiden Stellen gleich aus und hat dieselben Texte für TalkBack („Zu Favoriten hinzufügen“ bzw. „Aus Favoriten entfernen“). So steht der Code nur einmal im Projekt.
+- **Das Herz in der Liste ist ein eigener Knopf:** Ein Tipp darauf schaltet nur den Favoriten um und öffnet nicht die Detailseite.
+- **Bearbeiten behält den Favoriten:** Das war schon in Schritt 10 vorbereitet (`originalAd`).
+
+**Noch nicht dabei:** eine Ansicht „nur Favoriten“. Die passt zu Schritt 13 (Filter) und kommt dort als Filter-Chip dazu.
+
+## Auf dem Emulator getestet
+
+- **Liste:** Herz bei „Analysis 1 – Lehrbuch“ angetippt. Es wird gefüllt, die Liste bleibt offen.
+- **Detail:**
+  - Das Herz ist auch hier gefüllt.
+  - Antippen nimmt den Favoriten heraus, erneutes Antippen setzt ihn wieder.
+- **Querformat:** Das Herz bleibt gefüllt.
+- **Bearbeiten:** Nach dem Speichern bleibt die Anzeige Favorit.
+- **App-Neustart:** Das Herz in der Liste ist noch gefüllt.
+- Absturz-Log leer.
+
+## Testanleitung für euch
+
+```powershell
+.\gradlew.bat assembleDebug testDebugUnitTest
+```
+
+- **Favorit setzen:** In der Liste ein Herz antippen, dann die Anzeige öffnen. Das Herz ist auch dort gefüllt. In der Detailansicht wieder entfernen und zurück zur Liste: Das Herz ist dort leer.
+- **Rotation:** Ein Favorit bleibt beim Drehen Favorit.
+- **App-Neustart:** Favoriten bleiben erhalten.
+- **Flugmodus:** kein Unterschied, alles ist lokal.
+- **Ungültige Eingaben, Permission verweigert:** nicht betroffen. Bearbeiten und Kamera funktionieren wie vorher.
+- **TalkBack (optional):** Das Herz wird als „Zu Favoriten hinzufügen“ bzw. „Aus Favoriten entfernen“ vorgelesen.
+
+Prompt und Antwort stehen als Eintrag 15 in AI_USAGE.md.
+
+## Commit-Vorschlag
+
+```
+feat: Anzeigen als Favorit merken
+```
+
+(`data/AdDao.kt`, `data/AdRepository.kt`, `ui/FavoriteButton.kt`, `ui/adlist/*`, `ui/addetail/*`, `ic_favorite*.xml`, `strings.xml`, `README.md`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Favoriten-Markierung getestet
+
+#### Commits
+
+Anzeigen als Favorit merken
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

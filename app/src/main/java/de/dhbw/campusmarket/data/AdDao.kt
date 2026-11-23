@@ -32,6 +32,10 @@ interface AdDao {
     @Update
     suspend fun update(ad: Ad)
 
+    // Ändert nur die eine Spalte. So kann ein Tipp aufs Herz keine anderen Werte mit altem Stand überschreiben.
+    @Query("UPDATE ads SET isFavorite = :isFavorite WHERE id = :id")
+    suspend fun setFavorite(id: Long, isFavorite: Boolean)
+
     @Delete
     suspend fun delete(ad: Ad)
 }

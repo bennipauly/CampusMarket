@@ -44,6 +44,18 @@ class AdDetailViewModel(
         }
     }
 
+    // Herz oben rechts: schaltet den Favoriten um. Der neue Stand kommt über den Flow aus Room.
+    fun onFavoriteClick() {
+        val ad = _uiState.value.ad ?: return
+        viewModelScope.launch {
+            try {
+                repository.setFavorite(ad.id, !ad.isFavorite)
+            } catch (e: Exception) {
+                // Speichern hat nicht geklappt: Das Herz bleibt wie vorher, die App stürzt nicht ab.
+            }
+        }
+    }
+
     fun onDeleteClick() {
         _uiState.update { it.copy(showDeleteDialog = true) }
     }

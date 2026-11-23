@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import de.dhbw.campusmarket.CampusMarketApplication
+import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.AdRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +47,17 @@ class AdListViewModel(private val repository: AdRepository) : ViewModel() {
     // bleibt er bei einer Drehung erhalten.
     fun onQueryChange(query: String) {
         _uiState.update { it.copy(query = query) }
+    }
+
+    // Herz in der Liste: schaltet den Favoriten um. Die neue Liste kommt danach über den Flow.
+    fun onFavoriteClick(ad: Ad) {
+        viewModelScope.launch {
+            try {
+                repository.setFavorite(ad.id, !ad.isFavorite)
+            } catch (e: Exception) {
+                // Speichern hat nicht geklappt: Das Herz bleibt wie vorher, die App stürzt nicht ab.
+            }
+        }
     }
 
     companion object {

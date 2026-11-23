@@ -34,6 +34,7 @@ import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.sampleAds
 import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
+import de.dhbw.campusmarket.ui.FavoriteButton
 import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.formatPrice
@@ -58,6 +59,7 @@ fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit, onEd
         onBack = onBack,
         onPhotoClick = onPhotoClick,
         onEditClick = onEditClick,
+        onFavoriteClick = viewModel::onFavoriteClick,
         onRetry = viewModel::loadAd,
         onDeleteClick = viewModel::onDeleteClick,
         onDeleteConfirm = viewModel::onDeleteConfirm,
@@ -73,6 +75,7 @@ fun AdDetailScreen(
     onBack: () -> Unit,
     onPhotoClick: () -> Unit,
     onEditClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
     onRetry: () -> Unit,
     onDeleteClick: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -91,8 +94,9 @@ fun AdDetailScreen(
                     }
                 },
                 actions = {
-                    // Bearbeiten und Löschen gibt es nur, wenn wirklich eine Anzeige angezeigt wird.
+                    // Favorit, Bearbeiten und Löschen gibt es nur, wenn wirklich eine Anzeige angezeigt wird.
                     if (uiState.ad != null) {
+                        FavoriteButton(isFavorite = uiState.ad.isFavorite, onClick = onFavoriteClick)
                         IconButton(onClick = onEditClick) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_edit),
@@ -212,6 +216,7 @@ private fun AdDetailScreenReadyPreview() {
             onBack = {},
             onPhotoClick = {},
             onEditClick = {},
+            onFavoriteClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},
@@ -233,6 +238,7 @@ private fun AdDetailScreenDeleteDialogPreview() {
             onBack = {},
             onPhotoClick = {},
             onEditClick = {},
+            onFavoriteClick = {},
             onRetry = {},
             onDeleteClick = {},
             onDeleteConfirm = {},
