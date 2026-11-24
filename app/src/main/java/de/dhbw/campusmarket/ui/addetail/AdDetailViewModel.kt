@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.addetail
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -16,7 +17,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// Besitzer des Detail-States. Bekommt die id der Anzeige von der Route.
+private const val TAG = "AdDetailViewModel"
+
+// Owner of the detail state. Gets the id of the ad from the route.
 class AdDetailViewModel(
     private val repository: AdRepository,
     private val adId: Long
@@ -31,39 +34,46 @@ class AdDetailViewModel(
         loadAd()
     }
 
-    // Beobachtet die eine Anzeige in Room. Ändert sie sich, kommt der neue Stand automatisch.
+    // Observes the one ad in Room. If it changes, the new state arrives automatically.
     fun loadAd() {
         loadJob?.cancel()
         _uiState.update { it.copy(isLoading = true, hasError = false) }
         loadJob = viewModelScope.launch {
             repository.getAd(adId)
-                .catch { _uiState.update { it.copy(isLoading = false, hasError = true) } }
+                .catch { e ->
+                    Log.e(TAG, "Loading ad $adId failed", e)
+                    _uiState.update { it.copy(isLoading = false, hasError = true) }
+                }
                 .collect { ad ->
                     _uiState.update { it.copy(isLoading = false, hasError = false, ad = ad) }
                 }
         }
     }
 
-    // Herz oben rechts: schaltet den Favoriten um. Der neue Stand kommt über den Flow aus Room.
+    // Heart at the top right: toggles the favorite. The new state arrives through the Flow from Room.
     fun onFavoriteClick() {
         val ad = _uiState.value.ad ?: return
         viewModelScope.launch {
             try {
                 repository.setFavorite(ad.id, !ad.isFavorite)
+                Log.d(TAG, "Ad ${ad.id}: favorite set to ${!ad.isFavorite}")
             } catch (e: Exception) {
-                // Speichern hat nicht geklappt: Das Herz bleibt wie vorher, die App stürzt nicht ab.
+                // Saving failed: the heart stays as before and the app does not crash.
+                Log.e(TAG, "Changing the favorite of ad ${ad.id} failed", e)
             }
         }
     }
 
-    // Knopf unter den Details: wechselt zwischen "verfügbar" und "verkauft".
+    // Button below the details: switches between "available" and "sold".
     fun onSoldClick() {
         val ad = _uiState.value.ad ?: return
         viewModelScope.launch {
             try {
                 repository.setSold(ad.id, !ad.isSold)
+                Log.d(TAG, "Ad ${ad.id}: sold set to ${!ad.isSold}")
             } catch (e: Exception) {
-                // Speichern hat nicht geklappt: Der Status bleibt wie vorher, die App stürzt nicht ab.
+                // Saving failed: the status stays as before and the app does not crash.
+                Log.e(TAG, "Changing the status of ad ${ad.id} failed", e)
             }
         }
     }
@@ -79,22 +89,24 @@ class AdDetailViewModel(
     fun onDeleteConfirm() {
         val ad = _uiState.value.ad ?: return
         _uiState.update { it.copy(showDeleteDialog = false) }
-        // Erst das Beobachten beenden. Sonst würde Room nach dem Löschen "null" schicken
-        // und der Screen kurz "Anzeige nicht gefunden" zeigen, bevor er zurücknavigiert.
+        // Stop observing first. Otherwise Room would send "null" after deleting
+        // and the screen would briefly show "ad not found" before navigating back.
         loadJob?.cancel()
         viewModelScope.launch {
             try {
                 repository.deleteAd(ad)
+                Log.i(TAG, "Ad ${ad.id} deleted")
                 _uiState.update { it.copy(isDeleted = true) }
             } catch (e: Exception) {
-                // Löschen hat nicht geklappt: Fehler zeigen statt abstürzen.
+                // Deleting failed: show an error instead of crashing.
+                Log.e(TAG, "Deleting ad ${ad.id} failed", e)
                 _uiState.update { it.copy(hasError = true) }
             }
         }
     }
 
     companion object {
-        // Die id kommt als Parameter, darum ist das hier eine Funktion und kein festes Objekt.
+        // The id comes as a parameter, so this is a function and not a fixed object.
         fun factory(adId: Long): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as CampusMarketApplication

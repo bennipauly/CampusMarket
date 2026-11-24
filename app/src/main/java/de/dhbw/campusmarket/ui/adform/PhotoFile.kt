@@ -5,13 +5,13 @@ import android.net.Uri
 import androidx.core.content.FileProvider
 import java.io.File
 
-// Legt eine leere Datei für ein neues Foto im internen Speicher an (filesDir/photos)
-// und gibt eine content://-Uri dafür zurück. In diese Datei schreibt die Kamera-App das Foto.
-// Der Name enthält die Uhrzeit, damit jedes Foto eine eigene Datei bekommt.
+// Creates an empty file for a new photo in the internal storage (filesDir/photos)
+// and returns a content:// Uri for it. The camera app writes the photo into this file.
+// The name contains the time, so every photo gets its own file.
 fun createPhotoUri(context: Context): Uri {
     val folder = File(context.filesDir, "photos")
     folder.mkdirs()
     val file = File(folder, "photo_${System.currentTimeMillis()}.jpg")
-    // Muss zu android:authorities im Manifest passen.
+    // Must match android:authorities in the manifest.
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 }

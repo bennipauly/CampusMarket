@@ -1,6 +1,6 @@
 package de.dhbw.campusmarket.data
 
-// Feste Liste der Kategorien. Room speichert ein Enum automatisch als Text (z. B. "BOOKS").
+// Fixed list of categories. Room stores an enum automatically as text (e.g. "BOOKS").
 enum class Category {
     BOOKS,
     SCRIPTS,

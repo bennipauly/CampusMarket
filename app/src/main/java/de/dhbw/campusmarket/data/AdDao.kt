@@ -7,22 +7,22 @@ import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
-// Alle Datenbankzugriffe auf die Tabelle "ads". Room erzeugt die Implementierung beim Build (KSP).
+// All database access to the table "ads". Room generates the implementation during the build (KSP).
 @Dao
 interface AdDao {
 
-    // Flow: Sobald sich die Tabelle ändert, liefert Room automatisch die neue Liste.
+    // Flow: as soon as the table changes, Room delivers the new list automatically.
     @Query("SELECT * FROM ads ORDER BY createdAt DESC")
     fun getAll(): Flow<List<Ad>>
 
-    // null, wenn es keine Anzeige mit dieser id gibt (z. B. nach dem Löschen).
+    // null if there is no ad with this id (e.g. after deleting).
     @Query("SELECT * FROM ads WHERE id = :id")
     fun getById(id: Long): Flow<Ad?>
 
     @Query("SELECT COUNT(*) FROM ads")
     suspend fun count(): Int
 
-    // Gibt die neue id zurück.
+    // Returns the new id.
     @Insert
     suspend fun insert(ad: Ad): Long
 
@@ -32,11 +32,11 @@ interface AdDao {
     @Update
     suspend fun update(ad: Ad)
 
-    // Ändert nur die eine Spalte. So kann ein Tipp aufs Herz keine anderen Werte mit altem Stand überschreiben.
+    // Changes only this one column. This way a tap on the heart cannot overwrite other values with an old state.
     @Query("UPDATE ads SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun setFavorite(id: Long, isFavorite: Boolean)
 
-    // Wie setFavorite: ändert nur die Spalte isSold.
+    // Like setFavorite: changes only the column isSold.
     @Query("UPDATE ads SET isSold = :isSold WHERE id = :id")
     suspend fun setSold(id: Long, isSold: Boolean)
 

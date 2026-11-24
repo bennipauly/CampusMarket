@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.photoviewer
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -16,7 +17,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// Besitzer des Vollbild-States. Holt über die id die Anzeige und merkt sich nur die Foto-Uri.
+private const val TAG = "PhotoViewerViewModel"
+
+// Owner of the full screen state. Gets the ad by its id and only keeps the photo Uri.
 class PhotoViewerViewModel(
     private val repository: AdRepository,
     private val adId: Long
@@ -36,9 +39,12 @@ class PhotoViewerViewModel(
         _uiState.update { it.copy(isLoading = true, hasError = false) }
         loadJob = viewModelScope.launch {
             repository.getAd(adId)
-                .catch { _uiState.update { it.copy(isLoading = false, hasError = true) } }
+                .catch { e ->
+                    Log.e(TAG, "Loading ad $adId failed", e)
+                    _uiState.update { it.copy(isLoading = false, hasError = true) }
+                }
                 .collect { ad ->
-                    // ad kann null sein, wenn die Anzeige inzwischen gelöscht wurde.
+                    // ad can be null if the ad was deleted in the meantime.
                     _uiState.update { it.copy(isLoading = false, hasError = false, imageUri = ad?.imageUri) }
                 }
         }

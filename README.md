@@ -103,6 +103,6 @@ Die Regeln für Architektur und Code stehen in [CLAUDE.md](CLAUDE.md).
 
 ## KI-Nutzung
 
-Bei der Entwicklung wurde KI (Claude Code) eingesetzt. Alle Prompts und Ergebnisse sind vollständig in [AI_USAGE.md](AI_USAGE.md) dokumentiert.
+Bei der Entwicklung wurde KI (Claude Code) eingesetzt. Alle Prompts, die Aktionen der KI und die Commits, in die die Ergebnisse eingeflossen sind, stehen in [AI_USAGE.md](AI_USAGE.md).
 
 Die Gruppe verantwortet jede Zeile des Projekts.

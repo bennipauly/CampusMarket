@@ -8,7 +8,7 @@ import org.junit.Test
 
 class AdFilterTest {
 
-    // Hilfsfunktion: baut eine Anzeige, bei der nur die gefilterten Felder wichtig sind.
+    // Helper: builds an ad where only the filtered fields matter.
     private fun ad(id: Long, category: Category, isFavorite: Boolean = false, isSold: Boolean = false) = Ad(
         id = id,
         title = "Anzeige $id",

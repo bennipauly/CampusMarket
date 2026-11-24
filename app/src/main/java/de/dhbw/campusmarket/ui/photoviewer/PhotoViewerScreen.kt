@@ -24,7 +24,7 @@ import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
-// Route: holt den ViewModel für genau diese id und reicht State und Callbacks weiter.
+// Route: gets the ViewModel for exactly this id and passes state and callbacks on.
 @Composable
 fun PhotoViewerRoute(adId: Long, onBack: () -> Unit) {
     val viewModel: PhotoViewerViewModel = viewModel(factory = PhotoViewerViewModel.factory(adId))
@@ -32,7 +32,7 @@ fun PhotoViewerRoute(adId: Long, onBack: () -> Unit) {
     PhotoViewerScreen(uiState = uiState, onBack = onBack, onRetry = viewModel::loadPhoto)
 }
 
-// Stateless: zeigt das Foto so groß wie möglich und vollständig (nichts wird abgeschnitten).
+// Stateless: shows the photo as large as possible and complete (nothing is cut off).
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoViewerScreen(uiState: PhotoViewerUiState, onBack: () -> Unit, onRetry: () -> Unit) {
@@ -58,7 +58,7 @@ fun PhotoViewerScreen(uiState: PhotoViewerUiState, onBack: () -> Unit, onRetry: 
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(stringResource(R.string.photo_viewer_error), onRetry, contentModifier)
             uiState.imageUri == null -> MessageContent(stringResource(R.string.photo_viewer_no_photo), contentModifier)
-            // ContentScale.Fit: Das ganze Foto passt auf den Bildschirm, im Hoch- wie im Querformat.
+            // ContentScale.Fit: the whole photo fits on the screen, in portrait and landscape.
             else -> AsyncImage(
                 model = uiState.imageUri,
                 contentDescription = stringResource(R.string.ad_photo),
@@ -69,7 +69,7 @@ fun PhotoViewerScreen(uiState: PhotoViewerUiState, onBack: () -> Unit, onRetry: 
     }
 }
 
-// In der Preview gibt es keine echte Foto-Datei, darum zeigt sie den Fall "kein Foto".
+// The preview has no real photo file, so it shows the "no photo" case.
 @Preview(showBackground = true)
 @Composable
 private fun PhotoViewerScreenNoPhotoPreview() {

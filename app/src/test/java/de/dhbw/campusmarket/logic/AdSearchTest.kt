@@ -8,7 +8,7 @@ import org.junit.Test
 
 class AdSearchTest {
 
-    // Hilfsfunktion: baut eine Anzeige, bei der nur die durchsuchten Felder wichtig sind.
+    // Helper: builds an ad where only the searched fields matter.
     private fun ad(id: Long, title: String, description: String = "", location: String = "") = Ad(
         id = id,
         title = title,
@@ -67,7 +67,7 @@ class AdSearchTest {
 
     @Test
     fun keepsOriginalOrder() {
-        // "ch" steckt in "Lehrbuch", "Taschenrechner" und "Schreibtischstuhl".
+        // "ch" is part of "Lehrbuch", "Taschenrechner" and "Schreibtischstuhl".
         assertEquals(allAds, searchAds(allAds, "ch"))
     }
 

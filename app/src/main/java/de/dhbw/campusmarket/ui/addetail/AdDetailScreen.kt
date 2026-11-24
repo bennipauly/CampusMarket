@@ -42,13 +42,13 @@ import de.dhbw.campusmarket.ui.formatPrice
 import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
-// Route: holt den ViewModel für genau diese id und reicht State und Callbacks weiter.
+// Route: gets the ViewModel for exactly this id and passes state and callbacks on.
 @Composable
 fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit, onEditClick: () -> Unit) {
     val viewModel: AdDetailViewModel = viewModel(factory = AdDetailViewModel.factory(adId))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Sobald die Anzeige gelöscht ist, einmal zurück zur Liste.
+    // As soon as the ad is deleted, go back to the list once.
     LaunchedEffect(uiState.isDeleted) {
         if (uiState.isDeleted) {
             onBack()
@@ -69,7 +69,7 @@ fun AdDetailRoute(adId: Long, onBack: () -> Unit, onPhotoClick: () -> Unit, onEd
     )
 }
 
-// Stateless: bekommt nur Werte und Lambdas, kennt keinen ViewModel.
+// Stateless: only receives values and lambdas and knows no ViewModel.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdDetailScreen(
@@ -97,7 +97,7 @@ fun AdDetailScreen(
                     }
                 },
                 actions = {
-                    // Favorit, Bearbeiten und Löschen gibt es nur, wenn wirklich eine Anzeige angezeigt wird.
+                    // Favorite, edit and delete only exist when an ad is really shown.
                     if (uiState.ad != null) {
                         FavoriteButton(isFavorite = uiState.ad.isFavorite, onClick = onFavoriteClick)
                         IconButton(onClick = onEditClick) {
@@ -135,7 +135,7 @@ fun AdDetailScreen(
 
 @Composable
 private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, onSoldClick: () -> Unit, modifier: Modifier) {
-    // verticalScroll: Bei langer Beschreibung oder im Querformat kann man scrollen.
+    // verticalScroll: with a long description or in landscape the content can be scrolled.
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -145,7 +145,7 @@ private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, onSoldClick: () ->
             AdImage(
                 imageUri = ad.imageUri,
                 contentDescription = stringResource(R.string.ad_photo),
-                // Antippen öffnet das Foto im Vollbild. onClickLabel wird von TalkBack vorgelesen.
+                // Tapping opens the photo in full screen. TalkBack reads out onClickLabel.
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .fillMaxWidth()
@@ -166,7 +166,7 @@ private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, onSoldClick: () ->
         DetailRow(stringResource(R.string.label_location), ad.location)
         val status = if (ad.isSold) R.string.status_sold else R.string.status_available
         DetailRow(stringResource(R.string.label_status), stringResource(status))
-        // Der Knopf beschreibt, was beim Tippen passiert, nicht den aktuellen Zustand.
+        // The button describes what happens on tap, not the current state.
         OutlinedButton(
             onClick = onSoldClick,
             modifier = Modifier
@@ -176,7 +176,7 @@ private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, onSoldClick: () ->
             val text = if (ad.isSold) R.string.mark_available else R.string.mark_sold
             Text(stringResource(text))
         }
-        // Die Beschreibung ist im Formular optional. Ohne Text keine leere Überschrift zeigen.
+        // The description is optional in the form. Without text, do not show an empty heading.
         if (ad.description.isNotBlank()) {
             Text(
                 stringResource(R.string.label_description),
@@ -188,7 +188,7 @@ private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, onSoldClick: () ->
     }
 }
 
-// Eine Zeile "Bezeichnung: Wert", die Bezeichnung links, der Wert rechts daneben.
+// One row "label: value", the label on the left, the value next to it on the right.
 @Composable
 private fun DetailRow(label: String, value: String) {
     Row(modifier = Modifier
@@ -204,7 +204,7 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
-// Bestätigung vor dem Löschen, damit niemand aus Versehen eine Anzeige verliert.
+// Confirmation before deleting, so nobody loses an ad by accident.
 @Composable
 private fun DeleteDialog(title: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(

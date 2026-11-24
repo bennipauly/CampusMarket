@@ -1,8 +1,11 @@
 package de.dhbw.campusmarket.data
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 
-// Einziger Weg der ViewModels zu den Daten. Nur hier (und im DAO) wird Room benutzt.
+private const val TAG = "AdRepository"
+
+// The only way from the ViewModels to the data. Room is only used here (and in the DAO).
 class AdRepository(private val adDao: AdDao) {
 
     fun getAllAds(): Flow<List<Ad>> = adDao.getAll()
@@ -19,11 +22,13 @@ class AdRepository(private val adDao: AdDao) {
 
     suspend fun deleteAd(ad: Ad) = adDao.delete(ad)
 
-    // Wird beim App-Start aufgerufen. Fügt die Beispieldaten nur ein, wenn die Tabelle leer ist,
-    // damit sie nach einem Neustart nicht doppelt auftauchen.
+    // Called when the app starts. Inserts the sample data only if the table is empty,
+    // so that it does not appear twice after a restart.
     suspend fun insertSampleDataIfEmpty() {
         if (adDao.count() == 0) {
-            adDao.insertAll(sampleAds(System.currentTimeMillis()))
+            val ads = sampleAds(System.currentTimeMillis())
+            adDao.insertAll(ads)
+            Log.i(TAG, "Database was empty, inserted ${ads.size} sample ads")
         }
     }
 }

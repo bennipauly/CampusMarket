@@ -3,10 +3,10 @@ package de.dhbw.campusmarket.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-// Eine Anzeige. Jede Instanz ist eine Zeile in der Tabelle "ads".
+// An ad. Every instance is one row in the table "ads".
 @Entity(tableName = "ads")
 data class Ad(
-    // id = 0 bedeutet "neu"; Room vergibt beim Einfügen automatisch die nächste freie id.
+    // id = 0 means "new"; Room assigns the next free id automatically on insert.
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val title: String,
@@ -14,12 +14,12 @@ data class Ad(
     val price: Double,
     val category: Category,
     val condition: Condition,
-    // Übergabeort, z. B. "Bibliothek".
+    // Handover location, e.g. "Bibliothek".
     val location: String,
-    // Pfad bzw. Uri des Fotos; null, wenn es kein Foto gibt.
+    // Path or Uri of the photo; null if there is no photo.
     val imageUri: String? = null,
     val isFavorite: Boolean = false,
     val isSold: Boolean = false,
-    // Erstellzeitpunkt in Millisekunden seit 1970, wird später für die Sortierung gebraucht.
+    // Creation time in milliseconds since 1970, used for sorting.
     val createdAt: Long
 )

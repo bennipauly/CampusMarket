@@ -66,7 +66,7 @@ class AdValidationTest {
     fun price_invalidInputs_returnNull() {
         val invalid = listOf("", " ", "abc", "-5", "1e3", "NaN", "12,505", "123456", "12,", ",5", "1.000,00")
         for (input in invalid) {
-            assertNull("\"$input\" sollte ungültig sein", parsePrice(input))
+            assertNull("\"$input\" should be invalid", parsePrice(input))
         }
     }
 

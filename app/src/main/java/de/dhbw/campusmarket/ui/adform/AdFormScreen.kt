@@ -2,6 +2,7 @@ package de.dhbw.campusmarket.ui.adform
 
 import android.Manifest
 import android.content.ActivityNotFoundException
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -51,15 +52,17 @@ import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
-// Route: holt den ViewModel, reicht State und Callbacks weiter und meldet "gespeichert" nach oben.
-// adId == null: neue Anzeige. Sonst wird die Anzeige mit dieser id bearbeitet.
+private const val TAG = "AdFormScreen"
+
+// Route: gets the ViewModel, passes state and callbacks on and reports "saved" upwards.
+// adId == null: new ad. Otherwise the ad with this id is edited.
 @Composable
 fun AdFormRoute(adId: Long?, onBack: () -> Unit, onSaved: () -> Unit) {
     val viewModel: AdFormViewModel = viewModel(factory = AdFormViewModel.factory(adId))
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Startet die Kamera-App. Sie schreibt das Foto in die Datei hinter der Uri.
+    // Starts the camera app. It writes the photo into the file behind the Uri.
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success -> viewModel.onPhotoResult(success) }
@@ -70,13 +73,14 @@ fun AdFormRoute(adId: Long?, onBack: () -> Unit, onSaved: () -> Unit) {
         try {
             cameraLauncher.launch(uri)
         } catch (e: ActivityNotFoundException) {
-            // Ohne Kamera-App: Hinweis zeigen statt abstürzen.
+            // No camera app: show a hint instead of crashing.
+            Log.e(TAG, "No camera app found", e)
             viewModel.onCameraUnavailable()
         }
     }
 
-    // Schritt 1: nach der Kamera-Berechtigung fragen. Ist sie schon erteilt,
-    // kommt sofort "true" zurück, ohne dass ein Dialog erscheint.
+    // Step 1: ask for the camera permission. If it is already granted,
+    // "true" comes back immediately without a dialog.
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -87,7 +91,7 @@ fun AdFormRoute(adId: Long?, onBack: () -> Unit, onSaved: () -> Unit) {
         }
     }
 
-    // Sobald die Anzeige gespeichert ist, einmal zurück.
+    // As soon as the ad is saved, go back once.
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
             onSaved()
@@ -110,7 +114,7 @@ fun AdFormRoute(adId: Long?, onBack: () -> Unit, onSaved: () -> Unit) {
     )
 }
 
-// Stateless: bekommt nur Werte und Lambdas, kennt keinen ViewModel.
+// Stateless: only receives values and lambdas and knows no ViewModel.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdFormScreen(
@@ -148,7 +152,7 @@ fun AdFormScreen(
         val contentModifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-        // Loading/Error/nicht gefunden gibt es nur beim Bearbeiten. Beim Erstellen ist isLoading false.
+        // Loading/Error/not found only exist when editing. When creating, isLoading is false.
         when {
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(stringResource(R.string.ad_detail_error), onRetry, contentModifier)
@@ -170,7 +174,7 @@ fun AdFormScreen(
     }
 }
 
-// Die eigentlichen Eingabefelder, gleich für Erstellen und Bearbeiten.
+// The actual input fields, the same for creating and editing.
 @Composable
 private fun FormContent(
     uiState: AdFormUiState,
@@ -185,7 +189,7 @@ private fun FormContent(
     onSaveClick: () -> Unit,
     modifier: Modifier
 ) {
-    // verticalScroll + imePadding: Bei offener Tastatur kann man bis zum Button scrollen.
+    // verticalScroll + imePadding: with the keyboard open, you can still scroll down to the button.
     Column(
         modifier = modifier
             .imePadding()
@@ -255,7 +259,7 @@ private fun FormContent(
     }
 }
 
-// Foto-Vorschau, Knöpfe zum Aufnehmen/Entfernen und die Hinweise, wenn es nicht geht.
+// Photo preview, buttons to take/remove a photo and the hints if that is not possible.
 @Composable
 private fun PhotoSection(
     uiState: AdFormUiState,
@@ -290,7 +294,7 @@ private fun PhotoSection(
     }
 }
 
-// Einzeiliges Textfeld mit Fehlertext darunter, wenn errorText nicht null ist.
+// Single-line text field with an error text below it if errorText is not null.
 @Composable
 private fun FormTextField(
     value: String,
@@ -306,14 +310,14 @@ private fun FormTextField(
         isError = errorText != null,
         supportingText = errorText?.let { { Text(it) } },
         singleLine = true,
-        // ImeAction.Next: Die Enter-Taste springt ins nächste Feld.
+        // ImeAction.Next: the enter key jumps to the next field.
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = ImeAction.Next),
         modifier = Modifier.fillMaxWidth()
     )
 }
 
-// Überschrift und darunter ein Chip pro Möglichkeit. Genau ein Chip ist ausgewählt.
-// <T> erlaubt, dieselbe Funktion für Category und Condition zu benutzen.
+// Heading and below it one chip per option. Exactly one chip is selected.
+// <T> allows using the same function for Category and Condition.
 @Composable
 private fun <T> ChipGroup(
     title: String,

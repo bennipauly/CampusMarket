@@ -3,12 +3,12 @@ package de.dhbw.campusmarket.logic
 import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.Category
 
-// Reine Kotlin-Funktion ohne Android-Abhängigkeit, darum mit JUnit testbar.
-// Liefert nur die Anzeigen, die zu allen aktiven Filtern passen:
-// - category: nur diese Kategorie; null = alle Kategorien
-// - onlyFavorites: nur Anzeigen, die als Favorit gemerkt sind
-// - onlyAvailable: keine verkauften Anzeigen
-// Ist kein Filter aktiv, kommt die ganze Liste zurück.
+// Pure Kotlin function without Android dependencies, so it can be tested with JUnit.
+// Returns only the ads that match all active filters:
+// - category: only this category; null = all categories
+// - onlyFavorites: only ads that are marked as favorite
+// - onlyAvailable: no sold ads
+// If no filter is active, the whole list is returned.
 fun filterAds(
     ads: List<Ad>,
     category: Category?,

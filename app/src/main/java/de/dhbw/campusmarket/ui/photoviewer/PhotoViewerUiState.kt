@@ -1,7 +1,7 @@
 package de.dhbw.campusmarket.ui.photoviewer
 
-// Zustand der Vollbild-Ansicht: Loading (isLoading), Error (hasError) oder Ready (imageUri).
-// Ist nach dem Laden imageUri == null, hat die Anzeige kein Foto (mehr).
+// State of the full screen view: Loading (isLoading), Error (hasError) or Ready (imageUri).
+// If imageUri == null after loading, the ad has no photo (anymore).
 data class PhotoViewerUiState(
     val isLoading: Boolean = true,
     val hasError: Boolean = false,

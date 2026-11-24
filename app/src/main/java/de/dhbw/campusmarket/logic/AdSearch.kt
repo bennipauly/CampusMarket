@@ -2,9 +2,9 @@ package de.dhbw.campusmarket.logic
 
 import de.dhbw.campusmarket.data.Ad
 
-// Reine Kotlin-Funktion ohne Android-Abhängigkeit, darum mit JUnit testbar.
-// Liefert alle Anzeigen, in deren Titel, Beschreibung oder Übergabeort der Suchtext vorkommt.
-// Groß-/Kleinschreibung ist egal. Ein leerer Suchtext liefert die ganze Liste.
+// Pure Kotlin function without Android dependencies, so it can be tested with JUnit.
+// Returns all ads whose title, description or handover location contains the search text.
+// Upper and lower case do not matter. An empty search text returns the whole list.
 fun searchAds(ads: List<Ad>, query: String): List<Ad> {
     val searchText = query.trim()
     if (searchText.isEmpty()) {

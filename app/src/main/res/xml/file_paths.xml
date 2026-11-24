@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Nur der Ordner "photos" im internen App-Speicher (filesDir) wird über den FileProvider freigegeben. -->
+<!-- Only the folder "photos" in the internal app storage (filesDir) is shared through the FileProvider. -->
 <paths>
     <files-path
         name="photos"

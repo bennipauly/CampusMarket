@@ -3,8 +3,8 @@ package de.dhbw.campusmarket.data
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
-// Beschreibt die Datenbank: welche Tabellen es gibt und in welcher Version.
-// exportSchema = false, weil wir keine Migrationen planen und keinen Schema-Ordner brauchen.
+// Describes the database: which tables exist and in which version.
+// exportSchema = false because we plan no migrations and need no schema folder.
 @Database(entities = [Ad::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun adDao(): AdDao

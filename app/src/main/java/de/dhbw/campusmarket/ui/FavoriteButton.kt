@@ -8,8 +8,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import de.dhbw.campusmarket.R
 
-// Herz zum Merken einer Anzeige. Gefüllt und farbig = Favorit, nur Umriss = kein Favorit.
-// Wird in der Liste und in der Detailansicht benutzt.
+// Heart to remember an ad. Filled and colored = favorite, only outline = no favorite.
+// Used in the list and in the detail screen.
 @Composable
 fun FavoriteButton(isFavorite: Boolean, onClick: () -> Unit) {
     IconButton(onClick = onClick) {

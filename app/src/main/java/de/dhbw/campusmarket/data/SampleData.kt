@@ -2,8 +2,8 @@ package de.dhbw.campusmarket.data
 
 private const val ONE_DAY_MILLIS = 24 * 60 * 60 * 1000L
 
-// Beispielanzeigen für den ersten Start. "now" wird übergeben, damit die Anzeigen
-// unterschiedlich alt sind (heute, gestern, vor zwei Tagen, ...).
+// Sample ads for the first start. "now" is passed in so that the ads
+// have different ages (today, yesterday, two days ago, ...).
 fun sampleAds(now: Long): List<Ad> = listOf(
     Ad(
         title = "Analysis 1 – Lehrbuch",

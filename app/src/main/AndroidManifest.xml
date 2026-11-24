@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Kamera für Produktfotos. required="false": Die App lässt sich auch ohne Kamera installieren. -->
+    <!-- Camera for product photos. required="false": the app can also be installed without a camera. -->
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="false" />
@@ -32,8 +32,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Gibt der Kamera-App eine content://-Uri, unter der sie das Foto in unseren
-             internen Speicher schreiben darf. Die erlaubten Ordner stehen in file_paths.xml. -->
+        <!-- Gives the camera app a content:// Uri under which it may write the photo into our
+             internal storage. The allowed folders are listed in file_paths.xml. -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

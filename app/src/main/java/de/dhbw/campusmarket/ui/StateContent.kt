@@ -14,7 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.dhbw.campusmarket.R
 
-// Bausteine für die Zustände Loading und Error, die mehrere Screens gleich anzeigen.
+// Building blocks for the Loading and Error states that several screens show the same way.
 
 @Composable
 fun LoadingContent(modifier: Modifier) {
@@ -37,7 +37,7 @@ fun ErrorContent(message: String, onRetry: () -> Unit, modifier: Modifier) {
     }
 }
 
-// Zentrierter Hinweistext, z. B. für eine leere Liste oder keine Suchtreffer.
+// Centered hint text, e.g. for an empty list or no search results.
 @Composable
 fun MessageContent(text: String, modifier: Modifier) {
     Box(modifier = modifier.padding(16.dp), contentAlignment = Alignment.Center) {

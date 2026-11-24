@@ -2,14 +2,14 @@ package de.dhbw.campusmarket.ui.addetail
 
 import de.dhbw.campusmarket.data.Ad
 
-// Zustand der Detailseite: Loading (isLoading), Error (hasError) oder Ready (ad).
-// Ist nach dem Laden ad == null, gibt es die Anzeige nicht (mehr).
+// State of the detail screen: Loading (isLoading), Error (hasError) or Ready (ad).
+// If ad == null after loading, the ad does not exist (anymore).
 data class AdDetailUiState(
     val isLoading: Boolean = true,
     val hasError: Boolean = false,
     val ad: Ad? = null,
-    // Liegt im ViewModel, damit der offene Dialog eine Drehung übersteht.
+    // Lives in the ViewModel so that the open dialog survives a rotation.
     val showDeleteDialog: Boolean = false,
-    // true, sobald die Anzeige gelöscht ist. Die Route navigiert dann zurück.
+    // true as soon as the ad is deleted. The route then navigates back.
     val isDeleted: Boolean = false
 )

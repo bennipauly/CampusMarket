@@ -1,17 +1,20 @@
 package de.dhbw.campusmarket
 
 import android.app.Application
+import android.util.Log
 import androidx.room.Room
 import de.dhbw.campusmarket.data.AdRepository
 import de.dhbw.campusmarket.data.AppDatabase
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
-// Wird von Android genau einmal pro App-Prozess erzeugt (siehe android:name im Manifest).
-// Darum entstehen Datenbank und Repository hier genau einmal und alle ViewModels teilen sie.
+private const val TAG = "CampusMarketApplication"
+
+// Created by Android exactly once per app process (see android:name in the manifest).
+// That is why database and repository are created here exactly once and all ViewModels share them.
 class CampusMarketApplication : Application() {
 
-    // "by lazy": wird erst beim ersten Zugriff gebaut und danach wiederverwendet.
+    // "by lazy": built on first access and reused afterwards.
     private val database: AppDatabase by lazy {
         Room.databaseBuilder(this, AppDatabase::class.java, "campusmarket.db").build()
     }
@@ -22,9 +25,14 @@ class CampusMarketApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // Room führt suspend-Funktionen selbst im Hintergrund aus, der Main-Thread blockiert also nicht.
+        // Room runs suspend functions in the background itself, so the main thread does not block.
         MainScope().launch {
-            repository.insertSampleDataIfEmpty()
+            try {
+                repository.insertSampleDataIfEmpty()
+            } catch (e: Exception) {
+                // Without sample data the app still works, the list is just empty.
+                Log.e(TAG, "Inserting the sample data failed", e)
+            }
         }
     }
 }

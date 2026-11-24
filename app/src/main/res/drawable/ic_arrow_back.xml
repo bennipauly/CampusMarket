@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Zurück-Pfeil aus den Material Icons. autoMirrored dreht ihn bei Sprachen, die von rechts nach links laufen.
-     Die Farbe setzt das Compose-Icon selbst, darum reicht hier Weiß als Füllfarbe. -->
+<!-- Back arrow from the Material Icons. autoMirrored flips it for right-to-left languages.
+     The Compose Icon sets the color itself, so white is enough as fill color here. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"

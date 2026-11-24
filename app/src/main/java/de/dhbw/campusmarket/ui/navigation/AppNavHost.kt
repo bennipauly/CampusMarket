@@ -10,11 +10,11 @@ import de.dhbw.campusmarket.ui.adform.AdFormRoute
 import de.dhbw.campusmarket.ui.adlist.AdListRoute
 import de.dhbw.campusmarket.ui.photoviewer.PhotoViewerRoute
 
-// Der einzige Ort, an dem navigiert wird. Die Screens bekommen nur Callbacks
-// und wissen nicht, wohin es danach geht.
+// The only place where navigation happens. The screens only get callbacks
+// and do not know where to go next.
 @Composable
 fun AppNavHost() {
-    // rememberNavController merkt sich den Back-Stack auch über eine Drehung hinweg.
+    // rememberNavController keeps the back stack across a rotation.
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = AdList) {
@@ -25,12 +25,12 @@ fun AppNavHost() {
             )
         }
         composable<AdDetail> { backStackEntry ->
-            // toRoute() baut aus dem Back-Stack-Eintrag wieder unser AdDetail-Objekt.
+            // toRoute() turns the back stack entry back into our AdDetail object.
             val detail: AdDetail = backStackEntry.toRoute()
             AdDetailRoute(
                 adId = detail.adId,
-                // navigateUp statt popBackStack: Ein doppelter Tipp auf "Zurück"
-                // kann so nie die Startseite vom Stack werfen.
+                // navigateUp instead of popBackStack: a double tap on "back"
+                // can never remove the start screen from the stack this way.
                 onBack = { navController.navigateUp() },
                 onPhotoClick = { navController.navigate(PhotoViewer(detail.adId)) },
                 onEditClick = { navController.navigate(AdEdit(detail.adId)) }
@@ -44,7 +44,7 @@ fun AppNavHost() {
             )
         }
         composable<AdForm> {
-            // Nach dem Speichern zurück zur Liste, dort steht die neue Anzeige oben.
+            // After saving, back to the list, where the new ad is at the top.
             AdFormRoute(
                 adId = null,
                 onBack = { navController.navigateUp() },
@@ -53,8 +53,8 @@ fun AppNavHost() {
         }
         composable<AdEdit> { backStackEntry ->
             val edit: AdEdit = backStackEntry.toRoute()
-            // Nach dem Speichern zurück zur Detailseite. Sie liest aus Room und zeigt sofort
-            // die geänderten Werte.
+            // After saving, back to the detail screen. It reads from Room and immediately shows
+            // the changed values.
             AdFormRoute(
                 adId = edit.adId,
                 onBack = { navController.navigateUp() },

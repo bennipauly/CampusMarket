@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import de.dhbw.campusmarket.R
 
-// Zeigt das Foto einer Anzeige mit Coil. Hinter dem Foto liegt immer ein grauer Platzhalter
-// mit Bild-Symbol: Gibt es kein Foto oder lässt es sich nicht laden, sieht man den Platzhalter.
+// Shows the photo of an ad with Coil. Behind the photo there is always a grey placeholder
+// with an image symbol: if there is no photo or it cannot be loaded, the placeholder is visible.
 @Composable
 fun AdImage(imageUri: String?, contentDescription: String?, modifier: Modifier) {
     Box(
@@ -30,7 +30,7 @@ fun AdImage(imageUri: String?, contentDescription: String?, modifier: Modifier) 
             modifier = Modifier.size(32.dp)
         )
         if (imageUri != null) {
-            // AsyncImage lädt das Bild im Hintergrund, die Oberfläche friert also nicht ein.
+            // AsyncImage loads the image in the background, so the UI does not freeze.
             AsyncImage(
                 model = imageUri,
                 contentDescription = contentDescription,

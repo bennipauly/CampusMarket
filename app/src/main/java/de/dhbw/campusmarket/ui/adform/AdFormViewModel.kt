@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.adform
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -22,8 +23,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// Besitzer der Formulareingaben. Jede Eingabe läuft über eine on...Change-Funktion.
-// adId == null: neue Anzeige erstellen. Sonst: die Anzeige mit dieser id bearbeiten.
+private const val TAG = "AdFormViewModel"
+
+// Owner of the form input. Every input goes through an on...Change function.
+// adId == null: create a new ad. Otherwise: edit the ad with this id.
 class AdFormViewModel(
     private val repository: AdRepository,
     private val adId: Long?
@@ -34,27 +37,28 @@ class AdFormViewModel(
     )
     val uiState: StateFlow<AdFormUiState> = _uiState.asStateFlow()
 
-    // Beim Bearbeiten die Anzeige, wie sie in Room steht. Daraus übernimmt onSaveClick alles,
-    // was das Formular nicht kennt: id, Favorit, Status "verkauft" und Erstellzeitpunkt.
+    // When editing: the ad as it is stored in Room. onSaveClick takes everything from it
+    // that the form does not know: id, favorite, status "sold" and creation time.
     private var originalAd: Ad? = null
 
     init {
         loadAd()
     }
 
-    // Füllt das Formular einmal mit der gespeicherten Anzeige. Beim Erstellen passiert nichts.
+    // Fills the form once with the stored ad. When creating, nothing happens.
     fun loadAd() {
         if (adId == null) return
         _uiState.update { it.copy(isLoading = true, hasError = false) }
         viewModelScope.launch {
             try {
-                // first() statt collect: nur einmal laden. Sonst würde jede spätere Änderung
-                // in Room die Eingaben überschreiben, die man gerade tippt.
+                // first() instead of collect: load only once. Otherwise every later change
+                // in Room would overwrite the input the user is typing.
                 val ad = repository.getAd(adId).first()
                 originalAd = ad
                 _uiState.update {
                     if (ad == null) {
-                        // Anzeige wurde inzwischen gelöscht.
+                        // The ad was deleted in the meantime.
+                        Log.w(TAG, "Ad $adId not found")
                         it.copy(isLoading = false, notFound = true)
                     } else {
                         it.copy(
@@ -70,6 +74,7 @@ class AdFormViewModel(
                     }
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Loading ad $adId failed", e)
                 _uiState.update { it.copy(isLoading = false, hasError = true) }
             }
         }
@@ -99,14 +104,14 @@ class AdFormViewModel(
         _uiState.update { it.copy(location = location) }
     }
 
-    // Die Route hat eine leere Foto-Datei angelegt und startet gleich die Kamera.
+    // The route created an empty photo file and is about to start the camera.
     fun onPhotoUriCreated(uri: String) {
         _uiState.update {
             it.copy(pendingPhotoUri = uri, showPermissionHint = false, showNoCameraHint = false)
         }
     }
 
-    // Ergebnis der Kamera: success = false heißt abgebrochen, dann bleibt das alte Foto.
+    // Result of the camera: success = false means cancelled, then the old photo stays.
     fun onPhotoResult(success: Boolean) {
         _uiState.update {
             val newImage = if (success) it.pendingPhotoUri else it.imageUri
@@ -128,13 +133,13 @@ class AdFormViewModel(
 
     fun onSaveClick() {
         val state = _uiState.value
-        // Doppelklick auf "Speichern" soll nicht zwei Anzeigen anlegen.
-        // Solange die Anzeige noch lädt, gibt es nichts zu speichern.
+        // A double click on "save" must not create two ads.
+        // While the ad is still loading, there is nothing to save.
         if (state.isSaving || state.isLoading) return
 
         val price = parsePrice(state.price)
         if (!isValidTitle(state.title) || price == null || !isValidLocation(state.location)) {
-            // Ungültig: nichts speichern, nur die Fehler unter den Feldern einblenden.
+            // Invalid: save nothing, only show the errors below the fields.
             _uiState.update { it.copy(showErrors = true) }
             return
         }
@@ -154,10 +159,11 @@ class AdFormViewModel(
         viewModelScope.launch {
             try {
                 if (original == null) {
-                    repository.addAd(ad)
+                    val newId = repository.addAd(ad)
+                    Log.i(TAG, "Ad $newId created")
                 } else {
-                    // Gleiche id = Room überschreibt die Zeile. Erstellzeitpunkt bleibt,
-                    // damit die Anzeige in der Liste nicht nach oben springt.
+                    // Same id = Room overwrites the row. The creation time stays,
+                    // so that the ad does not jump to the top of the list.
                     repository.updateAd(
                         ad.copy(
                             id = original.id,
@@ -166,10 +172,12 @@ class AdFormViewModel(
                             createdAt = original.createdAt
                         )
                     )
+                    Log.i(TAG, "Ad ${original.id} updated")
                 }
                 _uiState.update { it.copy(isSaving = false, isSaved = true) }
             } catch (e: Exception) {
-                // Speichern hat nicht geklappt: Hinweis zeigen, die Eingaben bleiben erhalten.
+                // Saving failed: show a hint, the input is kept.
+                Log.e(TAG, "Saving the ad failed", e)
                 _uiState.update { it.copy(isSaving = false, saveFailed = true) }
             }
         }
