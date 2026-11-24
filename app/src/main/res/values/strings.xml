@@ -10,6 +10,12 @@
     <string name="ad_list_no_filter_results">Keine Anzeigen passen zu den gewählten Filtern.</string>
     <string name="filter_favorites">Favoriten</string>
     <string name="filter_available">Nur verfügbare</string>
+    <string name="sort">Sortieren</string>
+    <string name="sort_selected">Ausgewählt</string>
+    <string name="sort_newest">Neueste zuerst</string>
+    <string name="sort_price_ascending">Preis aufsteigend</string>
+    <string name="sort_price_descending">Preis absteigend</string>
+    <string name="sort_title">Titel (A–Z)</string>
     <string name="ad_detail_title">Details</string>
     <string name="ad_detail_error">Die Anzeige konnte nicht geladen werden.</string>
     <string name="ad_detail_not_found">Diese Anzeige gibt es nicht mehr.</string>

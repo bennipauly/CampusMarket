@@ -18,8 +18,8 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 ## Arbeitsweise mit der KI
 
 1. **Prompts immer wortwörtlich ins Logbuch.** Jeder Prompt wird vor der Bearbeitung unverändert in `AI_USAGE.md` eingetragen (neue Aufgabe = neuer Eintrag, Rückfragen = Prompt 2, 3, … im selben Eintrag). Geheimnisse und personenbezogene Daten → `[REDACTED]`.
-2. **Komplettes KI-Ergebnis ins Logbuch.** Nach jedem Prompt kommt unter „Ergebnis der KI zu Prompt N (vollständig)“ die komplette Antwort der KI wortwörtlich in `AI_USAGE.md`, dazu eine Liste der ausgeführten Aktionen (gelesene, angelegte und geänderte Dateien, ausgeführte Befehle mit Ergebnis) und das Kurzfazit aus dem Antwortfeld der App. Nichts wird gekürzt.
-3. Felder, die nur das Team kennt (Autor, Akzeptiert/Geändert/Abgelehnt, Geprüft, Commits), bleiben „eintragen“ oder bekommen einen markierten Vorschlag.
+2. **Ergebnis ins Logbuch, ohne Antworttext.** Nach jedem Prompt kommt unter „Ergebnis der KI zu Prompt N“ eine Liste der ausgeführten Aktionen (gelesene, angelegte und geänderte Dateien, ausgeführte Befehle mit Ergebnis) und das Kurzfazit aus dem Antwortfeld der App. Die ausführliche Antwort der KI kommt **nicht** ins Logbuch. Stattdessen steht unter „Commits“, in welchen Commit das Ergebnis eingeflossen ist (Hash und Nachricht).
+3. Felder, die nur das Team kennt (Autor, Akzeptiert/Geändert/Abgelehnt, Geprüft), bleiben „eintragen“ oder bekommen einen markierten Vorschlag. Den Commit trägt die KI nach, sobald das Team committet hat (aus `git log`). Vorher steht dort „eintragen“.
 4. **Kein Code ohne kurze Erklärung.** Nach jeder Änderung: kurze Erklärung auf Deutsch (was und warum), Testanleitung (Rotation, Permission verweigert, Flugmodus, App-Neustart, ungültige Eingaben) und Commit-Vorschlag.
 5. **Die KI committet und pusht nie selbst.** Commits macht das Team.
 6. Ein Schritt = ein Commit, der für sich baut. Nach jedem Schritt auf das OK des Teams warten.
@@ -32,7 +32,15 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - **Kein Hilt, kein Koin**, keine anderen DI-Frameworks.
 - Kein toter Code: keine ungenutzten Funktionen, Imports, Ressourcen oder auskommentierten Blöcke. Der Android-Studio-Beispielcode ist entfernt. Es gibt keine Instrumented Tests (`src/androidTest`) und deshalb auch keine Espresso-/Compose-Test-Bibliotheken.
 - Kleine Einheiten: eine Datei pro Screen-Teil (Route/Screen, ViewModel, UiState), Funktionen kurz halten.
-- Alle für Nutzer sichtbaren Texte stehen in `res/values/strings.xml` (Deutsch).
+- **Höchstens 500 Zeilen pro Datei** (Clean Code). Ausnahmen: `res/values/strings.xml` und Markdown-Dokumente (`README.md`, `AI_USAGE.md`, `CLAUDE.md`).
+- **Quellcode komplett auf Englisch:** Klassen, Funktionen, Variablen, Parameter und Kommentare. Deutsch sind nur die Texte in `strings.xml`.
+- **Keine hartkodierten Labels:** Alle für Nutzer sichtbaren Texte stehen in `res/values/strings.xml` (Deutsch) und werden mit `stringResource` bzw. `R.string` geladen. Ausnahmen: Beispieldaten (`SampleData.kt`) und Werte in `@Preview`- und Test-Funktionen.
+- **Benennung:** camelCase für Variablen und Funktionen, PascalCase für Klassen. Booleans beginnen mit `is`, `has`, `show` oder `only`. Der private `MutableStateFlow` heißt `_uiState`, der öffentliche `uiState`. Callbacks heißen `onXxx` (z. B. `onSaveClick`, `onQueryChange`).
+- **Feste Reihenfolge in jeder Datei:**
+  - ViewModel: 1. `_uiState` und `uiState`, 2. weitere private Felder (z. B. `loadJob`), 3. `init`, 4. öffentliche Funktionen (`loadXxx`, `onXxx`), 5. private Hilfsfunktionen, 6. `companion object` mit `factory`/`Factory`.
+  - UiState: zuerst Laden/Fehler (`isLoading`, `hasError`), dann Daten, dann Eingaben, dann einmalige Ereignisse (`isSaved`, `isDeleted`), am Ende berechnete Werte (`get()`).
+  - Screen-Datei: `TAG`/Konstanten, Route, Screen, private Teil-Composables, Previews.
+- **Logging mit `android.util.Log`:** Jede Datei, die loggt, hat oben `private const val TAG = "<Klassenname>"`. Jeder `catch`-Block loggt mit `Log.e(TAG, "...", e)`. Wichtige Ereignisse (Beispieldaten eingefügt, Anzeige gespeichert, gelöscht, Favorit/Status geändert) loggen mit `Log.d`/`Log.i`. In Logs stehen nur ids und Zustände, keine Nutzereingaben. Reine Funktionen in `logic/` loggen nicht, damit sie ohne Android mit JUnit testbar bleiben.
 
 ## Architektur
 
@@ -88,4 +96,5 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 ## Abgabe
 
 - README beschreibt Build- und Startschritte aus einem sauberen Checkout und enthält den Satz: „Die Gruppe verantwortet jede Zeile des Projekts.“
+- README nennt alles, was vorausgesetzt wird (Android Studio, SDK, JDK, Gerät/Emulator, Internet beim ersten Build), und wird bei jeder neuen Voraussetzung ergänzt.
 - `AI_USAGE.md` ist vollständig (Setup, alle Einträge, Reflexion).

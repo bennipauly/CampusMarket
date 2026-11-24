@@ -2064,6 +2064,59 @@ Anzeigen nach Kategorie, Favoriten und Status filtern
 
 ---
 
+### Eintrag 18: Schritt 14 – Sortierung und neue Bewertungsregeln
+
+- **Datum:** 24.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Jetzt Schritt 14, es gibt aber noch ein paar Regeländerungen für die Bewertung:
+
+In welcher spräche schrieben wir quellcode -> Englische Klassennamen, Kommentare auch auf Englisch, variable auf englisch
+Wie sind die Klassen. Nicht zu viel Inhalt. Variablen in eine bestimmten Muster deklarieren und dieses Muster beibehalten. Klassenlänge nicht länger als 500 Zeilen… (+ Ausnahmen) -> clean code anhalten
+Nicht hardcoded Labels
+READ.ME wenn man paar Sachen voraussetzt.
+Logs hinzugefügt?
+In AI_USAGE Antwort der KI rausnehmen nur in welchem Commit das eingeflossen ist hinschreiben
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -3` ausgeführt. Ergebnis: Schritt 13 committet (`16b2cd8`), Arbeitsverzeichnis sauber.
+2. `AI_USAGE.md`: Eintrag 18 mit dem Prompt angelegt, schon im neuen Format (ohne Antworttext der KI).
+3. `CLAUDE.md` gelesen und angepasst: Regel 2 und 3 (Logbuch ohne Antworttext, stattdessen Commit), neue Code-Stil-Regeln (höchstens 500 Zeilen pro Datei, Quellcode komplett Englisch, keine hartkodierten Labels, Benennung, feste Reihenfolge in ViewModel/UiState/Screen-Datei, Logging mit `android.util.Log`), README-Regel zu Voraussetzungen. Dateilängen geprüft (längste Datei `AdFormScreen.kt` mit 406 Zeilen) und nach `android.util.Log` gesucht (noch nirgends benutzt).
+4. Neu angelegt: `logic/AdSort.kt` (`SortOrder`, `sortAds`), `test/…/logic/AdSortTest.kt` (7 Tests).
+5. Gelesen und auf Englisch neu geschrieben: `ui/adlist/AdListScreen.kt` (Sortiermenü `SortMenu`, gemeinsame Preview-Hilfsfunktion, neue Preview „Sorted“), `ui/adlist/AdListViewModel.kt` (`onSortOrderChange`, `TAG` und Logs), `ui/adlist/AdListUiState.kt` (`sortOrder`), `ui/Labels.kt` (`SortOrder.labelRes()`).
+6. Skript `step14.py` im Scratchpad: 6 Texte in `strings.xml`, neue Icons `ic_sort.xml` und `ic_check.xml`.
+7. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen, 40/40 Tests grün.
+8. Emulator, erster Durchlauf: Bei „Titel (A–Z)“ blieb „foto test“ oben stehen, weil die Liste die Scroll-Position am ersten sichtbaren Eintrag festhielt. Behoben mit `key(uiState.sortOrder)` um die Liste in `AdListScreen.kt`, neu gebaut.
+9. Emulator, zweiter Durchlauf: Menü mit Häkchen (Screenshot). „Preis aufsteigend“ → 3,00 … 25,00 €, Querformat und zurück → bleibt. „Preis absteigend“ → 100,00 … 5,00 €. „Titel (A–Z)“ → „Analysis 1 – Lehrbuch“, „dsdsds“, „foto test“ … von oben. Logcat zeigt `D AdListViewModel: Sort order changed to …`. Absturz-Log leer.
+10. `README.md`: Funktion „Sortierung“, Testklasse `AdSortTest`, Ordnerbeschreibung `logic/` und Hinweis „Logs ansehen“ ergänzt.
+11. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 14 ist umgesetzt: Sortiermenü oben rechts (neueste, Preis auf-/absteigend, Titel A–Z), die Logik ist eine reine Funktion mit 7 neuen Tests. Die neuen Regeln stehen in CLAUDE.md, das Listen-Paket ist schon auf Englisch und loggt. Build, 40 Tests und Emulator-Test liefen fehlerfrei. Der übrige Code und die alten Logbuch-Einträge sind noch nicht umgestellt. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit den restlichen Code und AI_USAGE.md auf die neuen Regeln umstellen?“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Alle Filter überprüft
+
+#### Commits
+
+Anzeigen sortieren und neue Code-Regeln in CLAUDE.md
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._

@@ -3,6 +3,7 @@ package de.dhbw.campusmarket.ui.adlist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -29,6 +32,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -43,6 +50,7 @@ import de.dhbw.campusmarket.R
 import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.Category
 import de.dhbw.campusmarket.data.sampleAds
+import de.dhbw.campusmarket.logic.SortOrder
 import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
 import de.dhbw.campusmarket.ui.FavoriteButton
@@ -52,11 +60,11 @@ import de.dhbw.campusmarket.ui.formatPrice
 import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
-// Route: holt den ViewModel und reicht State und Callbacks an den Screen weiter.
+// Route: gets the ViewModel and passes state and callbacks on to the screen.
 @Composable
 fun AdListRoute(onAdClick: (Long) -> Unit, onAddClick: () -> Unit) {
     val viewModel: AdListViewModel = viewModel(factory = AdListViewModel.Factory)
-    // Sammelt nur, solange der Screen sichtbar ist.
+    // Collects only while the screen is visible.
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     AdListScreen(
         uiState = uiState,
@@ -67,11 +75,12 @@ fun AdListRoute(onAdClick: (Long) -> Unit, onAddClick: () -> Unit) {
         onFavoriteClick = viewModel::onFavoriteClick,
         onCategoryFilterClick = viewModel::onCategoryFilterClick,
         onOnlyFavoritesClick = viewModel::onOnlyFavoritesClick,
-        onOnlyAvailableClick = viewModel::onOnlyAvailableClick
+        onOnlyAvailableClick = viewModel::onOnlyAvailableClick,
+        onSortOrderChange = viewModel::onSortOrderChange
     )
 }
 
-// Stateless: bekommt nur Werte und Lambdas, kennt keinen ViewModel.
+// Stateless: only receives values and lambdas and knows no ViewModel.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdListScreen(
@@ -83,11 +92,22 @@ fun AdListScreen(
     onFavoriteClick: (Ad) -> Unit,
     onCategoryFilterClick: (Category) -> Unit,
     onOnlyFavoritesClick: () -> Unit,
-    onOnlyAvailableClick: () -> Unit
+    onOnlyAvailableClick: () -> Unit,
+    onSortOrderChange: (SortOrder) -> Unit
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
-        // FAB unten rechts: Material-Konvention für "Neues anlegen".
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.app_name)) },
+                actions = {
+                    // Sorting only makes sense once there are ads to sort.
+                    if (uiState.ads.isNotEmpty()) {
+                        SortMenu(sortOrder = uiState.sortOrder, onSortOrderChange = onSortOrderChange)
+                    }
+                }
+            )
+        },
+        // FAB at the bottom right: Material convention for "create something new".
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClick) {
                 Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.add_ad))
@@ -115,7 +135,41 @@ fun AdListScreen(
     }
 }
 
-// Ready: Suchfeld und Filter oben, darunter die Treffer oder ein Hinweis, dass nichts passt.
+// Sort button in the top app bar. Opens a menu with one entry per sort order;
+// the active one has a check mark.
+@Composable
+private fun SortMenu(sortOrder: SortOrder, onSortOrderChange: (SortOrder) -> Unit) {
+    // Whether the menu is open is pure UI state, so it may live in the composable.
+    // rememberSaveable keeps it open across a rotation.
+    var isMenuOpen by rememberSaveable { mutableStateOf(false) }
+    // The Box anchors the menu below the button.
+    Box {
+        IconButton(onClick = { isMenuOpen = true }) {
+            Icon(painterResource(R.drawable.ic_sort), contentDescription = stringResource(R.string.sort))
+        }
+        DropdownMenu(expanded = isMenuOpen, onDismissRequest = { isMenuOpen = false }) {
+            for (order in SortOrder.entries) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(order.labelRes())) },
+                    onClick = {
+                        isMenuOpen = false
+                        onSortOrderChange(order)
+                    },
+                    trailingIcon = {
+                        if (order == sortOrder) {
+                            Icon(
+                                painterResource(R.drawable.ic_check),
+                                contentDescription = stringResource(R.string.sort_selected)
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+// Ready: search field and filters at the top, below them the matching ads or a hint that nothing matches.
 @Composable
 private fun ReadyContent(
     uiState: AdListUiState,
@@ -137,7 +191,7 @@ private fun ReadyContent(
         )
         val visibleAds = uiState.visibleAds
         if (visibleAds.isEmpty()) {
-            // Mit Suchtext den Suchtext nennen, sonst liegt es nur an den Filtern.
+            // With a search text, name it; otherwise only the filters are the reason.
             val message = if (uiState.query.isBlank()) {
                 stringResource(R.string.ad_list_no_filter_results)
             } else {
@@ -145,14 +199,19 @@ private fun ReadyContent(
             }
             MessageContent(message, Modifier.fillMaxSize())
         } else {
-            AdListContent(visibleAds, onAdClick, onFavoriteClick, Modifier.fillMaxSize())
+            // key(sortOrder): a new sort order creates a new scroll state, so the list starts at
+            // the top again. Without it, Compose would keep the previously first ad in view.
+            // A rotation keeps the sort order and therefore also the scroll position.
+            key(uiState.sortOrder) {
+                AdListContent(visibleAds, onAdClick, onFavoriteClick, Modifier.fillMaxSize())
+            }
         }
     }
 }
 
 @Composable
 private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
-    // Nur zum Schließen der Tastatur, kein fachlicher State.
+    // Only used to close the keyboard, not business state.
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = query,
@@ -163,7 +222,7 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         placeholder = { Text(stringResource(R.string.search_hint)) },
         leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
         trailingIcon = {
-            // Das Kreuz erscheint nur, wenn etwas im Feld steht.
+            // The X only appears when there is text in the field.
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
                     Icon(
@@ -174,13 +233,13 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
             }
         },
         singleLine = true,
-        // Die Enter-Taste zeigt eine Lupe und schließt die Tastatur. Gesucht wird schon beim Tippen.
+        // The enter key shows a magnifier and closes the keyboard. Searching already happens while typing.
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
     )
 }
 
-// Eine Zeile Filter-Chips, die man seitlich wischen kann. Mehrere Filter gelten gleichzeitig.
+// A row of filter chips that can be swiped sideways. Several filters apply at the same time.
 @Composable
 private fun FilterRow(
     uiState: AdListUiState,
@@ -188,8 +247,8 @@ private fun FilterRow(
     onOnlyFavoritesClick: () -> Unit,
     onOnlyAvailableClick: () -> Unit
 ) {
-    // horizontalScroll: Nicht alle Chips passen nebeneinander auf den Bildschirm.
-    // Die Scroll-Position ist reiner UI-State und darf darum im Composable liegen.
+    // horizontalScroll: not all chips fit next to each other on the screen.
+    // The scroll position is pure UI state and may therefore live in the composable.
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,9 +283,9 @@ private fun AdListContent(
     onFavoriteClick: (Ad) -> Unit,
     modifier: Modifier
 ) {
-    // Unten Platz lassen, damit der FAB die letzte Anzeige nicht verdeckt.
+    // Leave space at the bottom so the FAB does not cover the last ad.
     LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = 88.dp)) {
-        // key = id: Compose erkennt dieselbe Anzeige wieder, wenn sich die Liste ändert.
+        // key = id: Compose recognizes the same ad again when the list changes.
         items(ads, key = { it.id }) { ad ->
             AdListItem(ad = ad, onClick = { onAdClick(ad.id) }, onFavoriteClick = { onFavoriteClick(ad) })
             HorizontalDivider()
@@ -237,12 +296,12 @@ private fun AdListContent(
 @Composable
 private fun AdListItem(ad: Ad, onClick: () -> Unit, onFavoriteClick: () -> Unit) {
     ListItem(
-        // Links ein kleines Vorschaubild oder der Platzhalter, wenn es kein Foto gibt.
+        // On the left a small thumbnail, or the placeholder if there is no photo.
         leadingContent = {
             AdImage(imageUri = ad.imageUri, contentDescription = null, modifier = Modifier.size(56.dp))
         },
         headlineContent = { Text(ad.title) },
-        // Unter dem Ort steht "Verkauft", damit man verkaufte Anzeigen schon in der Liste erkennt.
+        // "Sold" below the location, so sold ads can already be recognized in the list.
         supportingContent = {
             Column {
                 Text(ad.location)
@@ -255,7 +314,7 @@ private fun AdListItem(ad: Ad, onClick: () -> Unit, onFavoriteClick: () -> Unit)
                 }
             }
         },
-        // Rechts der Preis und das Herz. Das Herz hat einen eigenen Klick und öffnet nicht die Details.
+        // Price and heart on the right. The heart has its own click and does not open the details.
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(formatPrice(ad.price))
@@ -266,17 +325,16 @@ private fun AdListItem(ad: Ad, onClick: () -> Unit, onFavoriteClick: () -> Unit)
     )
 }
 
-@Preview(showBackground = true)
+// Sample ads with ids; Room would only assign them on insert.
+private fun previewAds(): List<Ad> =
+    sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L) }
+
+// Shared helper for all previews: the screen with the given state and empty callbacks.
 @Composable
-private fun AdListScreenReadyPreview() {
+private fun AdListScreenPreview(uiState: AdListUiState) {
     CampusMarketTheme {
-        // Die Beispieldaten bekommen hier ids, weil Room sie sonst erst beim Einfügen vergibt.
-        // Die erste Anzeige ist Favorit und die zweite verkauft, damit man beides sieht.
-        val ads = sampleAds(now = 0L).mapIndexed { index, ad ->
-            ad.copy(id = index + 1L, isFavorite = index == 0, isSold = index == 1)
-        }
         AdListScreen(
-            uiState = AdListUiState(isLoading = false, ads = ads),
+            uiState = uiState,
             onAdClick = {},
             onAddClick = {},
             onRetry = {},
@@ -284,69 +342,49 @@ private fun AdListScreenReadyPreview() {
             onFavoriteClick = {},
             onCategoryFilterClick = {},
             onOnlyFavoritesClick = {},
-            onOnlyAvailableClick = {}
+            onOnlyAvailableClick = {},
+            onSortOrderChange = {}
         )
     }
+}
+
+// The first ad is a favorite and the second one is sold, so both can be seen.
+@Preview(showBackground = true)
+@Composable
+private fun AdListScreenReadyPreview() {
+    val ads = previewAds().mapIndexed { index, ad -> ad.copy(isFavorite = index == 0, isSold = index == 1) }
+    AdListScreenPreview(AdListUiState(isLoading = false, ads = ads))
+}
+
+// Sorted by price, cheapest first.
+@Preview(showBackground = true)
+@Composable
+private fun AdListScreenSortedPreview() {
+    AdListScreenPreview(AdListUiState(isLoading = false, ads = previewAds(), sortOrder = SortOrder.PRICE_ASCENDING))
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun AdListScreenNoResultsPreview() {
-    CampusMarketTheme {
-        val ads = sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L) }
-        AdListScreen(
-            uiState = AdListUiState(isLoading = false, ads = ads, query = "Fahrrad"),
-            onAdClick = {},
-            onAddClick = {},
-            onRetry = {},
-            onQueryChange = {},
-            onFavoriteClick = {},
-            onCategoryFilterClick = {},
-            onOnlyFavoritesClick = {},
-            onOnlyAvailableClick = {}
-        )
-    }
+    AdListScreenPreview(AdListUiState(isLoading = false, ads = previewAds(), query = "Fahrrad"))
 }
 
-// Filter aktiv: Kategorie "Bücher" und "Nur verfügbare". Es bleibt eine Anzeige übrig.
+// Active filters: category "books" and "only available". One ad is left.
 @Preview(showBackground = true)
 @Composable
 private fun AdListScreenFilterPreview() {
-    CampusMarketTheme {
-        val ads = sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L) }
-        AdListScreen(
-            uiState = AdListUiState(
-                isLoading = false,
-                ads = ads,
-                categoryFilter = Category.BOOKS,
-                onlyAvailable = true
-            ),
-            onAdClick = {},
-            onAddClick = {},
-            onRetry = {},
-            onQueryChange = {},
-            onFavoriteClick = {},
-            onCategoryFilterClick = {},
-            onOnlyFavoritesClick = {},
-            onOnlyAvailableClick = {}
+    AdListScreenPreview(
+        AdListUiState(
+            isLoading = false,
+            ads = previewAds(),
+            categoryFilter = Category.BOOKS,
+            onlyAvailable = true
         )
-    }
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun AdListScreenErrorPreview() {
-    CampusMarketTheme {
-        AdListScreen(
-            uiState = AdListUiState(isLoading = false, hasError = true),
-            onAdClick = {},
-            onAddClick = {},
-            onRetry = {},
-            onQueryChange = {},
-            onFavoriteClick = {},
-            onCategoryFilterClick = {},
-            onOnlyFavoritesClick = {},
-            onOnlyAvailableClick = {}
-        )
-    }
+    AdListScreenPreview(AdListUiState(isLoading = false, hasError = true))
 }
