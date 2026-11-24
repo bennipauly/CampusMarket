@@ -16,6 +16,7 @@ Die App arbeitet **rein lokal**: Es gibt kein Backend, keinen Login und keine Ne
 - Anzeige löschen mit Bestätigungsdialog
 - Favoriten: Anzeigen mit dem Herz in der Liste oder in der Detailansicht merken
 - Status: Anzeige in der Detailansicht als verkauft markieren (und wieder freigeben), in der Liste steht dann „Verkauft“
+- Filter unter dem Suchfeld: Favoriten, nur verfügbare Anzeigen und Kategorie, kombinierbar mit der Suche
 - Produktfoto mit der Gerätekamera (mit Kamera-Berechtigung; ohne Berechtigung lässt sich die Anzeige trotzdem speichern)
 - Foto im Vollbild: In der Detailansicht auf das Foto tippen
 - Lokale Speicherung: Die Daten bleiben nach einem Neustart erhalten. Beim ersten Start werden sechs Beispielanzeigen angelegt.
@@ -64,6 +65,7 @@ Die Logik ohne Android-Abhängigkeit ist mit JUnit getestet (`app/src/test`):
 | Testklasse | Prüft |
 |---|---|
 | `AdSearchTest` | Suche: leerer Suchtext, Groß-/Kleinschreibung, Treffer in Titel/Beschreibung/Ort, keine Treffer |
+| `AdFilterTest` | Filter: Kategorie, nur Favoriten, nur verfügbare, alle zusammen, keine Treffer |
 | `AdValidationTest` | Eingabeprüfung: Titel, Übergabeort, Preis (z. B. „12,50“ gültig; „-5“, „1e3“, „12,505“ ungültig) und Preis als Text fürs Bearbeiten |
 | `PriceFormatTest` | Preisanzeige im deutschen Format („12,50 €“) |
 
@@ -84,7 +86,7 @@ app/src/main/java/de/dhbw/campusmarket/
 ├── CampusMarketApplication.kt   Datenbank und Repository (genau einmal), Beispieldaten
 ├── MainActivity.kt              setzt Theme und NavHost
 ├── data/                        Room: Entity Ad, AdDao, AppDatabase, AdRepository, Enums, Beispieldaten
-├── logic/                       reine Kotlin-Funktionen: Suche, Eingabeprüfung (mit JUnit-Tests)
+├── logic/                       reine Kotlin-Funktionen: Suche, Filter, Eingabeprüfung (mit JUnit-Tests)
 └── ui/
     ├── navigation/              typsichere Ziele und NavHost
     ├── adlist/                  Anzeigenliste mit Suche

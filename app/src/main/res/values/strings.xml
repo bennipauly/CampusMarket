@@ -7,6 +7,9 @@
     <string name="search_hint">Anzeigen durchsuchen</string>
     <string name="search_clear">Suche löschen</string>
     <string name="ad_list_no_results">Keine Treffer für „%1$s“.</string>
+    <string name="ad_list_no_filter_results">Keine Anzeigen passen zu den gewählten Filtern.</string>
+    <string name="filter_favorites">Favoriten</string>
+    <string name="filter_available">Nur verfügbare</string>
     <string name="ad_detail_title">Details</string>
     <string name="ad_detail_error">Die Anzeige konnte nicht geladen werden.</string>
     <string name="ad_detail_not_found">Diese Anzeige gibt es nicht mehr.</string>

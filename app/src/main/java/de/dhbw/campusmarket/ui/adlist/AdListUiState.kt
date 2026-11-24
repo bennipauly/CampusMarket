@@ -1,6 +1,8 @@
 package de.dhbw.campusmarket.ui.adlist
 
 import de.dhbw.campusmarket.data.Ad
+import de.dhbw.campusmarket.data.Category
+import de.dhbw.campusmarket.logic.filterAds
 import de.dhbw.campusmarket.logic.searchAds
 
 // Alles, was der Listen-Screen anzeigen muss. Es gibt drei Zustände:
@@ -11,10 +13,14 @@ data class AdListUiState(
     // Alle Anzeigen so, wie sie aus der Datenbank kommen.
     val ads: List<Ad> = emptyList(),
     // Text im Suchfeld.
-    val query: String = ""
+    val query: String = "",
+    // Filter-Chips unter dem Suchfeld. categoryFilter == null heißt: alle Kategorien.
+    val categoryFilter: Category? = null,
+    val onlyFavorites: Boolean = false,
+    val onlyAvailable: Boolean = false
 ) {
-    // Die Anzeigen, die zur Suche passen. Wird aus ads und query berechnet und nicht
-    // extra gespeichert, damit beide Listen nie auseinanderlaufen können.
+    // Die Anzeigen, die zur Suche und zu allen Filtern passen. Wird aus ads, query und den
+    // Filtern berechnet und nicht extra gespeichert, damit nichts auseinanderlaufen kann.
     val visibleAds: List<Ad>
-        get() = searchAds(ads, query)
+        get() = filterAds(searchAds(ads, query), categoryFilter, onlyFavorites, onlyAvailable)
 }

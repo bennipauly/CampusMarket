@@ -1,6 +1,8 @@
 package de.dhbw.campusmarket.ui.adlist
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,7 +14,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.dhbw.campusmarket.R
 import de.dhbw.campusmarket.data.Ad
+import de.dhbw.campusmarket.data.Category
 import de.dhbw.campusmarket.data.sampleAds
 import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
@@ -44,6 +49,7 @@ import de.dhbw.campusmarket.ui.FavoriteButton
 import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.formatPrice
+import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
 // Route: holt den ViewModel und reicht State und Callbacks an den Screen weiter.
@@ -58,7 +64,10 @@ fun AdListRoute(onAdClick: (Long) -> Unit, onAddClick: () -> Unit) {
         onAddClick = onAddClick,
         onRetry = viewModel::loadAds,
         onQueryChange = viewModel::onQueryChange,
-        onFavoriteClick = viewModel::onFavoriteClick
+        onFavoriteClick = viewModel::onFavoriteClick,
+        onCategoryFilterClick = viewModel::onCategoryFilterClick,
+        onOnlyFavoritesClick = viewModel::onOnlyFavoritesClick,
+        onOnlyAvailableClick = viewModel::onOnlyAvailableClick
     )
 }
 
@@ -71,7 +80,10 @@ fun AdListScreen(
     onAddClick: () -> Unit,
     onRetry: () -> Unit,
     onQueryChange: (String) -> Unit,
-    onFavoriteClick: (Ad) -> Unit
+    onFavoriteClick: (Ad) -> Unit,
+    onCategoryFilterClick: (Category) -> Unit,
+    onOnlyFavoritesClick: () -> Unit,
+    onOnlyAvailableClick: () -> Unit
 ) {
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.app_name)) }) },
@@ -89,28 +101,49 @@ fun AdListScreen(
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(stringResource(R.string.ad_list_error), onRetry, contentModifier)
             uiState.ads.isEmpty() -> MessageContent(stringResource(R.string.ad_list_empty), contentModifier)
-            else -> ReadyContent(uiState, onAdClick, onQueryChange, onFavoriteClick, contentModifier)
+            else -> ReadyContent(
+                uiState = uiState,
+                onAdClick = onAdClick,
+                onQueryChange = onQueryChange,
+                onFavoriteClick = onFavoriteClick,
+                onCategoryFilterClick = onCategoryFilterClick,
+                onOnlyFavoritesClick = onOnlyFavoritesClick,
+                onOnlyAvailableClick = onOnlyAvailableClick,
+                modifier = contentModifier
+            )
         }
     }
 }
 
-// Ready: Suchfeld oben, darunter die Treffer oder ein Hinweis, dass nichts passt.
+// Ready: Suchfeld und Filter oben, darunter die Treffer oder ein Hinweis, dass nichts passt.
 @Composable
 private fun ReadyContent(
     uiState: AdListUiState,
     onAdClick: (Long) -> Unit,
     onQueryChange: (String) -> Unit,
     onFavoriteClick: (Ad) -> Unit,
+    onCategoryFilterClick: (Category) -> Unit,
+    onOnlyFavoritesClick: () -> Unit,
+    onOnlyAvailableClick: () -> Unit,
     modifier: Modifier
 ) {
     Column(modifier = modifier) {
         SearchField(query = uiState.query, onQueryChange = onQueryChange)
+        FilterRow(
+            uiState = uiState,
+            onCategoryFilterClick = onCategoryFilterClick,
+            onOnlyFavoritesClick = onOnlyFavoritesClick,
+            onOnlyAvailableClick = onOnlyAvailableClick
+        )
         val visibleAds = uiState.visibleAds
         if (visibleAds.isEmpty()) {
-            MessageContent(
-                stringResource(R.string.ad_list_no_results, uiState.query.trim()),
-                Modifier.fillMaxSize()
-            )
+            // Mit Suchtext den Suchtext nennen, sonst liegt es nur an den Filtern.
+            val message = if (uiState.query.isBlank()) {
+                stringResource(R.string.ad_list_no_filter_results)
+            } else {
+                stringResource(R.string.ad_list_no_results, uiState.query.trim())
+            }
+            MessageContent(message, Modifier.fillMaxSize())
         } else {
             AdListContent(visibleAds, onAdClick, onFavoriteClick, Modifier.fillMaxSize())
         }
@@ -145,6 +178,43 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() })
     )
+}
+
+// Eine Zeile Filter-Chips, die man seitlich wischen kann. Mehrere Filter gelten gleichzeitig.
+@Composable
+private fun FilterRow(
+    uiState: AdListUiState,
+    onCategoryFilterClick: (Category) -> Unit,
+    onOnlyFavoritesClick: () -> Unit,
+    onOnlyAvailableClick: () -> Unit
+) {
+    // horizontalScroll: Nicht alle Chips passen nebeneinander auf den Bildschirm.
+    // Die Scroll-Position ist reiner UI-State und darf darum im Composable liegen.
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(
+            selected = uiState.onlyFavorites,
+            onClick = onOnlyFavoritesClick,
+            label = { Text(stringResource(R.string.filter_favorites)) }
+        )
+        FilterChip(
+            selected = uiState.onlyAvailable,
+            onClick = onOnlyAvailableClick,
+            label = { Text(stringResource(R.string.filter_available)) }
+        )
+        for (category in Category.entries) {
+            FilterChip(
+                selected = uiState.categoryFilter == category,
+                onClick = { onCategoryFilterClick(category) },
+                label = { Text(stringResource(category.labelRes())) }
+            )
+        }
+    }
 }
 
 @Composable
@@ -211,7 +281,10 @@ private fun AdListScreenReadyPreview() {
             onAddClick = {},
             onRetry = {},
             onQueryChange = {},
-            onFavoriteClick = {}
+            onFavoriteClick = {},
+            onCategoryFilterClick = {},
+            onOnlyFavoritesClick = {},
+            onOnlyAvailableClick = {}
         )
     }
 }
@@ -227,7 +300,35 @@ private fun AdListScreenNoResultsPreview() {
             onAddClick = {},
             onRetry = {},
             onQueryChange = {},
-            onFavoriteClick = {}
+            onFavoriteClick = {},
+            onCategoryFilterClick = {},
+            onOnlyFavoritesClick = {},
+            onOnlyAvailableClick = {}
+        )
+    }
+}
+
+// Filter aktiv: Kategorie "Bücher" und "Nur verfügbare". Es bleibt eine Anzeige übrig.
+@Preview(showBackground = true)
+@Composable
+private fun AdListScreenFilterPreview() {
+    CampusMarketTheme {
+        val ads = sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L) }
+        AdListScreen(
+            uiState = AdListUiState(
+                isLoading = false,
+                ads = ads,
+                categoryFilter = Category.BOOKS,
+                onlyAvailable = true
+            ),
+            onAdClick = {},
+            onAddClick = {},
+            onRetry = {},
+            onQueryChange = {},
+            onFavoriteClick = {},
+            onCategoryFilterClick = {},
+            onOnlyFavoritesClick = {},
+            onOnlyAvailableClick = {}
         )
     }
 }
@@ -242,7 +343,10 @@ private fun AdListScreenErrorPreview() {
             onAddClick = {},
             onRetry = {},
             onQueryChange = {},
-            onFavoriteClick = {}
+            onFavoriteClick = {},
+            onCategoryFilterClick = {},
+            onOnlyFavoritesClick = {},
+            onOnlyAvailableClick = {}
         )
     }
 }

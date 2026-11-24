@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import de.dhbw.campusmarket.CampusMarketApplication
 import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.AdRepository
+import de.dhbw.campusmarket.data.Category
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +48,22 @@ class AdListViewModel(private val repository: AdRepository) : ViewModel() {
     // bleibt er bei einer Drehung erhalten.
     fun onQueryChange(query: String) {
         _uiState.update { it.copy(query = query) }
+    }
+
+    // Tipp auf eine Kategorie: wählt sie aus. Ein zweiter Tipp auf dieselbe hebt den Filter auf.
+    fun onCategoryFilterClick(category: Category) {
+        _uiState.update {
+            val newCategory = if (it.categoryFilter == category) null else category
+            it.copy(categoryFilter = newCategory)
+        }
+    }
+
+    fun onOnlyFavoritesClick() {
+        _uiState.update { it.copy(onlyFavorites = !it.onlyFavorites) }
+    }
+
+    fun onOnlyAvailableClick() {
+        _uiState.update { it.copy(onlyAvailable = !it.onlyAvailable) }
     }
 
     // Herz in der Liste: schaltet den Favoriten um. Die neue Liste kommt danach über den Flow.

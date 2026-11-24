@@ -1960,6 +1960,110 @@ Anzeige als verkauft markieren
 
 ---
 
+### Eintrag 17: Schritt 13 – Filter
+
+- **Datum:** 24.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 13
+````
+
+#### Ergebnis der KI zu Prompt 1 (vollständig)
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -2` ausgeführt. Ergebnis: Schritt 12 committet (`937e832`), Arbeitsverzeichnis sauber, Eintrag 15 nur noch einmal vorhanden.
+2. `AI_USAGE.md`: Eintrag 17 mit dem Prompt angelegt (Skript `log17.py` im Scratchpad).
+3. Gelesen: `AdListUiState.kt`, `logic/AdSearch.kt`, `AdSearchTest.kt` (Anfang), `strings.xml` (Listen- und Kategorie-Texte), `ui/Labels.kt`.
+4. Neu angelegt: `app/src/main/java/de/dhbw/campusmarket/logic/AdFilter.kt`, `app/src/test/java/de/dhbw/campusmarket/logic/AdFilterTest.kt`.
+5. Skript `step13.py` im Scratchpad angelegt und mit `python -I` ausgeführt. Geändert: `ui/adlist/AdListUiState.kt`, `ui/adlist/AdListViewModel.kt`, `ui/adlist/AdListScreen.kt`, `res/values/strings.xml`.
+6. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen, 33/33 Tests grün (AdFilterTest 7, AdSearchTest 10, AdValidationTest 13, PriceFormatTest 3).
+7. Emulator: App installiert. Der erste Tipp auf „Favoriten“ kam vor dem Laden der App an und wurde nicht ausgeführt. Danach getestet: „Favoriten“ + „Bücher“ → nur „Analysis 1 – Lehrbuch“ (Screenshot). Nur „Bücher“, nur „Nur verfügbare“ (verkaufte fehlen), Drehung mit `adb emu rotate` (Filter bleiben), Suche „Stuhl“ mit Filtern („Keine Treffer für „Stuhl“.“, nach Abwählen von „Favoriten“ erscheint „Schreibtischstuhl“), „Favoriten“ + „Skripte“ ohne Suchtext („Keine Anzeigen passen zu den gewählten Filtern.“). Absturz-Log leer.
+8. `README.md`: Funktion „Filter“, Testklasse `AdFilterTest` und Ordnerbeschreibung `logic/` ergänzt.
+9. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 13 ist umgesetzt: Filter-Chips unter dem Suchfeld (Favoriten, nur verfügbare, Kategorie), kombinierbar mit der Suche. Die Filterlogik ist eine reine Funktion mit 7 neuen JUnit-Tests. Build, 33 Tests und der Emulator-Test liefen fehlerfrei. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit mit Schritt 14 (Sortierung) weitermachen?“
+
+**Antwort der KI:**
+
+````markdown
+Schritt 13 ist fertig: Unter dem Suchfeld steht jetzt eine Zeile mit Filter-Chips: „Favoriten“, „Nur verfügbare“ und je ein Chip pro Kategorie. Die Zeile lässt sich seitlich wischen. Mehrere Filter gelten gleichzeitig und lassen sich mit der Suche kombinieren. Build und alle 33 Tests (7 davon neu) liefen ohne Fehler, und auf dem Emulator gab es keinen Absturz.
+
+## Was sich geändert hat (`app/src/…/campusmarket/`)
+
+| Datei                                | Änderung                                                                                                                  |
+|--------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `logic/AdFilter.kt` (neu)            | Reine Funktion `filterAds(ads, category, onlyFavorites, onlyAvailable)`                                                   |
+| `test/…/logic/AdFilterTest.kt` (neu) | 7 JUnit-Tests: kein Filter, je ein Filter, alle zusammen, kein Treffer, leere Liste                                       |
+| `ui/adlist/AdListUiState.kt`         | Neue Felder `categoryFilter`, `onlyFavorites`, `onlyAvailable`. `visibleAds` wendet erst die Suche und dann die Filter an |
+| `ui/adlist/AdListViewModel.kt`       | `onCategoryFilterClick`, `onOnlyFavoritesClick`, `onOnlyAvailableClick`                                                   |
+| `ui/adlist/AdListScreen.kt`          | `FilterRow` mit `FilterChip`s, eigener Hinweis, wenn nur die Filter nichts übrig lassen, neue Preview „Filter“            |
+| `res/values/strings.xml`             | 3 neue Texte                                                                                                              |
+
+## Warum so
+
+- **Filterlogik als reine Funktion in `logic/`:** Wie die Suche hat sie keine Android-Abhängigkeit und ist deshalb mit JUnit testbar (Regel aus CLAUDE.md).
+- **Gefilterte Liste wird berechnet, nicht gespeichert:** `visibleAds` wird jedes Mal aus `ads`, Suchtext und Filtern berechnet. Ändert sich eine Anzeige in Room (z. B. Herz entfernt), passt die gefilterte Liste sofort, ohne extra Code.
+- **Filter im UiState des ViewModels:** Damit überstehen sie eine Drehung. Nur die Wisch-Position der Chip-Zeile liegt im Composable (`rememberScrollState`), weil sie reiner UI-State ist.
+- **Kategorie ist eine Einzelauswahl:** Ein zweiter Tipp auf dieselbe Kategorie hebt den Filter wieder auf, statt einen eigenen Chip „Alle“ zu brauchen. „Favoriten“ und „Nur verfügbare“ sind An/Aus-Schalter.
+- **Zwei verschiedene Hinweise bei leerer Liste:** Mit Suchtext erscheint wie bisher „Keine Treffer für „…“.“. Ohne Suchtext würde dort „Keine Treffer für „“.“ stehen, darum gibt es dann „Keine Anzeigen passen zu den gewählten Filtern.“
+- **Filter werden nicht dauerhaft gespeichert:** Nach einem App-Neustart sind sie wie der Suchtext wieder aus. Dauerhaft gespeichert werden nur die Anzeigen selbst.
+
+## Auf dem Emulator getestet
+
+- **„Favoriten“ und „Bücher“ zusammen:** Nur „Analysis 1 – Lehrbuch“ bleibt übrig (Screenshot).
+- **Nur „Bücher“:** Alle Anzeigen der Kategorie Bücher erscheinen, auch eine verkaufte.
+- **Nur „Nur verfügbare“:** Die beiden verkauften Anzeigen („foto test“, „Programmieren in Kotlin“) fehlen.
+- **Querformat:** Filter und Liste bleiben gleich.
+- **Suche „Stuhl“ mit „Favoriten“ und „Nur verfügbare“:** „Keine Treffer für „Stuhl“.“ Nach dem Abwählen von „Favoriten“ erscheint „Schreibtischstuhl“.
+- **„Favoriten“ und „Skripte“ ohne Suchtext:** „Keine Anzeigen passen zu den gewählten Filtern.“
+- Absturz-Log leer.
+
+## Testanleitung für euch
+
+```powershell
+.\gradlew.bat assembleDebug testDebugUnitTest
+```
+
+- **Filter:** Chips einzeln und zusammen antippen, auch nach rechts wischen bis „Sonstiges“. Eine Kategorie zweimal antippen hebt sie wieder auf.
+- **Ungültige Eingaben:** Filter, die nichts übrig lassen, zeigen einen Hinweis, keinen leeren Bildschirm und keinen Absturz.
+- **Rotation:** Filter einschalten und drehen. Die Chips bleiben ausgewählt.
+- **App-Neustart:** Filter sind wieder aus, die Anzeigen bleiben erhalten.
+- **Flugmodus:** kein Unterschied, alles ist lokal.
+- **Permission verweigert:** nicht betroffen.
+- **Zusammenspiel:** Bei aktivem Filter „Favoriten“ ein Herz entfernen. Die Anzeige verschwindet sofort aus der Liste.
+
+Prompt und Antwort stehen als Eintrag 17 in AI_USAGE.md.
+
+## Commit-Vorschlag
+
+```
+feat: Anzeigen nach Kategorie, Favoriten und Status filtern
+```
+
+(`logic/AdFilter.kt`, `AdFilterTest.kt`, `ui/adlist/*`, `strings.xml`, `README.md`, `AI_USAGE.md`)
+````
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Filter getestet, funktioniert
+
+#### Commits
+
+Anzeigen nach Kategorie, Favoriten und Status filtern
+
+---
+
 ## 3. Reflexion
 
 _Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._
