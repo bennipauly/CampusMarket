@@ -1122,7 +1122,72 @@ Geschaut, was entfernt wurde und warum
 
 #### Commits
 
-Lint-Funde behoben und README auf Englisch
+- `1ed2063` Lint-Funde behoben und README auf Englisch
+
+---
+
+### Eintrag 22: Schritt 16 – Testdaten über das Netzwerk laden
+
+- **Datum:** 25.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Neue Änderung: Die Anzeigen sollen nicht mehr hart codiert sein, sondern als Testdaten über das Netzwerk geladen werden.
+
+Entscheidungen:
+1. Datenquelle: `testdata/anzeigen.json` plus Bilder in `testdata/images/` in einem öffentlichen GitHub-Repo, geladen über raw.githubusercontent.com.
+   Base-URL: https://raw.githubusercontent.com/bennipauly/CampusMarket/main/
+   Jede Anzeige hat eine `bildUrl`, die auf ihr Bild im Repo zeigt.
+2. Fehler getrennt abfangen: `IOException` (kein Internet/Flugmodus → "Keine Internetverbindung."), `HttpException` (Serverfehler mit Code), `SerializationException` (JSON passt nicht). Kein pauschales `catch (e: Exception)`.
+3. UI: Bei Laden ein Ladekreis. Bei Fehler die Meldung mit einem Button "Erneut versuchen", aber KEINE Anzeigen. Bei Erfolg die Liste. Dazu ein Refresh-Button in der TopAppBar.
+4. `INTERNET`-Permission im Manifest.
+
+Vorgehen:
+- Bestehendes Model und Sample-Daten anpassen bzw. ersetzen statt doppelt anlegen. Sag mir, was du änderst.
+- Dependencies über den Version Catalog eintragen, mit aktuellen stabilen Versionen.
+- Erstelle `testdata/anzeigen.json` mit 5–6 Beispielanzeigen passend zu unserem Model und sag mir, welche Bilddateien wir in `testdata/images/` hochladen müssen.
+- In kleinen Schritten mit Commit-Vorschlägen arbeiten. Am Ende prüfen, ob das Projekt baut.
+- Erklär kurz pro Datei, was sie macht, für die Code-Verteidigung.
+- Dokumentier das Ganze wie gewohnt in `AI_USAGE.md`.
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -3` ausgeführt: Feinschliff committet (`1ed2063`), in Eintrag 21 nachgetragen. `git ls-remote --symref origin HEAD` ausgeführt. Ergebnis: Der Branch auf GitHub heißt **`master`**, nicht `main`. Die im Prompt genannte Base-URL `…/main/` hätte immer 404 geliefert, deshalb benutzt der Code `https://raw.githubusercontent.com/bennipauly/CampusMarket/master/`.
+2. `AI_USAGE.md`: Eintrag 22 mit dem Prompt angelegt (Skript `log22.py`).
+3. Neueste Versionen auf Maven Central abgefragt (`maven-metadata.xml`) und in den POM-Dateien geprüft, welche Kotlin-Version sie brauchen. Ergebnis: Retrofit 3.0.0 und converter-kotlinx-serialization 3.0.0 passen. kotlinx-serialization-json 1.12/1.13 brauchen Kotlin 2.4 und 1.10/1.11 Kotlin 2.3, also wird **1.9.0** verwendet. `coil-network-okhttp` bleibt wie Coil auf **3.3.0**. OkHttp 4.12.0 kommt über Retrofit.
+4. **16a:** `gradle/libs.versions.toml` (Versionen `retrofit`, `kotlinxSerializationJson`, vier Bibliotheken), `app/build.gradle.kts` (vier `implementation`), `AndroidManifest.xml` (`INTERNET`-Permission), `CLAUDE.md` (Netzwerk-Regel statt „rein lokal“, Versionsgrenzen, Testdaten statt Beispieldaten, Fehlerarten, Flugmodus, Ausnahme für das Retrofit-Interface). Build und 40 Tests grün. `gradle dependencies` geprüft: kotlin-stdlib bleibt 2.2.10, serialization-core 1.9.0.
+5. Rückfrage zum Commit von 16a: Das Team entschied, alles am Ende zu committen. Die Teilschritte wurden deshalb so geschnitten, dass keine Datei in zwei Commits vorkommt.
+6. **16b:** Neu `testdata/anzeigen.json` (6 Anzeigen, Inhalte der bisherigen Beispieldaten, deutsche JSON-Schlüssel, `bildUrl` auf `testdata/images/…`), `data/network/AdDto.kt`, `data/network/AdApi.kt` (Retrofit-Interface, `adJson`, `createAdApi()`), `test/…/data/network/AdDtoTest.kt` (7 Tests, liest die echte JSON-Datei). Build grün, 47 Tests grün.
+7. **16c:** `data/Ad.kt` (`remoteId` mit Unique-Index), `data/AppDatabase.kt` (Version 2, `MIGRATION_1_2`), `data/AdDao.kt` (`insertOrIgnore`, `count`/`insertAll` entfernt), neu `data/network/AdMapping.kt` (`toAds`) mit `AdMappingTest.kt` (5 Tests), `data/AdRepository.kt` (`refreshAdsFromNetwork`, `insertSampleDataIfEmpty` entfernt), `CampusMarketApplication.kt` (Migration, `createAdApi()`, kein Einfügen von Beispieldaten mehr), `data/SampleData.kt` gelöscht und als `ui/PreviewData.kt` (`previewAds()`, nur für Previews) neu angelegt, `AdDetailScreen.kt` und `AdListScreen.kt` (Previews), `AdFormViewModel.kt` (`remoteId` bleibt beim Bearbeiten erhalten), neu `ui/adlist/LoadError.kt`, `AdListUiState.kt` (`loadError` statt `hasError`), `AdListViewModel.kt` (`refreshAds` mit getrennten `catch` für `IOException`, `HttpException`, `SerializationException`, `SQLiteException`), `AdListScreen.kt` (Refresh-Button, Fehlertext je Fehlerart, Previews „NoInternet“ und „ServerError“), `strings.xml` (4 Texte), neu `ic_refresh.xml`.
+8. `gradlew.bat assembleDebug testDebugUnitTest lintDebug` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, 52/52 Tests grün, Lint 0 Fehler (11 Warnungen: nur Versionshinweise und der bekannte Plural-Hinweis).
+9. Emulator: `curl` auf die Raw-URL liefert 404, weil `testdata/` noch nicht gepusht ist. App über die alte Version installiert: Die Migration 1→2 lief ohne Absturz, und die Liste zeigt „Serverfehler (Code 404). Bitte später erneut versuchen.“ mit „Erneut versuchen“ und ohne Anzeigen (Log `HttpException: HTTP 404`). Flugmodus an, „Erneut versuchen“ → „Keine Internetverbindung.“. Gedreht → Meldung bleibt, kein neuer Ladeversuch. Refresh-Button → erneut „Keine Internetverbindung.“. Flugmodus wieder aus. Absturz-Log leer. **Nicht getestet:** der Erfolgsfall (Liste mit Testdaten und Bildern), weil die Dateien erst nach dem Push auf GitHub liegen.
+10. **16d:** `README.md` ergänzt (Beschreibung, Funktionen, Internet zur Laufzeit, Testklassen, Abschnitt „Test data“ mit der Liste der Bilddateien, „Known limitations“, Code-Struktur).
+11. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Die Anzeigen kommen jetzt als Testdaten aus testdata/anzeigen.json auf GitHub und werden in Room übernommen. Fehler werden nach Art getrennt angezeigt, mit Refresh-Button. Wichtig: Der Branch heißt master, nicht main. Build, 52 Tests, Lint und die Fehlerfälle auf dem Emulator sind geprüft. Der Erfolgsfall ist erst nach dem Push testbar. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit und Push den Erfolgsfall auf dem Emulator testen?“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Fehlermeldungen überprüft, Bilder aus Github Test erst nach Push möglich
+
+#### Commits
+
+Retrofit, kotlinx-serialization-json, Coil-Netzwerk und INTERNET-Permission
+Testdaten-JSON, DTO und Retrofit-Schnittstelle
+Anzeigen aus dem Netz laden mit Fehlerarten und Refresh
+README und Logbuch zu den Netzwerk-Testdaten
 
 ---
 

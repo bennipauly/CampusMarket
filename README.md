@@ -3,7 +3,7 @@
 CampusMarket is a native Android app where students can offer and find used items (books, lecture notes, calculators, tech, furniture).
 The app is an exam project for the module "Entwicklung mobiler Applikationen" (mobile application development) at DHBW Mannheim.
 
-The app works **completely offline**: there is no backend, no login and no network access. All ads are stored in a Room database on the device.
+The ads are **test data from this GitHub repository**: the app loads `testdata/anzeigen.json` (and the images in `testdata/images/`) via `https://raw.githubusercontent.com/bennipauly/CampusMarket/master/`. New ads are stored in a Room database on the device, which all screens read from. There is no own backend and no login.
 The user interface of the app is in German.
 
 **Group:** eintragen
@@ -11,6 +11,7 @@ The user interface of the app is in German.
 ## Features
 
 - List of all ads with search (title, description, handover location)
+- Test data from the network: loaded when the list opens and with the refresh button in the top bar. While loading a progress indicator is shown. On an error the list shows only the message and "Erneut versuchen" (try again): no internet, server error with HTTP code, or invalid JSON
 - Detail screen with photo, price, category, condition, handover location and status
 - Create an ad with input validation (empty title, invalid price, missing handover location)
 - Edit an ad (pencil icon on the detail screen) with the same validation as when creating it
@@ -22,7 +23,7 @@ The user interface of the app is in German.
 - Product photo with the device camera (asks for the camera permission; without it the ad can still be saved)
 - Photo from the gallery via the Android photo picker (needs no permission). The photo is copied into the app storage, so it stays even if it is deleted from the gallery
 - Full screen photo: tap the photo on the detail screen
-- Local storage: all data is kept after a restart. Six sample ads are created on the first start.
+- Local storage: own ads and changes (favorite, sold, edited) are kept after a restart. A refresh only adds test ads that are not stored yet.
 
 ## Requirements
 
@@ -32,7 +33,7 @@ The user interface of the app is in German.
 | Android SDK | Platform **API 37** (Android Studio offers to install it during the first sync) |
 | Device or emulator | Android **8.0 (API 26)** or newer |
 | Java | No separate JDK needed, see below |
-| Internet | Only for the **first** build, to download Gradle, the libraries and the JDK |
+| Internet | For the **first** build (Gradle, libraries, JDK) and **while the app runs** (test data and images from GitHub) |
 
 **About the JDK:** Gradle builds with **Java 25**. This is set in `gradle/gradle-daemon-jvm.properties`. Android Studio already includes Java 25, and on the command line Gradle downloads it automatically during the first build. Any installed Java (tested from Java 8) is enough to start `gradlew`.
 
@@ -47,7 +48,7 @@ The user interface of the app is in German.
 2. Open Android Studio → **File → Open** → select the `CampusMarket` folder → trust the project ("Trust Project").
 3. Wait until the **Gradle Sync** has finished. Android Studio creates the file `local.properties` with the path to the Android SDK. If API 37 is missing, accept the offered installation.
 4. Select a device at the top (an emulator from the **Device Manager** or a phone with USB debugging).
-5. Click **Run ▶**. The app starts with the list of ads and six sample ads.
+5. Click **Run ▶**. The app loads the six test ads from GitHub and shows the list.
 
 ## Build on the command line
 
@@ -68,6 +69,8 @@ The logic without Android dependencies is tested with JUnit (`app/src/test`):
 
 | Test class | Checks |
 |---|---|
+| `AdDtoTest` | Test data: `testdata/anzeigen.json` matches the model, unique ids, image URLs; unknown keys are ignored; unknown category, missing field or no JSON throw a `SerializationException` |
+| `AdMappingTest` | Conversion of the JSON ads into the Room model (`remoteId`, image URL, creation time) |
 | `AdSearchTest` | Search: empty search text, upper/lower case, matches in title/description/location, no matches |
 | `AdFilterTest` | Filters: category, only favorites, only available, all together, no matches |
 | `AdSortTest` | Sorting: newest first, price ascending/descending, titles with umlauts, equal prices keep their order |
@@ -81,11 +84,29 @@ In Android Studio: right-click on `app/src/test/java` → **Run 'Tests in …'**
 - **Camera:** The emulator camera returns a test image. To cancel without a photo, use the back gesture or the ◁ button in the emulator side bar.
 - If the emulator crashes when opening the camera: **Device Manager → ⋮ → Edit → Advanced Settings → Back camera: Emulated**, then **Cold Boot Now**.
 - **Gallery:** A fresh emulator has no pictures. Drag and drop an image file onto the emulator window (it is saved in the "Download" folder) or take a picture once with the emulator's camera app. On newer Android versions the selection in the photo picker has to be confirmed with **Done**.
-- **Reset the sample data:** Settings → Apps → CampusMarket → Storage → Clear storage.
+- **Reset the data:** Settings → Apps → CampusMarket → Storage → Clear storage. The next start loads the test data again. Recommended once after updating from a version before step 16, because the old built-in sample ads stay in the database as normal ads.
+- **Test the error messages:** airplane mode → "Keine Internetverbindung."; a wrong file name in `AdApi.kt` → "Serverfehler (Code 404)".
 - **Show the logs:** In Android Studio open **Logcat** at the bottom and filter by `package:mine`. The app logs errors and important actions (e.g. sorting, favorite changed) with the class name as tag, e.g. `AdListViewModel`.
+
+## Test data
+
+`testdata/anzeigen.json` contains six ads. The JSON keys are German (`titel`, `preis`, `kategorie`, …); `kategorie` and `zustand` use the enum names from the code (e.g. `BOOKS`, `LIKE_NEW`). Every ad has a `bildUrl` pointing to its image in `testdata/images/`:
+
+| File in `testdata/images/` | Ad |
+|---|---|
+| `analysis-lehrbuch.jpg` | Analysis 1 – Lehrbuch |
+| `skript-theoinf.jpg` | Skript Theoretische Informatik |
+| `taschenrechner.jpg` | Taschenrechner TI-30X |
+| `usb-c-hub.jpg` | USB-C-Hub mit HDMI |
+| `schreibtischstuhl.jpg` | Schreibtischstuhl |
+| `programmieren-in-kotlin.jpg` | Programmieren in Kotlin |
+
+The app only sees the files after they are pushed to the `master` branch on GitHub.
 
 ## Known limitations
 
+- Without internet the list shows only the error message, also hiding own ads that are stored locally (a deliberate decision of the group).
+- A deleted test ad comes back with the next refresh, because it is still in the JSON file.
 - Search, filters and sorting are not stored: after an app restart the list shows all ads again, newest first.
 - When a photo is replaced or removed, or an ad is deleted, the old photo file stays in the app storage. It is not visible in the app; clearing the app storage removes it.
 
@@ -95,13 +116,14 @@ Layers: **UI → ViewModel → Repository → Room (DAO)**. Every screen consist
 
 ```
 app/src/main/java/de/dhbw/campusmarket/
-├── CampusMarketApplication.kt   database and repository (exactly once), sample data
+├── CampusMarketApplication.kt   database, network client and repository (exactly once)
 ├── MainActivity.kt              sets the theme and the NavHost
-├── data/                        Room: entity Ad, AdDao, AppDatabase, AdRepository, enums, sample data
+├── data/                        Room: entity Ad, AdDao, AppDatabase (with migration), AdRepository, enums
+│   └── network/                 Retrofit: AdApi, AdDto (JSON), conversion into the model
 ├── logic/                       pure Kotlin functions: search, filters, sorting, input validation (with JUnit tests)
 └── ui/
     ├── navigation/              type-safe destinations and NavHost
-    ├── adlist/                  list of ads with search, filters and sorting
+    ├── adlist/                  list of ads with search, filters, sorting, refresh and error types
     ├── addetail/                detail screen with favorite, status, edit and delete
     ├── adform/                  form for creating and editing, camera and gallery
     ├── photoviewer/             full screen photo
