@@ -21,14 +21,15 @@ data class AdFormUiState(
     val category: Category = Category.BOOKS,
     val condition: Condition = Condition.GOOD,
     val location: String = "",
-    // content:// Uri of the taken photo as text; null = no photo.
+    // content:// Uri of the photo (taken with the camera or copied from the gallery) as text; null = no photo.
     val imageUri: String? = null,
     // Uri of the file the camera is currently writing to. Lives here and not in the composable
     // so that it is kept if the activity is recreated while the photo is being taken.
     val pendingPhotoUri: String? = null,
-    // Hints if the camera permission was denied or there is no camera.
+    // Hints if the camera permission was denied, there is no camera or the gallery photo could not be copied.
     val showPermissionHint: Boolean = false,
     val showNoCameraHint: Boolean = false,
+    val showGalleryError: Boolean = false,
     // Show errors only after the first click on "save", not already when opening.
     val showErrors: Boolean = false,
     val isSaving: Boolean = false,

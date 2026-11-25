@@ -19,6 +19,7 @@ Die App arbeitet **rein lokal**: Es gibt kein Backend, keinen Login und keine Ne
 - Filter unter dem Suchfeld: Favoriten, nur verfügbare Anzeigen und Kategorie, kombinierbar mit der Suche
 - Sortierung über das Symbol oben rechts: neueste zuerst, Preis auf- oder absteigend, Titel A–Z
 - Produktfoto mit der Gerätekamera (mit Kamera-Berechtigung; ohne Berechtigung lässt sich die Anzeige trotzdem speichern)
+- Foto aus der Galerie über die Fotoauswahl von Android (braucht keine Berechtigung). Das Foto wird in den App-Speicher kopiert und bleibt auch erhalten, wenn es in der Galerie gelöscht wird
 - Foto im Vollbild: In der Detailansicht auf das Foto tippen
 - Lokale Speicherung: Die Daten bleiben nach einem Neustart erhalten. Beim ersten Start werden sechs Beispielanzeigen angelegt.
 
@@ -77,6 +78,7 @@ In Android Studio: Rechtsklick auf `app/src/test/java` → **Run 'Tests in …'*
 
 - **Kamera:** Die Emulator-Kamera liefert ein Testbild. Zum Abbrechen ohne Foto die Zurück-Geste oder den ◁-Knopf in der Seitenleiste des Emulators benutzen.
 - Stürzt der Emulator beim Öffnen der Kamera ab: **Device Manager → ⋮ → Edit → Advanced Settings → Back camera: Emulated**, danach **Cold Boot Now**.
+- **Galerie:** Ein frischer Emulator hat keine Bilder. Ein Bild per Drag & Drop auf das Emulator-Fenster ziehen (landet im Ordner „Download“) oder einmal mit der Kamera-App des Emulators fotografieren. Bei neueren Android-Versionen muss die Auswahl in der Fotoauswahl mit **Done** bestätigt werden.
 - **Beispieldaten zurücksetzen:** Einstellungen → Apps → CampusMarket → Speicher → Speicher leeren.
 - **Logs ansehen:** In Android Studio unten **Logcat** öffnen und nach `package:mine` filtern. Die App loggt Fehler und wichtige Aktionen (z. B. Sortierung, Favorit geändert) mit dem Klassennamen als Tag, z. B. `AdListViewModel`.
 

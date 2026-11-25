@@ -4,11 +4,11 @@ import android.Manifest
 import android.content.ActivityNotFoundException
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -51,6 +52,8 @@ import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
+import kotlinx.coroutines.launch
+import java.io.IOException
 
 private const val TAG = "AdFormScreen"
 
@@ -91,6 +94,29 @@ fun AdFormRoute(adId: Long?, onBack: () -> Unit, onSaved: () -> Unit) {
         }
     }
 
+    // Fallback without camera: the system photo picker. It needs no permission, so it also
+    // works when the camera permission was denied or there is no camera app.
+    val scope = rememberCoroutineScope()
+    val galleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { pickedUri ->
+        // pickedUri == null: the picker was closed without choosing a photo, the old photo stays.
+        if (pickedUri != null) {
+            scope.launch {
+                try {
+                    val copyUri = copyPhotoToAppStorage(context, pickedUri)
+                    viewModel.onGalleryPhotoCopied(copyUri.toString())
+                } catch (e: IOException) {
+                    Log.e(TAG, "Copying the gallery photo failed", e)
+                    viewModel.onGalleryPhotoFailed()
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "No access to the gallery photo", e)
+                    viewModel.onGalleryPhotoFailed()
+                }
+            }
+        }
+    }
+
     // As soon as the ad is saved, go back once.
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
@@ -109,6 +135,9 @@ fun AdFormRoute(adId: Long?, onBack: () -> Unit, onSaved: () -> Unit) {
         onConditionChange = viewModel::onConditionChange,
         onLocationChange = viewModel::onLocationChange,
         onTakePhotoClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+        onPickFromGalleryClick = {
+            galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
         onRemovePhotoClick = viewModel::onRemovePhotoClick,
         onSaveClick = viewModel::onSaveClick
     )
@@ -128,6 +157,7 @@ fun AdFormScreen(
     onConditionChange: (Condition) -> Unit,
     onLocationChange: (String) -> Unit,
     onTakePhotoClick: () -> Unit,
+    onPickFromGalleryClick: () -> Unit,
     onRemovePhotoClick: () -> Unit,
     onSaveClick: () -> Unit
 ) {
@@ -166,6 +196,7 @@ fun AdFormScreen(
                 onConditionChange = onConditionChange,
                 onLocationChange = onLocationChange,
                 onTakePhotoClick = onTakePhotoClick,
+                onPickFromGalleryClick = onPickFromGalleryClick,
                 onRemovePhotoClick = onRemovePhotoClick,
                 onSaveClick = onSaveClick,
                 modifier = contentModifier
@@ -185,6 +216,7 @@ private fun FormContent(
     onConditionChange: (Condition) -> Unit,
     onLocationChange: (String) -> Unit,
     onTakePhotoClick: () -> Unit,
+    onPickFromGalleryClick: () -> Unit,
     onRemovePhotoClick: () -> Unit,
     onSaveClick: () -> Unit,
     modifier: Modifier
@@ -200,6 +232,7 @@ private fun FormContent(
         PhotoSection(
             uiState = uiState,
             onTakePhotoClick = onTakePhotoClick,
+            onPickFromGalleryClick = onPickFromGalleryClick,
             onRemovePhotoClick = onRemovePhotoClick
         )
         FormTextField(
@@ -259,11 +292,12 @@ private fun FormContent(
     }
 }
 
-// Photo preview, buttons to take/remove a photo and the hints if that is not possible.
+// Photo preview, buttons to take, pick or remove a photo and the hints if that is not possible.
 @Composable
 private fun PhotoSection(
     uiState: AdFormUiState,
     onTakePhotoClick: () -> Unit,
+    onPickFromGalleryClick: () -> Unit,
     onRemovePhotoClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -274,10 +308,14 @@ private fun PhotoSection(
                 .fillMaxWidth()
                 .height(200.dp)
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // FlowRow: if the three buttons do not fit next to each other, they wrap into a second row.
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = onTakePhotoClick) {
                 val text = if (uiState.imageUri == null) R.string.photo_take else R.string.photo_retake
                 Text(stringResource(text))
+            }
+            OutlinedButton(onClick = onPickFromGalleryClick) {
+                Text(stringResource(R.string.photo_pick))
             }
             if (uiState.imageUri != null) {
                 OutlinedButton(onClick = onRemovePhotoClick) {
@@ -290,6 +328,9 @@ private fun PhotoSection(
         }
         if (uiState.showNoCameraHint) {
             Text(stringResource(R.string.photo_no_camera), color = MaterialTheme.colorScheme.error)
+        }
+        if (uiState.showGalleryError) {
+            Text(stringResource(R.string.photo_gallery_error), color = MaterialTheme.colorScheme.error)
         }
     }
 }
@@ -340,12 +381,12 @@ private fun <T> ChipGroup(
     }
 }
 
-@Preview(showBackground = true)
+// Shared helper for all previews: the screen with the given state and empty callbacks.
 @Composable
-private fun AdFormScreenEmptyPreview() {
+private fun AdFormScreenPreview(uiState: AdFormUiState) {
     CampusMarketTheme {
         AdFormScreen(
-            uiState = AdFormUiState(),
+            uiState = uiState,
             onBack = {},
             onRetry = {},
             onTitleChange = {},
@@ -355,56 +396,35 @@ private fun AdFormScreenEmptyPreview() {
             onConditionChange = {},
             onLocationChange = {},
             onTakePhotoClick = {},
+            onPickFromGalleryClick = {},
             onRemovePhotoClick = {},
             onSaveClick = {}
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AdFormScreenEmptyPreview() {
+    AdFormScreenPreview(AdFormUiState())
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun AdFormScreenErrorsPreview() {
-    CampusMarketTheme {
-        AdFormScreen(
-            uiState = AdFormUiState(price = "12,505", showErrors = true, showPermissionHint = true),
-            onBack = {},
-            onRetry = {},
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onPriceChange = {},
-            onCategoryChange = {},
-            onConditionChange = {},
-            onLocationChange = {},
-            onTakePhotoClick = {},
-            onRemovePhotoClick = {},
-            onSaveClick = {}
-        )
-    }
+    AdFormScreenPreview(AdFormUiState(price = "12,505", showErrors = true, showPermissionHint = true))
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun AdFormScreenEditPreview() {
-    CampusMarketTheme {
-        AdFormScreen(
-            uiState = AdFormUiState(
-                isEditing = true,
-                title = "Analysis 1 Skript",
-                price = "8,00",
-                location = "Bibliothek",
-                category = Category.SCRIPTS
-            ),
-            onBack = {},
-            onRetry = {},
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onPriceChange = {},
-            onCategoryChange = {},
-            onConditionChange = {},
-            onLocationChange = {},
-            onTakePhotoClick = {},
-            onRemovePhotoClick = {},
-            onSaveClick = {}
+    AdFormScreenPreview(
+        AdFormUiState(
+            isEditing = true,
+            title = "Analysis 1 Skript",
+            price = "8,00",
+            location = "Bibliothek",
+            category = Category.SCRIPTS
         )
-    }
+    )
 }

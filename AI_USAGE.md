@@ -1032,7 +1032,50 @@ Alle Änderungen überprüft
 
 #### Commits
 
-Kommentare auf Englisch, Logging und Logbuch ohne Antworttexte
+- `3375c59` Kommentare auf Englisch, Logging und Logbuch ohne Antworttexte
+
+---
+
+### Eintrag 20: Schritt 15 – Foto aus der Galerie
+
+- **Datum:** 24.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja, Schritt 15
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -2` ausgeführt. Ergebnis: Schritt 14a committet (`3375c59`), Arbeitsverzeichnis sauber.
+2. `AI_USAGE.md`: Eintrag 20 mit dem Prompt angelegt (Skript `log20.py`). In Eintrag 19 unter „Commits“ den Hash `3375c59` nachgetragen. Der erste Versuch dafür traf wegen eines zu weit greifenden Suchmusters den Commit-Abschnitt von Eintrag 20; das wurde sofort korrigiert und geprüft (Eintrag 19: Hash und Nachricht, Eintrag 20: „eintragen“).
+3. Gelesen: `PhotoFile.kt`, `AdFormScreen.kt` (komplett), Foto-Funktionen in `AdFormViewModel.kt`, `AdFormUiState.kt`, Foto-Texte in `strings.xml`.
+4. Geändert: `PhotoFile.kt` (neu `copyPhotoToAppStorage` auf `Dispatchers.IO`, gemeinsame private Hilfsfunktionen), `AdFormScreen.kt` (Launcher `PickVisualMedia`, Kopieren mit `rememberCoroutineScope`, `catch` für `IOException` und `SecurityException` mit Log, Knopf „Aus Galerie“, Knopfzeile als `FlowRow`, Fehlerhinweis, gemeinsame Preview-Hilfsfunktion), `AdFormViewModel.kt` (`onGalleryPhotoCopied` mit Log, `onGalleryPhotoFailed`), `AdFormUiState.kt` (`showGalleryError`), `strings.xml` (2 neue Texte, 2 Hinweise um die Galerie ergänzt, Skript `step15.py`).
+5. `gradlew.bat assembleDebug testDebugUnitTest` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, keine Warnungen, 40/40 Tests grün.
+6. Emulator: Testbild nach `/sdcard/Pictures/galerie_test.png` kopiert und per Media-Scanner in die Galerie aufgenommen. „Aus Galerie“ → Fotoauswahl, Bild gewählt, mit „Done“ bestätigt → Vorschau zeigt das Foto, Kopie `files/photos/photo_….jpg` (212263 Bytes) angelegt, Log `Gallery photo copied into the app storage`. Querformat und zurück → Foto bleibt. Anzeige „Galerietest“ gespeichert → Detail zeigt das Foto. Original in der Galerie gelöscht, App neu gestartet → Foto weiterhin sichtbar (Screenshot). Kamera-Berechtigung mit `pm revoke` entzogen, „Foto aufnehmen“ → „Don’t allow“ → neuer Hinweistext mit Galerie erscheint. Absturz-Log leer.
+7. `README.md`: Funktion „Foto aus der Galerie“ und Emulator-Hinweis „Galerie“ ergänzt.
+8. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Schritt 15 ist umgesetzt: Neben „Foto aufnehmen“ gibt es „Aus Galerie“. Das gewählte Foto wird in den App-Speicher kopiert und bleibt auch nach dem Löschen in der Galerie erhalten. Build, 40 Tests und Emulator-Test liefen fehlerfrei. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit mit dem Feinschliff weitermachen?“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Bildupload aus Galerie getestet
+
+#### Commits
+
+Foto aus der Galerie wählen
 
 ---
 

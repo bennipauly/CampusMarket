@@ -107,7 +107,12 @@ class AdFormViewModel(
     // The route created an empty photo file and is about to start the camera.
     fun onPhotoUriCreated(uri: String) {
         _uiState.update {
-            it.copy(pendingPhotoUri = uri, showPermissionHint = false, showNoCameraHint = false)
+            it.copy(
+                pendingPhotoUri = uri,
+                showPermissionHint = false,
+                showNoCameraHint = false,
+                showGalleryError = false
+            )
         }
     }
 
@@ -117,6 +122,23 @@ class AdFormViewModel(
             val newImage = if (success) it.pendingPhotoUri else it.imageUri
             it.copy(imageUri = newImage, pendingPhotoUri = null)
         }
+    }
+
+    // A photo from the gallery was copied into the app storage. It replaces the old photo.
+    fun onGalleryPhotoCopied(uri: String) {
+        Log.d(TAG, "Gallery photo copied into the app storage")
+        _uiState.update {
+            it.copy(
+                imageUri = uri,
+                showPermissionHint = false,
+                showNoCameraHint = false,
+                showGalleryError = false
+            )
+        }
+    }
+
+    fun onGalleryPhotoFailed() {
+        _uiState.update { it.copy(showGalleryError = true) }
     }
 
     fun onCameraPermissionDenied() {
