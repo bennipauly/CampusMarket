@@ -3,6 +3,7 @@ package de.dhbw.campusmarket.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
@@ -19,15 +20,15 @@ interface AdDao {
     @Query("SELECT * FROM ads WHERE id = :id")
     fun getById(id: Long): Flow<Ad?>
 
-    @Query("SELECT COUNT(*) FROM ads")
-    suspend fun count(): Int
-
     // Returns the new id.
     @Insert
     suspend fun insert(ad: Ad): Long
 
-    @Insert
-    suspend fun insertAll(ads: List<Ad>)
+    // For the test data. IGNORE: an ad whose remoteId already exists is skipped, so local
+    // changes (favorite, sold, edited text) are not overwritten on refresh.
+    // Returns the new row ids; -1 means "already there, skipped".
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertOrIgnore(ads: List<Ad>): List<Long>
 
     @Update
     suspend fun update(ad: Ad)

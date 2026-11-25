@@ -32,13 +32,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.dhbw.campusmarket.R
 import de.dhbw.campusmarket.data.Ad
-import de.dhbw.campusmarket.data.sampleAds
 import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
 import de.dhbw.campusmarket.ui.FavoriteButton
 import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.formatPrice
+import de.dhbw.campusmarket.ui.previewAds
 import de.dhbw.campusmarket.ui.labelRes
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
@@ -225,7 +225,7 @@ private fun DeleteDialog(title: String, onConfirm: () -> Unit, onDismiss: () -> 
 private fun AdDetailScreenReadyPreview() {
     CampusMarketTheme {
         AdDetailScreen(
-            uiState = AdDetailUiState(isLoading = false, ad = sampleAds(now = 0L).first().copy(id = 1L)),
+            uiState = AdDetailUiState(isLoading = false, ad = previewAds().first()),
             onBack = {},
             onPhotoClick = {},
             onEditClick = {},
@@ -246,7 +246,7 @@ private fun AdDetailScreenDeleteDialogPreview() {
         AdDetailScreen(
             uiState = AdDetailUiState(
                 isLoading = false,
-                ad = sampleAds(now = 0L).first().copy(id = 1L),
+                ad = previewAds().first(),
                 showDeleteDialog = true
             ),
             onBack = {},

@@ -8,10 +8,12 @@ import de.dhbw.campusmarket.logic.searchAds
 import de.dhbw.campusmarket.logic.sortAds
 
 // Everything the list screen has to show. There are three states:
-// Loading (isLoading = true), Error (hasError = true) and Ready (the list in ads).
+// Loading (isLoading = true), Error (loadError != null) and Ready (the list in ads).
 data class AdListUiState(
+    // true while the test data is loaded from the network.
     val isLoading: Boolean = true,
-    val hasError: Boolean = false,
+    // Why loading failed; null if there is no error. With an error the screen shows no ads.
+    val loadError: LoadError? = null,
     // All ads exactly as they come from the database.
     val ads: List<Ad> = emptyList(),
     // Text in the search field.

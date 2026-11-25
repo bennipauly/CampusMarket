@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.adlist
 
+import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -18,6 +19,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
+import retrofit2.HttpException
+import java.io.IOException
 
 private const val TAG = "AdListViewModel"
 
@@ -27,27 +31,38 @@ class AdListViewModel(private val repository: AdRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(AdListUiState())
     val uiState: StateFlow<AdListUiState> = _uiState.asStateFlow()
 
-    // Remembers the running collection so that "try again" does not start it twice.
-    private var loadJob: Job? = null
+    // Remembers the running jobs so that "try again" and the refresh button never start them twice.
+    private var refreshJob: Job? = null
+    private var observeJob: Job? = null
 
     init {
-        loadAds()
+        refreshAds()
     }
 
-    // Collects the ads from Room. Because the DAO returns a Flow, the new list arrives
-    // automatically after every change of the table (e.g. deleting).
-    fun loadAds() {
-        loadJob?.cancel()
-        _uiState.update { it.copy(isLoading = true, hasError = false) }
-        loadJob = viewModelScope.launch {
-            repository.getAllAds()
-                .catch { e ->
-                    Log.e(TAG, "Loading the ads failed", e)
-                    _uiState.update { it.copy(isLoading = false, hasError = true) }
-                }
-                .collect { ads ->
-                    _uiState.update { it.copy(isLoading = false, hasError = false, ads = ads) }
-                }
+    // Loads the test data from the network into Room. Called on start, by the refresh button in
+    // the top app bar and by "try again". Every kind of error is caught on its own, there is no
+    // catch (e: Exception). A CancellationException (e.g. when the screen is closed) is not caught.
+    fun refreshAds() {
+        observeAdsIfNeeded()
+        refreshJob?.cancel()
+        _uiState.update { it.copy(isLoading = true, loadError = null) }
+        refreshJob = viewModelScope.launch {
+            try {
+                repository.refreshAdsFromNetwork()
+                _uiState.update { it.copy(isLoading = false) }
+            } catch (e: IOException) {
+                Log.e(TAG, "No connection while loading the test data", e)
+                showError(LoadError.NoInternet)
+            } catch (e: HttpException) {
+                Log.e(TAG, "Server error ${e.code()} while loading the test data", e)
+                showError(LoadError.Server(e.code()))
+            } catch (e: SerializationException) {
+                Log.e(TAG, "The test data does not match the model", e)
+                showError(LoadError.InvalidData)
+            } catch (e: SQLiteException) {
+                Log.e(TAG, "Storing the test data failed", e)
+                showError(LoadError.Database)
+            }
         }
     }
 
@@ -90,6 +105,27 @@ class AdListViewModel(private val repository: AdRepository) : ViewModel() {
                 Log.e(TAG, "Changing the favorite of ad ${ad.id} failed", e)
             }
         }
+    }
+
+    // Collects the ads from Room. Because the DAO returns a Flow, the new list arrives
+    // automatically after every change of the table (refresh, delete, favorite, ...).
+    // Started only once; it is restarted only if a database error stopped it.
+    private fun observeAdsIfNeeded() {
+        if (observeJob?.isActive == true) return
+        observeJob = viewModelScope.launch {
+            repository.getAllAds()
+                .catch { e ->
+                    // Only database errors are expected here; anything else is a bug and is thrown again.
+                    if (e !is SQLiteException) throw e
+                    Log.e(TAG, "Reading the ads failed", e)
+                    showError(LoadError.Database)
+                }
+                .collect { ads -> _uiState.update { it.copy(ads = ads) } }
+        }
+    }
+
+    private fun showError(error: LoadError) {
+        _uiState.update { it.copy(isLoading = false, loadError = error) }
     }
 
     companion object {

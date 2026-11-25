@@ -49,7 +49,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.dhbw.campusmarket.R
 import de.dhbw.campusmarket.data.Ad
 import de.dhbw.campusmarket.data.Category
-import de.dhbw.campusmarket.data.sampleAds
 import de.dhbw.campusmarket.logic.SortOrder
 import de.dhbw.campusmarket.ui.AdImage
 import de.dhbw.campusmarket.ui.ErrorContent
@@ -58,6 +57,7 @@ import de.dhbw.campusmarket.ui.LoadingContent
 import de.dhbw.campusmarket.ui.MessageContent
 import de.dhbw.campusmarket.ui.formatPrice
 import de.dhbw.campusmarket.ui.labelRes
+import de.dhbw.campusmarket.ui.previewAds
 import de.dhbw.campusmarket.ui.theme.CampusMarketTheme
 
 // Route: gets the ViewModel and passes state and callbacks on to the screen.
@@ -70,7 +70,7 @@ fun AdListRoute(onAdClick: (Long) -> Unit, onAddClick: () -> Unit) {
         uiState = uiState,
         onAdClick = onAdClick,
         onAddClick = onAddClick,
-        onRetry = viewModel::loadAds,
+        onRefreshClick = viewModel::refreshAds,
         onQueryChange = viewModel::onQueryChange,
         onFavoriteClick = viewModel::onFavoriteClick,
         onCategoryFilterClick = viewModel::onCategoryFilterClick,
@@ -87,7 +87,7 @@ fun AdListScreen(
     uiState: AdListUiState,
     onAdClick: (Long) -> Unit,
     onAddClick: () -> Unit,
-    onRetry: () -> Unit,
+    onRefreshClick: () -> Unit,
     onQueryChange: (String) -> Unit,
     onFavoriteClick: (Ad) -> Unit,
     onCategoryFilterClick: (Category) -> Unit,
@@ -100,8 +100,12 @@ fun AdListScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
                 actions = {
-                    // Sorting only makes sense once there are ads to sort.
-                    if (uiState.ads.isNotEmpty()) {
+                    // Loads the test data again. Disabled while loading, so it cannot start twice.
+                    IconButton(onClick = onRefreshClick, enabled = !uiState.isLoading) {
+                        Icon(painterResource(R.drawable.ic_refresh), contentDescription = stringResource(R.string.refresh))
+                    }
+                    // Sorting only makes sense when ads are shown.
+                    if (uiState.loadError == null && uiState.ads.isNotEmpty()) {
                         SortMenu(sortOrder = uiState.sortOrder, onSortOrderChange = onSortOrderChange)
                     }
                 }
@@ -117,9 +121,10 @@ fun AdListScreen(
         val contentModifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
+        // On an error only the message and "try again" are shown, no ads (even if Room has some).
         when {
             uiState.isLoading -> LoadingContent(contentModifier)
-            uiState.hasError -> ErrorContent(stringResource(R.string.ad_list_error), onRetry, contentModifier)
+            uiState.loadError != null -> ErrorContent(loadErrorText(uiState.loadError), onRefreshClick, contentModifier)
             uiState.ads.isEmpty() -> MessageContent(stringResource(R.string.ad_list_empty), contentModifier)
             else -> ReadyContent(
                 uiState = uiState,
@@ -133,6 +138,16 @@ fun AdListScreen(
             )
         }
     }
+}
+
+// The message for each kind of error. "when" without else: a new LoadError case would not compile
+// until it has a text here.
+@Composable
+private fun loadErrorText(error: LoadError): String = when (error) {
+    LoadError.NoInternet -> stringResource(R.string.error_no_internet)
+    is LoadError.Server -> stringResource(R.string.error_server, error.code)
+    LoadError.InvalidData -> stringResource(R.string.error_invalid_data)
+    LoadError.Database -> stringResource(R.string.ad_list_error)
 }
 
 // Sort button in the top app bar. Opens a menu with one entry per sort order;
@@ -325,10 +340,6 @@ private fun AdListItem(ad: Ad, onClick: () -> Unit, onFavoriteClick: () -> Unit)
     )
 }
 
-// Sample ads with ids; Room would only assign them on insert.
-private fun previewAds(): List<Ad> =
-    sampleAds(now = 0L).mapIndexed { index, ad -> ad.copy(id = index + 1L) }
-
 // Shared helper for all previews: the screen with the given state and empty callbacks.
 @Composable
 private fun AdListScreenPreview(uiState: AdListUiState) {
@@ -337,7 +348,7 @@ private fun AdListScreenPreview(uiState: AdListUiState) {
             uiState = uiState,
             onAdClick = {},
             onAddClick = {},
-            onRetry = {},
+            onRefreshClick = {},
             onQueryChange = {},
             onFavoriteClick = {},
             onCategoryFilterClick = {},
@@ -383,8 +394,15 @@ private fun AdListScreenFilterPreview() {
     )
 }
 
+// Airplane mode: only the message and "try again", even though Room has ads.
 @Preview(showBackground = true)
 @Composable
-private fun AdListScreenErrorPreview() {
-    AdListScreenPreview(AdListUiState(isLoading = false, hasError = true))
+private fun AdListScreenNoInternetPreview() {
+    AdListScreenPreview(AdListUiState(isLoading = false, loadError = LoadError.NoInternet, ads = previewAds()))
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AdListScreenServerErrorPreview() {
+    AdListScreenPreview(AdListUiState(isLoading = false, loadError = LoadError.Server(404)))
 }

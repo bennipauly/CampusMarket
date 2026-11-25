@@ -1,10 +1,15 @@
-package de.dhbw.campusmarket.data
+package de.dhbw.campusmarket.ui
+
+import de.dhbw.campusmarket.data.Ad
+import de.dhbw.campusmarket.data.Category
+import de.dhbw.campusmarket.data.Condition
 
 private const val ONE_DAY_MILLIS = 24 * 60 * 60 * 1000L
 
-// Sample ads for the first start. "now" is passed in so that the ads
-// have different ages (today, yesterday, two days ago, ...).
-fun sampleAds(now: Long): List<Ad> = listOf(
+// Example ads that are only used by the @Preview functions in Android Studio.
+// The app itself loads its ads from testdata/anzeigen.json (see AdRepository).
+// The ids are set here because in the app Room assigns them on insert.
+fun previewAds(): List<Ad> = listOf(
     Ad(
         title = "Analysis 1 – Lehrbuch",
         description = "Kaum benutzt, ein paar Markierungen mit Bleistift.",
@@ -12,7 +17,7 @@ fun sampleAds(now: Long): List<Ad> = listOf(
         category = Category.BOOKS,
         condition = Condition.LIKE_NEW,
         location = "Bibliothek",
-        createdAt = now
+        createdAt = 0L
     ),
     Ad(
         title = "Skript Theoretische Informatik",
@@ -21,7 +26,7 @@ fun sampleAds(now: Long): List<Ad> = listOf(
         category = Category.SCRIPTS,
         condition = Condition.GOOD,
         location = "Mensa",
-        createdAt = now - ONE_DAY_MILLIS
+        createdAt = -ONE_DAY_MILLIS
     ),
     Ad(
         title = "Taschenrechner TI-30X",
@@ -30,7 +35,7 @@ fun sampleAds(now: Long): List<Ad> = listOf(
         category = Category.CALCULATORS,
         condition = Condition.GOOD,
         location = "Haupteingang",
-        createdAt = now - 2 * ONE_DAY_MILLIS
+        createdAt = -2 * ONE_DAY_MILLIS
     ),
     Ad(
         title = "USB-C-Hub mit HDMI",
@@ -39,7 +44,7 @@ fun sampleAds(now: Long): List<Ad> = listOf(
         category = Category.TECH,
         condition = Condition.NEW,
         location = "Cafeteria",
-        createdAt = now - 3 * ONE_DAY_MILLIS
+        createdAt = -3 * ONE_DAY_MILLIS
     ),
     Ad(
         title = "Schreibtischstuhl",
@@ -48,7 +53,7 @@ fun sampleAds(now: Long): List<Ad> = listOf(
         category = Category.FURNITURE,
         condition = Condition.USED,
         location = "Parkplatz",
-        createdAt = now - 4 * ONE_DAY_MILLIS
+        createdAt = -4 * ONE_DAY_MILLIS
     ),
     Ad(
         title = "Programmieren in Kotlin",
@@ -58,6 +63,6 @@ fun sampleAds(now: Long): List<Ad> = listOf(
         condition = Condition.NEW,
         location = "Bibliothek",
         isSold = true,
-        createdAt = now - 5 * ONE_DAY_MILLIS
+        createdAt = -5 * ONE_DAY_MILLIS
     )
-)
+).mapIndexed { index, ad -> ad.copy(id = index + 1L) }

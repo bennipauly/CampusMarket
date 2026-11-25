@@ -189,6 +189,8 @@ class AdFormViewModel(
                     repository.updateAd(
                         ad.copy(
                             id = original.id,
+                            // Keeps the link to the test data, otherwise a refresh would add the ad again.
+                            remoteId = original.remoteId,
                             isFavorite = original.isFavorite,
                             isSold = original.isSold,
                             createdAt = original.createdAt
