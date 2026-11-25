@@ -50,6 +50,8 @@
     <string name="ad_form_title_create">Neue Anzeige</string>
     <string name="ad_form_title_edit">Anzeige bearbeiten</string>
     <string name="edit">Bearbeiten</string>
+    <string name="test_data_hint">Testanzeige aus GitHub, nicht bearbeitbar</string>
+    <string name="test_data_not_editable">Testanzeigen aus GitHub können in der App nicht bearbeitet werden.</string>
     <string name="favorite_add">Zu Favoriten hinzufügen</string>
     <string name="favorite_remove">Aus Favoriten entfernen</string>
     <string name="label_title">Titel</string>

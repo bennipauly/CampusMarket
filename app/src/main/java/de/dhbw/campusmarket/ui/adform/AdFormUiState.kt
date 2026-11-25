@@ -13,6 +13,8 @@ data class AdFormUiState(
     val isLoading: Boolean = false,
     val hasError: Boolean = false,
     val notFound: Boolean = false,
+    // true for test ads from GitHub: the form shows only a hint and cannot save.
+    val isReadOnly: Boolean = false,
     // true = edit an existing ad, false = create a new ad.
     val isEditing: Boolean = false,
     val title: String = "",

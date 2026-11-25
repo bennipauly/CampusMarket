@@ -24,14 +24,32 @@ interface AdDao {
     @Insert
     suspend fun insert(ad: Ad): Long
 
-    // For the test data. IGNORE: an ad whose remoteId already exists is skipped, so local
-    // changes (favorite, sold, edited text) are not overwritten on refresh.
+    // For the test data. IGNORE: an ad whose remoteId already exists is skipped, so the local
+    // state (favorite, sold) is not overwritten on refresh. Its texts are updated by updateTestData.
     // Returns the new row ids; -1 means "already there, skipped".
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnore(ads: List<Ad>): List<Long>
 
     @Update
     suspend fun update(ad: Ad)
+
+    // For test ads that already exist: takes over the texts and the image from the JSON file.
+    // isFavorite, isSold and createdAt are not touched, so the local state stays.
+    @Query(
+        "UPDATE ads SET title = :title, description = :description, price = :price, " +
+            "category = :category, condition = :condition, location = :location, imageUri = :imageUri " +
+            "WHERE remoteId = :remoteId"
+    )
+    suspend fun updateTestData(
+        remoteId: Long,
+        title: String,
+        description: String,
+        price: Double,
+        category: Category,
+        condition: Condition,
+        location: String,
+        imageUri: String?
+    )
 
     // Changes only this one column. This way a tap on the heart cannot overwrite other values with an old state.
     @Query("UPDATE ads SET isFavorite = :isFavorite WHERE id = :id")

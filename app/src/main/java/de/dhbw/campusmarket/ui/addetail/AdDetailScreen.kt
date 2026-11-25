@@ -100,11 +100,14 @@ fun AdDetailScreen(
                     // Favorite, edit and delete only exist when an ad is really shown.
                     if (uiState.ad != null) {
                         FavoriteButton(isFavorite = uiState.ad.isFavorite, onClick = onFavoriteClick)
-                        IconButton(onClick = onEditClick) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_edit),
-                                contentDescription = stringResource(R.string.edit)
-                            )
+                        // Test ads from GitHub cannot be edited, so they get no pencil.
+                        if (!uiState.ad.isTestData) {
+                            IconButton(onClick = onEditClick) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_edit),
+                                    contentDescription = stringResource(R.string.edit)
+                                )
+                            }
                         }
                         IconButton(onClick = onDeleteClick) {
                             Icon(
@@ -160,6 +163,14 @@ private fun AdDetailContent(ad: Ad, onPhotoClick: () -> Unit, onSoldClick: () ->
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(top = 4.dp)
         )
+        if (ad.isTestData) {
+            Text(
+                stringResource(R.string.test_data_hint),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
         DetailRow(stringResource(R.string.label_category), stringResource(ad.category.labelRes()))
         DetailRow(stringResource(R.string.label_condition), stringResource(ad.condition.labelRes()))

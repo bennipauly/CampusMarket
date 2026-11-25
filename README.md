@@ -14,7 +14,7 @@ The user interface of the app is in German.
 - Test data from the network: loaded when the list opens and with the refresh button in the top bar. While loading a progress indicator is shown. On an error the list shows only the message and "Erneut versuchen" (try again): no internet, server error with HTTP code, or invalid JSON
 - Detail screen with photo, price, category, condition, handover location and status
 - Create an ad with input validation (empty title, invalid price, missing handover location)
-- Edit an ad (pencil icon on the detail screen) with the same validation as when creating it
+- Edit an own ad (pencil icon on the detail screen) with the same validation as when creating it. Test ads from GitHub are read-only: they have no pencil and show the hint "Testanzeige aus GitHub, nicht bearbeitbar"
 - Delete an ad with a confirmation dialog
 - Favorites: mark ads with the heart in the list or on the detail screen
 - Status: mark an ad as sold on the detail screen (and make it available again); the list then shows "Verkauft" (sold)
@@ -23,7 +23,8 @@ The user interface of the app is in German.
 - Product photo with the device camera (asks for the camera permission; without it the ad can still be saved)
 - Photo from the gallery via the Android photo picker (needs no permission). The photo is copied into the app storage, so it stays even if it is deleted from the gallery
 - Full screen photo: tap the photo on the detail screen
-- Local storage: own ads and changes (favorite, sold, edited) are kept after a restart. A refresh only adds test ads that are not stored yet.
+- Local storage: own ads, favorites and the sold status are kept after a restart. A refresh adds new test ads and takes over changed texts of existing test ads from GitHub (GitHub is the only source of the test data).
+- App icon: an adaptive vector icon (shopping bag with a graduation cap) with a one-color version for themed icons on Android 13+
 
 ## Requirements
 
@@ -70,7 +71,7 @@ The logic without Android dependencies is tested with JUnit (`app/src/test`):
 | Test class | Checks |
 |---|---|
 | `AdDtoTest` | Test data: `testdata/anzeigen.json` matches the model, unique ids, image URLs; unknown keys are ignored; unknown category, missing field or no JSON throw a `SerializationException` |
-| `AdMappingTest` | Conversion of the JSON ads into the Room model (`remoteId`, image URL, creation time) |
+| `AdMappingTest` | Conversion of the JSON ads into the Room model (`remoteId`, image URL, creation time); ads from the JSON are test data, own ads are not |
 | `AdSearchTest` | Search: empty search text, upper/lower case, matches in title/description/location, no matches |
 | `AdFilterTest` | Filters: category, only favorites, only available, all together, no matches |
 | `AdSortTest` | Sorting: newest first, price ascending/descending, titles with umlauts, equal prices keep their order |
@@ -128,6 +129,7 @@ app/src/main/java/de/dhbw/campusmarket/
     ├── adform/                  form for creating and editing, camera and gallery
     ├── photoviewer/             full screen photo
     └── theme/                   colors, typography, theme
+app/src/main/res/drawable/ic_launcher_*.xml   app icon (background, foreground, monochrome)
 ```
 
 The rules for architecture and code are in [CLAUDE.md](CLAUDE.md) (in German).

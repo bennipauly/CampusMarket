@@ -25,14 +25,28 @@ class AdRepository(private val adDao: AdDao, private val adApi: AdApi) {
 
     suspend fun deleteAd(ad: Ad) = adDao.delete(ad)
 
-    // Loads testdata/anzeigen.json and stores ads that are not in Room yet.
+    // Loads testdata/anzeigen.json into Room: new ads are inserted, existing test ads get the
+    // current texts from GitHub (GitHub is the only source of the test data; favorite and sold stay).
     // Room stays the single source of truth: the screens never read the network result directly.
     // Does not catch anything on purpose: IOException, HttpException and SerializationException
     // go to the ViewModel, which shows a matching message for each of them.
     // Returns how many ads were new.
     suspend fun refreshAdsFromNetwork(): Int {
         val dtos = adApi.getAds()
-        val rowIds = adDao.insertOrIgnore(toAds(dtos, System.currentTimeMillis()))
+        val ads = toAds(dtos, System.currentTimeMillis())
+        val rowIds = adDao.insertOrIgnore(ads)
+        for (dto in dtos) {
+            adDao.updateTestData(
+                remoteId = dto.remoteId,
+                title = dto.title,
+                description = dto.description,
+                price = dto.price,
+                category = dto.category,
+                condition = dto.condition,
+                location = dto.location,
+                imageUri = dto.imageUrl
+            )
+        }
         val newCount = rowIds.count { it != -1L }
         Log.i(TAG, "Loaded ${dtos.size} test ads, $newCount new")
         return newCount

@@ -26,4 +26,9 @@ data class Ad(
     val isSold: Boolean = false,
     // Creation time in milliseconds since 1970, used for sorting.
     val createdAt: Long
-)
+) {
+    // Ads from testdata/anzeigen.json belong to GitHub: they cannot be edited in the app.
+    // A getter without a backing field, so Room does not store it as a column.
+    val isTestData: Boolean
+        get() = remoteId != null
+}

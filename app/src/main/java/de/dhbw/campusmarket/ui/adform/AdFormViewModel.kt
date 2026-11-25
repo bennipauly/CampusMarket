@@ -60,6 +60,10 @@ class AdFormViewModel(
                         // The ad was deleted in the meantime.
                         Log.w(TAG, "Ad $adId not found")
                         it.copy(isLoading = false, notFound = true)
+                    } else if (ad.isTestData) {
+                        // Second safety net: the detail screen shows no pencil for test ads anyway.
+                        Log.w(TAG, "Ad $adId is test data and cannot be edited")
+                        it.copy(isLoading = false, isReadOnly = true)
                     } else {
                         it.copy(
                             isLoading = false,
@@ -157,7 +161,7 @@ class AdFormViewModel(
         val state = _uiState.value
         // A double click on "save" must not create two ads.
         // While the ad is still loading, there is nothing to save.
-        if (state.isSaving || state.isLoading) return
+        if (state.isSaving || state.isLoading || state.isReadOnly) return
 
         val price = parsePrice(state.price)
         if (!isValidTitle(state.title) || price == null || !isValidLocation(state.location)) {

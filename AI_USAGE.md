@@ -1181,13 +1181,58 @@ Vorgehen:
 #### Geprüft / Getestet
 
 Fehlermeldungen überprüft, Bilder aus Github Test erst nach Push möglich
+->Nach Push: Testdaten werden geladen, aber man kann sie bearbeiten. Das sollte nicht so sein
+#### Commits
+
+- `66579a0` Retrofit, kotlinx-serialization-json, Coil-Netzwerk und INTERNET-Permission
+- `cbcf904` Testdaten-JSON, DTO und Retrofit-Schnittstelle
+- `5e5a0d2` Anzeigen aus dem Netz laden mit Fehlerarten und Refresh
+- `dc903aa` README und Logbuch zu den Netzwerk-Testdaten
+
+---
+
+### Eintrag 23: Erfolgsfall testen, Testdaten schreibgeschützt, App-Icon
+
+- **Datum:** 25.11.2026
+- **Autor:** Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja kannst testen. Außerdem ist uns aufgefallen, dass man die Testdaten aus GIthub bearbeiten kann. Das sollte nicht möglich sein.
+Wir hätten auch noch gerne ein App Icon, kannst du da was bauen?
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -6`, `git fetch` ausgeführt. Ergebnis: Schritt 16 in vier Commits committet und auf `master` gepusht. In der Arbeitskopie von `AI_USAGE.md` stand nur die neue Notiz des Teams in Eintrag 22, sie bleibt. In Eintrag 22 die vier Hashes unter „Commits“ eingetragen, Eintrag 23 mit dem Prompt angelegt (Skript `log23.py`).
+2. Mit `curl` geprüft: `testdata/anzeigen.json` und alle 6 Bilder liefern HTTP 200.
+3. Emulator, Erfolgsfall: App gestartet → Log `Loaded 6 test ads, 0 new` (schon beim Test des Teams eingefügt). Die Liste zeigt die Testanzeigen mit den Bildern aus GitHub (Screenshot). Refresh-Button → erneut `0 new`. Gefunden: Die Testanzeige „Analysis 1 – Lehrbuch“ war in der App zu „… test“ geändert worden.
+4. Testdaten schreibgeschützt (Skript `step17.py`): `data/Ad.kt` (berechnete Eigenschaft `isTestData`), `data/AdDao.kt` (neu `updateTestData`, Kommentar zu `insertOrIgnore` angepasst), `data/AdRepository.kt` (`refreshAdsFromNetwork` übernimmt für vorhandene Testanzeigen Texte und Bild aus der JSON-Datei; Favorit, verkauft und Erstellzeit bleiben), `ui/addetail/AdDetailScreen.kt` (kein Stift bei Testanzeigen, Hinweistext unter dem Preis), `ui/adform/AdFormUiState.kt` (`isReadOnly`), `ui/adform/AdFormViewModel.kt` (Testanzeige → `isReadOnly`, Speichern gesperrt), `ui/adform/AdFormScreen.kt` (Hinweis statt Formular), `strings.xml` (2 Texte). `AdMappingTest.kt` um 1 Test und 1 Prüfung zu `isTestData` ergänzt.
+5. App-Icon: `res/drawable/ic_launcher_background.xml` (violette Fläche) und `ic_launcher_foreground.xml` (weiße Einkaufstasche mit Doktorhut) neu gezeichnet, neu `ic_launcher_monochrome.xml` für Themed Icons. `mipmap-anydpi/ic_launcher.xml` und `ic_launcher_round.xml` zeigen für `monochrome` auf die neue Datei. Die alten Bitmaps `mipmap-hdpi` bis `mipmap-xxxhdpi` (`ic_launcher*.webp`, Android-Standard-Icon) gelöscht, weil sie bei minSdk 26 nie benutzt werden.
+6. `gradlew.bat assembleDebug testDebugUnitTest lintDebug` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, 53/53 Tests grün, Lint 0 Fehler (11 Warnungen wie bisher: Versionshinweise, Plural-Hinweis).
+7. Emulator: App installiert und gestartet → „Analysis 1 – Lehrbuch“ heißt nach dem Laden wieder so (Text aus GitHub übernommen). Detail einer Testanzeige: kein „Bearbeiten“, Hinweis „Testanzeige aus GitHub, nicht bearbeitbar“ (Screenshot). Detail der eigenen Anzeige „Galerietest“: „Bearbeiten“ vorhanden. App-Übersicht: neues Icon wird angezeigt (Screenshot). Absturz-Log leer.
+8. `README.md`: schreibgeschützte Testanzeigen, Übernahme der Texte beim Aktualisieren, App-Icon, `AdMappingTest`, Icon-Dateien in der Code-Struktur.
+9. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Der Erfolgsfall funktioniert: Die 6 Testanzeigen kommen mit Bildern von GitHub. Testanzeigen sind jetzt schreibgeschützt, und beim Aktualisieren gelten wieder die Texte aus GitHub. Dazu gibt es ein neues App-Icon (Einkaufstasche mit Doktorhut). Build, 53 Tests, Lint und Emulator-Test liefen fehlerfrei. Es ist nichts committet.“ Frage: „Sollen Testanzeigen auch nicht mehr gelöscht werden können?“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Icon der App und Testdaten geprüft  
 
 #### Commits
 
-Retrofit, kotlinx-serialization-json, Coil-Netzwerk und INTERNET-Permission
-Testdaten-JSON, DTO und Retrofit-Schnittstelle
-Anzeigen aus dem Netz laden mit Fehlerarten und Refresh
-README und Logbuch zu den Netzwerk-Testdaten
+App-Icon sowie Bearbeitungsfunktion überarbeitet
 
 ---
 

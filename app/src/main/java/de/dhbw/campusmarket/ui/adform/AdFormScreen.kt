@@ -187,6 +187,7 @@ fun AdFormScreen(
             uiState.isLoading -> LoadingContent(contentModifier)
             uiState.hasError -> ErrorContent(stringResource(R.string.ad_detail_error), onRetry, contentModifier)
             uiState.notFound -> MessageContent(stringResource(R.string.ad_detail_not_found), contentModifier)
+            uiState.isReadOnly -> MessageContent(stringResource(R.string.test_data_not_editable), contentModifier)
             else -> FormContent(
                 uiState = uiState,
                 onTitleChange = onTitleChange,

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One-color version of the app icon for "themed icons" (Android 13+). The launcher only uses
+     the shape and colors it itself, so the bag is drawn as an outline and the cap stays visible. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Handle of the bag -->
+    <path
+        android:pathData="M44,46V41A10,10 0,0 1,64 41V46"
+        android:strokeWidth="4.5"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round" />
+    <!-- Outline of the bag -->
+    <path
+        android:pathData="M34,46H74L76.5,77A4,4 0,0 1,72.5 81.5H35.5A4,4 0,0 1,31.5 77Z"
+        android:strokeWidth="3.5"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineJoin="round" />
+    <!-- Graduation cap -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,55L69,61L54,67L39,61Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M45,63.4L54,67L63,63.4V70C63,73.5 45,73.5 45,70Z" />
+    <path
+        android:pathData="M67,61.8V69"
+        android:strokeWidth="1.6"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M67,70.2m-1.6,0a1.6,1.6 0,1 0,3.2 0a1.6,1.6 0,1 0,-3.2 0" />
+</vector>
