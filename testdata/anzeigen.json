@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "titel": "Analysis 1 – Lehrbuch",
+    "beschreibung": "Kaum benutzt, ein paar Markierungen mit Bleistift.",
+    "preis": 15.0,
+    "kategorie": "BOOKS",
+    "zustand": "LIKE_NEW",
+    "ort": "Bibliothek",
+    "bildUrl": "https://raw.githubusercontent.com/bennipauly/CampusMarket/master/testdata/images/analysis-lehrbuch.jpg"
+  },
+  {
+    "id": 2,
+    "titel": "Skript Theoretische Informatik",
+    "beschreibung": "Ausgedrucktes Skript mit eigenen Notizen, gebunden.",
+    "preis": 5.0,
+    "kategorie": "SCRIPTS",
+    "zustand": "GOOD",
+    "ort": "Mensa",
+    "bildUrl": "https://raw.githubusercontent.com/bennipauly/CampusMarket/master/testdata/images/skript-theoinf.jpg"
+  },
+  {
+    "id": 3,
+    "titel": "Taschenrechner TI-30X",
+    "beschreibung": "Funktioniert einwandfrei, für Klausuren zugelassen.",
+    "preis": 12.5,
+    "kategorie": "CALCULATORS",
+    "zustand": "GOOD",
+    "ort": "Haupteingang",
+    "bildUrl": "https://raw.githubusercontent.com/bennipauly/CampusMarket/master/testdata/images/taschenrechner.jpg"
+  },
+  {
+    "id": 4,
+    "titel": "USB-C-Hub mit HDMI",
+    "beschreibung": "4 Anschlüsse, Originalverpackung vorhanden.",
+    "preis": 20.0,
+    "kategorie": "TECH",
+    "zustand": "NEW",
+    "ort": "Cafeteria",
+    "bildUrl": "https://raw.githubusercontent.com/bennipauly/CampusMarket/master/testdata/images/usb-c-hub.jpg"
+  },
+  {
+    "id": 5,
+    "titel": "Schreibtischstuhl",
+    "beschreibung": "Höhenverstellbar, Stoff etwas abgenutzt. Nur Abholung.",
+    "preis": 25.0,
+    "kategorie": "FURNITURE",
+    "zustand": "USED",
+    "ort": "Parkplatz",
+    "bildUrl": "https://raw.githubusercontent.com/bennipauly/CampusMarket/master/testdata/images/schreibtischstuhl.jpg"
+  },
+  {
+    "id": 6,
+    "titel": "Programmieren in Kotlin",
+    "beschreibung": "Neuwertig, nur einmal durchgeblättert.",
+    "preis": 18.0,
+    "kategorie": "BOOKS",
+    "zustand": "NEW",
+    "ort": "Bibliothek",
+    "bildUrl": "https://raw.githubusercontent.com/bennipauly/CampusMarket/master/testdata/images/programmieren-in-kotlin.jpg"
+  }
+]
