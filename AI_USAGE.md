@@ -1075,7 +1075,54 @@ Bildupload aus Galerie getestet
 
 #### Commits
 
-Foto aus der Galerie wählen
+- `50aba60` Foto aus der Galerie wählen
+
+---
+
+### Eintrag 21: Feinschliff und README auf Englisch
+
+- **Datum:** 25.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja Feinschliff, uns wurde aber noch gesagt, dass die Readme auf englisch sein soll
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -3` ausgeführt. Ergebnis: Schritt 15 war noch nicht committet. Mit einer Rückfrage geklärt; das Team hat danach `50aba60` („Foto aus der Galerie wählen“) committet.
+2. `AI_USAGE.md`: Eintrag 21 mit dem Prompt angelegt (Skript `log21.py`).
+3. Danach fehlten in der Arbeitskopie von `AI_USAGE.md` Eintrag 20 und 21 sowie der Hash in Eintrag 19 (vermutlich hat ein Editor einen alten Stand gespeichert). Mit `git diff` geprüft: Die Arbeitskopie enthielt nichts, was nicht auch im Commit `50aba60` steht. Alter Stand als `AI_USAGE.stale.md` im Scratchpad gesichert, Datei mit `git checkout HEAD -- AI_USAGE.md` wiederhergestellt, Eintrag 21 neu angelegt und in Eintrag 20 den Hash `50aba60` eingetragen.
+4. `gradlew.bat lintDebug` ausgeführt. Ergebnis: 0 Fehler, 19 Warnungen (7 ungenutzte Farben, überflüssiger Ordner `mipmap-anydpi-v26`, doppeltes `android:label` im Manifest, ein Plural-Hinweis, 9 Hinweise auf neuere Versionen).
+5. Gelesen: `colors.xml`, `Type.kt`, `Theme.kt`, Manifest, Abhängigkeiten in `app/build.gradle.kts`.
+6. Skript `polish.py` im Scratchpad: auskommentierte Vorlagen-Blöcke aus `Type.kt` und `Theme.kt` entfernt (Regel „kein toter Code“) und deren Kommentare angepasst, `android:label` und `android:theme` der Activity entfernt (gleich wie bei der Application), `colors.xml` gelöscht (alle 7 Farben ungenutzt), `mipmap-anydpi-v26` in `mipmap-anydpi` umbenannt.
+7. `lifecycle-runtime-ktx` aus `app/build.gradle.kts` und `gradle/libs.versions.toml` entfernt (nirgends benutzt), Versionsschlüssel `lifecycleRuntimeKtx` in `lifecycle` umbenannt.
+8. `gradlew.bat assembleDebug testDebugUnitTest lintDebug` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, 40/40 Tests grün, Lint 0 Fehler, 9 Warnungen (8 Versionshinweise, 1 Plural-Hinweis, beide bewusst nicht geändert).
+9. `README.md` komplett auf Englisch neu geschrieben, mit neuem Abschnitt „Known limitations“ und dem Befehl `lintDebug`. Der Pflichtsatz steht wortwörtlich auf Deutsch, mit englischer Übersetzung in Klammern.
+10. `CLAUDE.md`: Regel „README ist auf Englisch“ im Abschnitt „Abgabe“ ergänzt.
+11. Emulator: App installiert und gestartet, Liste erscheint, Formular „Anzeige bearbeiten“ geöffnet, gedreht, kein Absturz. Mit `aapt2 dump badging` geprüft: App-Icon `ic_launcher` und Name „CampusMarket“ werden gefunden.
+12. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Der Feinschliff ist fertig: Lint-Funde behoben (ungenutzte Farben, auskommentierte Vorlagen-Blöcke, überflüssiger Ordner, doppelte Manifest-Angaben, ungenutzte Bibliothek), das README ist komplett auf Englisch. Build, 40 Tests, Lint und Emulator-Test liefen fehlerfrei. Es ist nichts committet.“ Frage: „Soll ich nach eurem Commit einen Entwurf für die Reflexion schreiben?“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Geschaut, was entfernt wurde und warum
+
+#### Commits
+
+Lint-Funde behoben und README auf Englisch
 
 ---
 

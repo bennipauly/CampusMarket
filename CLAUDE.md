@@ -95,6 +95,7 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 
 ## Abgabe
 
+- **README ist auf Englisch.** Einzige Ausnahme ist der Pflichtsatz, der wortwörtlich auf Deutsch bleibt (mit englischer Übersetzung in Klammern). `CLAUDE.md` und `AI_USAGE.md` bleiben Deutsch.
 - README beschreibt Build- und Startschritte aus einem sauberen Checkout und enthält den Satz: „Die Gruppe verantwortet jede Zeile des Projekts.“
 - README nennt alles, was vorausgesetzt wird (Android Studio, SDK, JDK, Gerät/Emulator, Internet beim ersten Build), und wird bei jeder neuen Voraussetzung ergänzt.
 - `AI_USAGE.md` ist vollständig (Setup, alle Einträge, Reflexion).
