@@ -10,9 +10,9 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - Compose-Theme: `CampusMarketTheme` (`ui/theme/Theme.kt`), XML-Theme: `Theme.CampusMarket`
 - Build: Gradle 9.6.0, AGP 9.4.1, Kotlin 2.2.10, Version Catalog in `gradle/libs.versions.toml`
 - compileSdk / targetSdk 37, **minSdk 26**
-- Bibliotheksversionen müssen zu Kotlin 2.2 passen. Coil bleibt deshalb auf **3.3.0**, weil Coil 3.4 und neuer Kotlin 2.3/2.4 voraussetzen und der Build dann bricht.
-- Keine Bibliothek ohne Aufgabe: kein `room-ktx` (Flow/suspend steckt seit Room 2.7 in `room-runtime`), keine eigene `kotlinx-serialization-json` (Navigation bringt `serialization-core` mit).
-- Keine Netzwerkzugriffe, kein Login, kein Backend. Die App ist rein lokal.
+- Bibliotheksversionen müssen zu Kotlin 2.2 passen. Coil (und `coil-network-okhttp`) bleibt deshalb auf **3.3.0**, weil Coil 3.4 und neuer Kotlin 2.3/2.4 voraussetzen und der Build dann bricht. Aus demselben Grund bleibt `kotlinx-serialization-json` auf **1.9.0** (1.10/1.11 brauchen Kotlin 2.3, 1.12/1.13 Kotlin 2.4).
+- Keine Bibliothek ohne Aufgabe: kein `room-ktx` (Flow/suspend steckt seit Room 2.7 in `room-runtime`). OkHttp wird nicht selbst eingetragen, Retrofit bringt es mit.
+- **Netzwerk nur lesend für Testdaten:** Die Anzeigen kommen als `testdata/anzeigen.json` (Bilder in `testdata/images/`) aus diesem öffentlichen GitHub-Repo über `https://raw.githubusercontent.com/bennipauly/CampusMarket/master/`. Dafür gibt es Retrofit mit kotlinx-serialization und die `INTERNET`-Permission. Kein Login, kein eigenes Backend, kein Hochladen.
 - Icons liegen als Vector-Drawable in `res/drawable` (z. B. `ic_arrow_back.xml`) und werden mit `painterResource` geladen. Keine `material-icons`-Bibliothek. Weil es kein AppCompat gibt, nutzen Drawables keine `?attr/…`-Farben.
 
 ## Arbeitsweise mit der KI
@@ -27,7 +27,7 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 
 ## Code-Stil
 
-- Einfacher, gut lesbarer Kotlin-Code auf Studierenden-Niveau. Keine unnötigen Abstraktionen (keine Interfaces mit nur einer Implementierung, keine generischen Basisklassen, kein UseCase-Layer).
+- Einfacher, gut lesbarer Kotlin-Code auf Studierenden-Niveau. Keine unnötigen Abstraktionen (keine Interfaces mit nur einer Implementierung, keine generischen Basisklassen, kein UseCase-Layer). Einzige Ausnahme: `AdApi`, weil Retrofit ein Interface verlangt.
 - Nur Bibliotheken, die wirklich gebraucht werden: Compose/Material 3, Lifecycle-ViewModel, Navigation Compose, kotlinx-serialization, Room + KSP, Coil, JUnit (+ kotlinx-coroutines-test, falls nötig).
 - **Kein Hilt, kein Koin**, keine anderen DI-Frameworks.
 - Kein toter Code: keine ungenutzten Funktionen, Imports, Ressourcen oder auskommentierten Blöcke. Der Android-Studio-Beispielcode ist entfernt. Es gibt keine Instrumented Tests (`src/androidTest`) und deshalb auch keine Espresso-/Compose-Test-Bibliotheken.
@@ -48,7 +48,8 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - **Nur Room-Zugriffe im Repository/DAO.** Composables und ViewModels importieren weder `RoomDatabase` noch DAOs.
 - Die Room-Datenbank ist die **Single Source of Truth**. Das DAO liefert Lese-Abfragen als `Flow`, Schreibzugriffe sind `suspend`-Funktionen.
 - Datenbank und Repository werden **genau einmal** in einer eigenen `Application`-Klasse (`CampusMarketApplication`) erzeugt und im Manifest eingetragen.
-- Beim ersten Start (leere Datenbank) werden Beispieldaten eingefügt.
+- **Testdaten aus dem Netz:** Die Liste lädt beim Öffnen und über den Refresh-Button die JSON-Datei und übernimmt neue Anzeigen in Room (`remoteId` + `OnConflictStrategy.IGNORE`). Lokale Änderungen (Favorit, Status, Bearbeiten) bleiben dabei erhalten. Room bleibt die Single Source of Truth, aus der alle Screens lesen.
+- **Netzwerkfehler getrennt abfangen:** `IOException` (keine Verbindung), `HttpException` (Serverfehler mit Code), `SerializationException` (JSON passt nicht zum Model). Kein pauschales `catch (e: Exception)` beim Laden. Bei einem Fehler zeigt die Liste nur die Meldung mit „Erneut versuchen“ und keine Anzeigen.
 - Room läuft mit **KSP** (kein kapt).
 
 ## State und ViewModels
@@ -83,14 +84,14 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 
 ## Logik und Tests
 
-- Such-, Filter- und Sortierlogik sind **reine Kotlin-Funktionen** ohne Android-Abhängigkeiten.
+- Such-, Filter- und Sortierlogik sowie die Umwandlung der JSON-Daten in das Model (`AdDto.toAd()`) sind **reine Kotlin-Funktionen** ohne Android-Abhängigkeiten.
 - Für diese Funktionen gibt es **JUnit-Tests** unter `app/src/test`.
 - Eingaben werden validiert (z. B. leerer Titel, ungültiger Preis); ungültige Eingaben führen nie zum Absturz.
 
 ## Robustheit (wird bei jeder Änderung geprüft)
 
 - Kein Absturz bei leerer Eingabe, verweigerter Permission oder Rotation.
-- Im Flugmodus kein Absturz und kein eingefrorener Screen.
+- Im Flugmodus kein Absturz und kein eingefrorener Screen: Die Liste zeigt „Keine Internetverbindung.“ mit „Erneut versuchen“.
 - Daten bleiben nach App-Neustart erhalten.
 
 ## Abgabe

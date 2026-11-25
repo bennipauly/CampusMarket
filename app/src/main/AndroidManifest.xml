@@ -9,6 +9,9 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Loads the test ads (JSON) and their images from GitHub. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".CampusMarketApplication"
         android:allowBackup="true"
