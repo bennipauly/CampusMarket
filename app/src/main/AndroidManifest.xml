@@ -12,6 +12,9 @@
     <!-- Loads the test ads (JSON) and their images from GitHub. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Checks before saving an ad whether there is an internet connection. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".CampusMarketApplication"
         android:allowBackup="true"

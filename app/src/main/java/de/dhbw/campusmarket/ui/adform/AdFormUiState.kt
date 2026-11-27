@@ -36,6 +36,8 @@ data class AdFormUiState(
     val showErrors: Boolean = false,
     val isSaving: Boolean = false,
     val saveFailed: Boolean = false,
+    // Saving was refused because there is no internet connection. The input is kept.
+    val showNoInternetError: Boolean = false,
     // true as soon as the ad is in Room. The route then navigates back.
     val isSaved: Boolean = false
 ) {

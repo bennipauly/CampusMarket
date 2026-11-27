@@ -113,8 +113,10 @@ fun AdListScreen(
         },
         // FAB at the bottom right: Material convention for "create something new".
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddClick) {
-                Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.add_ad))
+            if (uiState.showAddButton) {
+                FloatingActionButton(onClick = onAddClick) {
+                    Icon(painterResource(R.drawable.ic_add), contentDescription = stringResource(R.string.add_ad))
+                }
             }
         }
     ) { innerPadding ->

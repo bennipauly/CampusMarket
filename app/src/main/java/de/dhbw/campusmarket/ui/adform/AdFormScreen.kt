@@ -280,6 +280,9 @@ private fun FormContent(
             labelRes = { it.labelRes() },
             onSelect = onConditionChange
         )
+        if (uiState.showNoInternetError) {
+            Text(stringResource(R.string.error_save_no_internet), color = MaterialTheme.colorScheme.error)
+        }
         if (uiState.saveFailed) {
             Text(stringResource(R.string.error_save), color = MaterialTheme.colorScheme.error)
         }

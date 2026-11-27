@@ -5,6 +5,7 @@ import androidx.room.Room
 import de.dhbw.campusmarket.data.AdRepository
 import de.dhbw.campusmarket.data.AppDatabase
 import de.dhbw.campusmarket.data.MIGRATION_1_2
+import de.dhbw.campusmarket.data.network.ConnectionChecker
 import de.dhbw.campusmarket.data.network.createAdApi
 
 // Created by Android exactly once per app process (see android:name in the manifest).
@@ -20,6 +21,6 @@ class CampusMarketApplication : Application() {
     }
 
     val repository: AdRepository by lazy {
-        AdRepository(database.adDao(), createAdApi())
+        AdRepository(database.adDao(), createAdApi(), ConnectionChecker(this))
     }
 }

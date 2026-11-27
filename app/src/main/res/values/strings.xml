@@ -4,6 +4,7 @@
     <string name="retry">Erneut versuchen</string>
     <string name="ad_list_error">Die Anzeigen konnten nicht geladen werden.</string>
     <string name="error_no_internet">Keine Internetverbindung.</string>
+    <string name="error_save_no_internet">Keine Internetverbindung. Die Anzeige kann erst gespeichert werden, wenn wieder eine Verbindung besteht. Die Eingaben bleiben erhalten.</string>
     <string name="error_server">Serverfehler (Code %1$d). Bitte später erneut versuchen.</string>
     <string name="error_invalid_data">Die Testdaten haben ein ungültiges Format.</string>
     <string name="refresh">Aktualisieren</string>
@@ -50,7 +51,7 @@
     <string name="ad_form_title_create">Neue Anzeige</string>
     <string name="ad_form_title_edit">Anzeige bearbeiten</string>
     <string name="edit">Bearbeiten</string>
-    <string name="test_data_hint">Testanzeige aus GitHub, nicht bearbeitbar</string>
+    <string name="test_data_hint">Testanzeige aus GitHub, kann nicht bearbeitet oder gelöscht werden</string>
     <string name="test_data_not_editable">Testanzeigen aus GitHub können in der App nicht bearbeitet werden.</string>
     <string name="favorite_add">Zu Favoriten hinzufügen</string>
     <string name="favorite_remove">Aus Favoriten entfernen</string>

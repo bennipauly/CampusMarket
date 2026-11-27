@@ -2,18 +2,26 @@ package de.dhbw.campusmarket.data
 
 import android.util.Log
 import de.dhbw.campusmarket.data.network.AdApi
+import de.dhbw.campusmarket.data.network.ConnectionChecker
 import de.dhbw.campusmarket.data.network.toAds
 import kotlinx.coroutines.flow.Flow
 
 private const val TAG = "AdRepository"
 
 // The only way from the ViewModels to the data. Room is only used here (and in the DAO),
-// the network only here (and in AdApi).
-class AdRepository(private val adDao: AdDao, private val adApi: AdApi) {
+// the network only here (and in AdApi and ConnectionChecker).
+class AdRepository(
+    private val adDao: AdDao,
+    private val adApi: AdApi,
+    private val connectionChecker: ConnectionChecker
+) {
 
     fun getAllAds(): Flow<List<Ad>> = adDao.getAll()
 
     fun getAd(id: Long): Flow<Ad?> = adDao.getById(id)
+
+    // Ads may only be saved with an internet connection (decision of the group).
+    fun isOnline(): Boolean = connectionChecker.isOnline()
 
     suspend fun addAd(ad: Ad): Long = adDao.insert(ad)
 
@@ -30,8 +38,7 @@ class AdRepository(private val adDao: AdDao, private val adApi: AdApi) {
     // Room stays the single source of truth: the screens never read the network result directly.
     // Does not catch anything on purpose: IOException, HttpException and SerializationException
     // go to the ViewModel, which shows a matching message for each of them.
-    // Returns how many ads were new.
-    suspend fun refreshAdsFromNetwork(): Int {
+    suspend fun refreshAdsFromNetwork() {
         val dtos = adApi.getAds()
         val ads = toAds(dtos, System.currentTimeMillis())
         val rowIds = adDao.insertOrIgnore(ads)
@@ -49,6 +56,5 @@ class AdRepository(private val adDao: AdDao, private val adApi: AdApi) {
         }
         val newCount = rowIds.count { it != -1L }
         Log.i(TAG, "Loaded ${dtos.size} test ads, $newCount new")
-        return newCount
     }
 }

@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.adform
 
+import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -77,7 +78,7 @@ class AdFormViewModel(
                         )
                     }
                 }
-            } catch (e: Exception) {
+            } catch (e: SQLiteException) {
                 Log.e(TAG, "Loading ad $adId failed", e)
                 _uiState.update { it.copy(isLoading = false, hasError = true) }
             }
@@ -170,7 +171,15 @@ class AdFormViewModel(
             return
         }
 
-        _uiState.update { it.copy(isSaving = true, saveFailed = false) }
+        // Without internet nothing is saved, the same as the list without internet.
+        // The input stays in the form, so the user can simply tap "save" again later.
+        if (!repository.isOnline()) {
+            Log.w(TAG, "Saving refused: no internet connection")
+            _uiState.update { it.copy(showNoInternetError = true) }
+            return
+        }
+
+        _uiState.update { it.copy(isSaving = true, saveFailed = false, showNoInternetError = false) }
         val ad = Ad(
             title = state.title.trim(),
             description = state.description.trim(),
@@ -203,7 +212,7 @@ class AdFormViewModel(
                     Log.i(TAG, "Ad ${original.id} updated")
                 }
                 _uiState.update { it.copy(isSaving = false, isSaved = true) }
-            } catch (e: Exception) {
+            } catch (e: SQLiteException) {
                 // Saving failed: show a hint, the input is kept.
                 Log.e(TAG, "Saving the ad failed", e)
                 _uiState.update { it.copy(isSaving = false, saveFailed = true) }

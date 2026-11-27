@@ -29,4 +29,9 @@ data class AdListUiState(
     // fields above and not stored separately, so nothing can get out of sync.
     val visibleAds: List<Ad>
         get() = sortAds(filterAds(searchAds(ads, query), categoryFilter, onlyFavorites, onlyAvailable), sortOrder)
+
+    // The "create ad" button only exists after the test data was loaded successfully.
+    // While loading or without internet (or any other load error) no ad can be created.
+    val showAddButton: Boolean
+        get() = !isLoading && loadError == null
 }
