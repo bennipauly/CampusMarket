@@ -34,7 +34,7 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - Kleine Einheiten: eine Datei pro Screen-Teil (Route/Screen, ViewModel, UiState), Funktionen kurz halten.
 - **Höchstens 500 Zeilen pro Datei** (Clean Code). Ausnahmen: `res/values/strings.xml` und Markdown-Dokumente (`README.md`, `AI_USAGE.md`, `CLAUDE.md`).
 - **Quellcode komplett auf Englisch:** Klassen, Funktionen, Variablen, Parameter und Kommentare. Deutsch sind nur die Texte in `strings.xml`.
-- **Keine hartkodierten Labels:** Alle für Nutzer sichtbaren Texte stehen in `res/values/strings.xml` (Deutsch) und werden mit `stringResource` bzw. `R.string` geladen. Ausnahmen: Beispieldaten (`SampleData.kt`) und Werte in `@Preview`- und Test-Funktionen.
+- **Keine hartkodierten Labels:** Alle für Nutzer sichtbaren Texte stehen in `res/values/strings.xml` (Deutsch) und werden mit `stringResource` bzw. `R.string` geladen. Ausnahmen: Preview-Daten (`ui/PreviewData.kt`), Werte in `@Preview`- und Test-Funktionen sowie die Testdaten in `testdata/anzeigen.json`.
 - **Benennung:** camelCase für Variablen und Funktionen, PascalCase für Klassen. Booleans beginnen mit `is`, `has`, `show` oder `only`. Der private `MutableStateFlow` heißt `_uiState`, der öffentliche `uiState`. Callbacks heißen `onXxx` (z. B. `onSaveClick`, `onQueryChange`).
 - **Feste Reihenfolge in jeder Datei:**
   - ViewModel: 1. `_uiState` und `uiState`, 2. weitere private Felder (z. B. `loadJob`), 3. `init`, 4. öffentliche Funktionen (`loadXxx`, `onXxx`), 5. private Hilfsfunktionen, 6. `companion object` mit `factory`/`Factory`.
@@ -48,8 +48,9 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - **Nur Room-Zugriffe im Repository/DAO.** Composables und ViewModels importieren weder `RoomDatabase` noch DAOs.
 - Die Room-Datenbank ist die **Single Source of Truth**. Das DAO liefert Lese-Abfragen als `Flow`, Schreibzugriffe sind `suspend`-Funktionen.
 - Datenbank und Repository werden **genau einmal** in einer eigenen `Application`-Klasse (`CampusMarketApplication`) erzeugt und im Manifest eingetragen.
-- **Testdaten aus dem Netz:** Die Liste lädt beim Öffnen und über den Refresh-Button die JSON-Datei und übernimmt neue Anzeigen in Room (`remoteId` + `OnConflictStrategy.IGNORE`). Lokale Änderungen (Favorit, Status, Bearbeiten) bleiben dabei erhalten. Room bleibt die Single Source of Truth, aus der alle Screens lesen.
-- **Netzwerkfehler getrennt abfangen:** `IOException` (keine Verbindung), `HttpException` (Serverfehler mit Code), `SerializationException` (JSON passt nicht zum Model). Kein pauschales `catch (e: Exception)` beim Laden. Bei einem Fehler zeigt die Liste nur die Meldung mit „Erneut versuchen“ und keine Anzeigen.
+- **Testdaten aus dem Netz:** Die Liste lädt beim Öffnen und über den Refresh-Button die JSON-Datei. Neue Anzeigen kommen mit `remoteId` + `OnConflictStrategy.IGNORE` in Room, vorhandene Testanzeigen bekommen Texte und Bild aus der JSON-Datei (`updateTestData`). Favorit und Status bleiben lokal erhalten. Room bleibt die Single Source of Truth, aus der alle Screens lesen.
+- **Testanzeigen sind schreibgeschützt:** Anzeigen mit `remoteId` (`isTestData`) haben keinen Stift und keinen Mülleimer. Formular und Löschen weisen sie zusätzlich im ViewModel ab. Bearbeiten und Löschen gibt es nur für eigene Anzeigen.
+- **Netzwerkfehler getrennt abfangen:** `IOException` (keine Verbindung), `HttpException` (Serverfehler mit Code), `SerializationException` (JSON passt nicht zum Model). Kein pauschales `catch (e: Exception)` im ganzen Projekt: Room-Zugriffe fangen `SQLiteException`, Datei-Zugriffe `IOException`/`SecurityException`. Bei einem Fehler zeigt die Liste nur die Meldung mit „Erneut versuchen“, keine Anzeigen und keinen FAB. Neue Anzeigen lassen sich nur nach erfolgreichem Laden erstellen (`showAddButton` im `AdListUiState`). Beim Speichern prüft `AdFormViewModel` über `repository.isOnline()` (`ConnectionChecker`, Permission `ACCESS_NETWORK_STATE`) noch einmal die Verbindung; ohne Internet wird nichts gespeichert und die Eingaben bleiben.
 - Room läuft mit **KSP** (kein kapt).
 
 ## State und ViewModels
@@ -80,11 +81,12 @@ Jede Regel unten ist so formuliert, dass man sie am Code prüfen kann.
 - Ablauf: zuerst `ActivityResultContracts.RequestPermission()` für `Manifest.permission.CAMERA`.
 - Bei Erfolg: `ActivityResultContracts.TakePicture()` mit einer Uri aus einem `FileProvider`.
 - Bei Ablehnung: sichtbarer Hinweis; Speichern ohne Foto bleibt möglich.
+- Galerie-Fallback: `ActivityResultContracts.PickVisualMedia()` (braucht keine Permission). Das gewählte Bild wird nach `filesDir/photos` kopiert, damit es auch nach einem Neustart da ist.
 - Bilder werden mit **Coil** (`AsyncImage`) angezeigt. Gespeichert wird nur der Pfad/die Uri in Room.
 
 ## Logik und Tests
 
-- Such-, Filter- und Sortierlogik sowie die Umwandlung der JSON-Daten in das Model (`AdDto.toAd()`) sind **reine Kotlin-Funktionen** ohne Android-Abhängigkeiten.
+- Such-, Filter- und Sortierlogik sowie die Umwandlung der JSON-Daten in das Model (`toAds()` in `data/network/AdMapping.kt`) sind **reine Kotlin-Funktionen** ohne Android-Abhängigkeiten.
 - Für diese Funktionen gibt es **JUnit-Tests** unter `app/src/test`.
 - Eingaben werden validiert (z. B. leerer Titel, ungültiger Preis); ungültige Eingaben führen nie zum Absturz.
 

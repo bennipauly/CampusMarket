@@ -1091,7 +1091,17 @@ Bildupload aus Galerie getestet
 Ja Feinschliff, uns wurde aber noch gesagt, dass die Readme auf englisch sein soll
 ````
 
-#### Ergebnis der KI zu Prompt 1
+#### Rückfrage der KI und Antwort (Prompt 2)
+
+Die KI hat vor dem Feinschliff im Auswahldialog der App gefragt: „Schritt 15 (Foto aus der Galerie) ist noch nicht committet. Der letzte Commit ist 3375c59 (Schritt 14a). Soll ich warten, bis ihr Schritt 15 committet habt, oder Feinschliff und README zusammen mit Schritt 15 in einen Commit packen?“ Optionen: „Commit ist jetzt durch (Recommended)“ / „Zusammen committen“.
+
+Antwort im Dialog (gewählte Option):
+
+````text
+Commit ist jetzt durch (Recommended)
+````
+
+#### Ergebnis der KI zu Prompt 1 und 2
 
 **Ausgeführte Aktionen:**
 
@@ -1154,7 +1164,27 @@ Vorgehen:
 - Dokumentier das Ganze wie gewohnt in `AI_USAGE.md`.
 ````
 
-#### Ergebnis der KI zu Prompt 1
+#### Rückfrage der KI und Antwort (Prompt 2)
+
+Die KI hat nach Schritt 16a im Auswahldialog der App gefragt: „Schritt 16a ist fertig und baut (BUILD SUCCESSFUL, 40/40 Tests). Geändert: gradle/libs.versions.toml, app/build.gradle.kts, AndroidManifest.xml (INTERNET) und CLAUDE.md (Netzwerk-Regeln, Branch master statt main). Commit-Vorschlag: „build: Retrofit, kotlinx-serialization-json, Coil-Netzwerk und INTERNET-Permission“. AI_USAGE.md bitte noch nicht committen, die kommt am Ende. Ist der Commit durch?“ Optionen: „Commit ist durch“ / „Alles am Ende committen“.
+
+Antwort im Dialog (gewählte Option):
+
+````text
+Commit ist durch
+````
+
+#### Rückfrage der KI und Antwort (Prompt 3)
+
+`git log` zeigte danach noch keinen neuen Commit. Die KI hat deshalb im Auswahldialog nachgefragt: „Laut git ist Schritt 16a noch nicht committet. HEAD ist weiterhin 1ed2063, und CLAUDE.md, app/build.gradle.kts, AndroidManifest.xml und gradle/libs.versions.toml sind noch geändert. Bitte diese vier Dateien committen („build: Retrofit, kotlinx-serialization-json, Coil-Netzwerk und INTERNET-Permission“), ohne AI_USAGE.md. Wie geht es weiter?“ Optionen: „Jetzt committet“ / „Alles am Ende committen“.
+
+Antwort im Dialog (gewählte Option):
+
+````text
+Alles am Ende committen
+````
+
+#### Ergebnis der KI zu Prompt 1 bis 3
 
 **Ausgeführte Aktionen:**
 
@@ -1232,7 +1262,115 @@ Icon der App und Testdaten geprüft
 
 #### Commits
 
-App-Icon sowie Bearbeitungsfunktion überarbeitet
+- `6f8b47b` App-Icon sowie Bearbeitungsfunktion überarbeitet
+
+---
+
+### Eintrag 24: Löschen für Testanzeigen sperren, Abgleich mit dem Anfangsprompt
+
+- **Datum:** 27.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ja löschen können wir sperren. Schau danach nochmal über das gesamte Projekt und prüfe, ob wir nichts vergessen haben aus dem Anfangsprompt
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -5`, `git diff` ausgeführt. Ergebnis: Eintrag 23 als `6f8b47b` committet. `AdMappingTest.kt` (Test zu `isTestData`) war nicht im Commit. In der Arbeitskopie von `AI_USAGE.md` fehlten erneut Eintrag 23 und die Hashes in Eintrag 22 (alter Editor-Stand, nichts Neues darin). Alter Stand als `AI_USAGE.stale3.md` im Scratchpad gesichert, Datei mit `git checkout HEAD -- AI_USAGE.md` wiederhergestellt, Hash `6f8b47b` in Eintrag 23 eingetragen, Eintrag 24 mit dem Prompt angelegt (Skript `log24.py`).
+2. Löschen gesperrt: `ui/addetail/AdDetailScreen.kt` (Mülleimer nur bei eigenen Anzeigen), `ui/addetail/AdDetailViewModel.kt` (`onDeleteClick` und `onDeleteConfirm` weisen Testanzeigen ab), `strings.xml` (Hinweis „…kann nicht bearbeitet oder gelöscht werden“).
+3. Anfangsprompt aus Eintrag 1 gelesen und Punkt für Punkt geprüft: Funktionsumfang, Mindestanforderungen, Bewertungskriterien, technische Vorgaben, KI-Dokumentation. Geprüft mit `git shortlog -sn` (Commits beider Mitglieder: 22 und 9), `grep` (Route/Screen/Preview je Screen, nur der NavHost navigiert, keine Room-Importe in UI/Logik, keine hartkodierten Texte, `catch`-Blöcke), `wc -l` (alle Dateien unter 500 Zeilen, längste `AdFormScreen.kt` mit 431).
+4. Gefunden und behoben: sechs pauschale `catch (e: Exception)` um Room-Zugriffe (`AdDetailViewModel` 3×, `AdFormViewModel` 2×, `AdListViewModel` 1×) durch `catch (e: SQLiteException)` ersetzt. In `AdDetailViewModel` und `PhotoViewerViewModel` fängt `.catch` beim Lesen nur noch `SQLiteException` und wirft alles andere weiter. Ungenutzter Rückgabewert von `refreshAdsFromNetwork()` entfernt. `CLAUDE.md` aktualisiert (Testdaten-Abgleich, Testanzeigen schreibgeschützt, kein pauschales `catch`, Preview-Daten statt `SampleData.kt`, `toAds()` statt `AdDto.toAd()`, Galerie-Fallback). `README.md`: Löschen nur für eigene Anzeigen, veraltete Einschränkung entfernt (Skript `review.py`).
+5. Gefunden in AI_USAGE.md: In Eintrag 21 und 22 fehlten die Antworten aus den Auswahldialogen der App. Nachgetragen als Prompt 2 (Eintrag 21) bzw. Prompt 2 und 3 (Eintrag 22), im Format von Eintrag 9 (Skript `dialogs.py`).
+6. Frischer Klon von GitHub (`git clone`, Stand `6f8b47b`) im Scratchpad, nur `ANDROID_HOME` gesetzt, `gradlew.bat assembleDebug testDebugUnitTest`. Ergebnis: **BUILD SUCCESSFUL**, 52 Tests grün, APK erzeugt (Mindestanforderung 1).
+7. Im Projekt `gradlew.bat assembleDebug testDebugUnitTest lintDebug`. Ergebnis: **BUILD SUCCESSFUL**, 53/53 Tests grün, Lint 0 Fehler (11 Warnungen wie bisher).
+8. Emulator: Testanzeige „Taschenrechner TI-30X“ ohne „Bearbeiten“ und ohne „Löschen“, mit Hinweis. Eigene Anzeige „Galerietest“ mit beiden Knöpfen, Löschdialog erscheint, „Abbrechen“ → Anzeige bleibt. Refresh → `Loaded 6 test ads, 0 new`. Absturz-Log leer.
+9. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Testanzeigen lassen sich jetzt auch nicht mehr löschen. Der Abgleich mit dem Anfangsprompt hat drei Code-Punkte (pauschale catch-Blöcke, ungenutzter Rückgabewert, veraltete CLAUDE.md) und fehlende Dialog-Antworten im Logbuch gefunden, alles behoben. Ein frischer Klon baut. Offen sind nur Team-Aufgaben: Begründungen bei Akzeptiert/Geändert/Abgelehnt, Setup-Feld, Gruppe im README und die Reflexion. Es ist nichts committet.“ Frage: „Soll ich einen Entwurf für die Reflexion schreiben?“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Löschen getestet, nur eigene Anzeigen können gelöscht werden
+
+#### Commits
+
+Testanzeigen nicht löschbar, gezielte catch-Blöcke
+
+---
+
+### Eintrag 25: Ohne Internet keine Anzeigen erstellen
+
+- **Datum:** 27.11.2026
+- **Autor:** Benjamin
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Bevor ich commite, mir ist aufgefallen, dass man trotzdem Anzeigen erstellen kann, auch wenn man kein Internet hat. Das sollte so nicht sein
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -2` ausgeführt. Ergebnis: Die Änderungen aus Eintrag 24 sind noch nicht committet, Eintrag 24 ist vollständig. Eintrag 25 mit dem Prompt angelegt (Skript `log25.py`).
+2. Gelesen: FAB in `ui/adlist/AdListScreen.kt`, berechnete Werte in `ui/adlist/AdListUiState.kt`.
+3. Geändert: `AdListUiState.kt` (neuer berechneter Wert `showAddButton` = nicht am Laden und kein Ladefehler), `AdListScreen.kt` (FAB nur bei `showAddButton`). Neu: `test/…/ui/adlist/AdListUiStateTest.kt` (4 Tests).
+4. `gradlew.bat assembleDebug testDebugUnitTest lintDebug` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, 57/57 Tests grün, Lint 0 Fehler (11 Warnungen wie bisher).
+5. Emulator: Beim ersten Versuch lag das Schnelleinstellungs-Panel über der App. Mit `cmd statusbar collapse` geschlossen und Test wiederholt. Online → „Anzeige erstellen“ vorhanden. Flugmodus an, „Aktualisieren“ → nur „Keine Internetverbindung.“, „Erneut versuchen“ und „Aktualisieren“, kein „Anzeige erstellen“ (Screenshot). Querformat → unverändert. Flugmodus aus, „Erneut versuchen“ → „Anzeige erstellen“ wieder da. Flugmodus am Ende aus, Absturz-Log leer.
+6. `README.md` (Funktion, Einschränkung, Testklasse) und `CLAUDE.md` (Regel: FAB nur nach erfolgreichem Laden) ergänzt.
+7. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Ohne Internet gibt es jetzt keinen Button zum Erstellen mehr: Er erscheint erst, wenn die Testdaten erfolgreich geladen wurden. Build, 57 Tests, Lint und der Flugmodus-Test auf dem Emulator liefen fehlerfrei. Es ist nichts committet.“ Frage: „Soll das Formular beim Speichern zusätzlich die Verbindung prüfen?“
+
+#### Prompt 2
+
+````text
+Ja, beim Speichern
+````
+
+#### Ergebnis der KI zu Prompt 2
+
+**Ausgeführte Aktionen:**
+
+1. `AI_USAGE.md`: Prompt 2 in Eintrag 25 eingetragen.
+2. Gelesen: `data/AdRepository.kt`, `onSaveClick` in `ui/adform/AdFormViewModel.kt`, Speicher-Felder in `AdFormUiState.kt` und `AdFormScreen.kt`, `CampusMarketApplication.kt`, Manifest.
+3. Neu: `data/network/ConnectionChecker.kt` (`isOnline()` über `ConnectivityManager` und `NET_CAPABILITY_INTERNET`). Geändert (Skript `step25b.py`): `AndroidManifest.xml` (Permission `ACCESS_NETWORK_STATE`), `data/AdRepository.kt` (Parameter `connectionChecker`, `isOnline()`), `CampusMarketApplication.kt` (`ConnectionChecker(this)`), `ui/adform/AdFormUiState.kt` (`showNoInternetError`), `ui/adform/AdFormViewModel.kt` (nach der Eingabeprüfung: ohne Verbindung nichts speichern, Log, Hinweis), `ui/adform/AdFormScreen.kt` (Hinweistext), `strings.xml` (1 Text).
+4. `gradlew.bat assembleDebug testDebugUnitTest lintDebug` ausgeführt. Ergebnis: **BUILD SUCCESSFUL**, 57/57 Tests grün, Lint 0 Fehler (11 Warnungen wie bisher).
+5. Emulator, erster Versuch: Die Liste zeigte beim Start noch „Keine Internetverbindung.“, weil das Netz des Emulators nach dem vorigen Flugmodus-Test noch nicht wieder da war. Mit `ping` auf die Verbindung gewartet, „Erneut versuchen“ → Liste mit „Anzeige erstellen“.
+6. Emulator, zweiter Versuch: Formular geöffnet, „Offlinetest“, 2, „Mensa“ eingegeben, Flugmodus an, „Speichern“ → Hinweis „Keine Internetverbindung. Die Anzeige kann erst gespeichert werden …“, Formular bleibt offen (Log `Saving refused: no internet connection`). Gedreht und zurück → Eingaben noch da. Flugmodus aus, gewartet, „Speichern“ → zurück zur Liste, „Offlinetest“ erscheint (Log `Ad 201 created`). Testanzeige danach über die App wieder gelöscht (Log `Ad 201 deleted`). Flugmodus am Ende aus, Absturz-Log leer.
+7. `README.md` (Funktion, Einschränkung entfernt, Code-Struktur) und `CLAUDE.md` (Regel zur Verbindungsprüfung beim Speichern) ergänzt.
+8. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Das Formular prüft jetzt beim Speichern die Internetverbindung. Ohne Verbindung wird nichts gespeichert, ein Hinweis erscheint und die Eingaben bleiben. Build, 57 Tests, Lint und der Flugmodus-Test im Formular liefen fehlerfrei. Es ist nichts committet.“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Funktionen bei ausgeschaltetem Internet getestet
+
+#### Commits
+
+Anzeigen nur mit Internet erstellen und speichern
+CLAUDE.md, README und Logbuch
 
 ---
 

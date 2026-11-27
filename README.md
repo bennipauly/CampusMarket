@@ -13,9 +13,9 @@ The user interface of the app is in German.
 - List of all ads with search (title, description, handover location)
 - Test data from the network: loaded when the list opens and with the refresh button in the top bar. While loading a progress indicator is shown. On an error the list shows only the message and "Erneut versuchen" (try again): no internet, server error with HTTP code, or invalid JSON
 - Detail screen with photo, price, category, condition, handover location and status
-- Create an ad with input validation (empty title, invalid price, missing handover location)
-- Edit an own ad (pencil icon on the detail screen) with the same validation as when creating it. Test ads from GitHub are read-only: they have no pencil and show the hint "Testanzeige aus GitHub, nicht bearbeitbar"
-- Delete an ad with a confirmation dialog
+- Create an ad with input validation (empty title, invalid price, missing handover location). The "+" button only appears after the test data was loaded successfully, and saving (creating or editing) checks the connection again: without internet the form shows a hint and keeps the input
+- Edit an own ad (pencil icon on the detail screen) with the same validation as when creating it. Test ads from GitHub are read-only: they have no pencil and no trash can and show the hint "Testanzeige aus GitHub, kann nicht bearbeitet oder gelöscht werden"
+- Delete an own ad with a confirmation dialog
 - Favorites: mark ads with the heart in the list or on the detail screen
 - Status: mark an ad as sold on the detail screen (and make it available again); the list then shows "Verkauft" (sold)
 - Filters below the search field: favorites, only available ads and category, combinable with the search
@@ -70,6 +70,7 @@ The logic without Android dependencies is tested with JUnit (`app/src/test`):
 
 | Test class | Checks |
 |---|---|
+| `AdListUiStateTest` | The "+" button is hidden while loading and on every load error, and shown after a successful load (also with an empty list) |
 | `AdDtoTest` | Test data: `testdata/anzeigen.json` matches the model, unique ids, image URLs; unknown keys are ignored; unknown category, missing field or no JSON throw a `SerializationException` |
 | `AdMappingTest` | Conversion of the JSON ads into the Room model (`remoteId`, image URL, creation time); ads from the JSON are test data, own ads are not |
 | `AdSearchTest` | Search: empty search text, upper/lower case, matches in title/description/location, no matches |
@@ -106,8 +107,7 @@ The app only sees the files after they are pushed to the `master` branch on GitH
 
 ## Known limitations
 
-- Without internet the list shows only the error message, also hiding own ads that are stored locally (a deliberate decision of the group).
-- A deleted test ad comes back with the next refresh, because it is still in the JSON file.
+- Without internet the list shows only the error message, also hiding own ads that are stored locally, and the "+" button (a deliberate decision of the group).
 - Search, filters and sorting are not stored: after an app restart the list shows all ads again, newest first.
 - When a photo is replaced or removed, or an ad is deleted, the old photo file stays in the app storage. It is not visible in the app; clearing the app storage removes it.
 
@@ -120,7 +120,7 @@ app/src/main/java/de/dhbw/campusmarket/
 ├── CampusMarketApplication.kt   database, network client and repository (exactly once)
 ├── MainActivity.kt              sets the theme and the NavHost
 ├── data/                        Room: entity Ad, AdDao, AppDatabase (with migration), AdRepository, enums
-│   └── network/                 Retrofit: AdApi, AdDto (JSON), conversion into the model
+│   └── network/                 Retrofit: AdApi, AdDto (JSON), conversion into the model, ConnectionChecker
 ├── logic/                       pure Kotlin functions: search, filters, sorting, input validation (with JUnit tests)
 └── ui/
     ├── navigation/              type-safe destinations and NavHost
