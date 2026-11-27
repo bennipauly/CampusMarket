@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.photoviewer
 
+import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -40,6 +41,8 @@ class PhotoViewerViewModel(
         loadJob = viewModelScope.launch {
             repository.getAd(adId)
                 .catch { e ->
+                    // Only database errors are expected here; anything else is a bug and is thrown again.
+                    if (e !is SQLiteException) throw e
                     Log.e(TAG, "Loading ad $adId failed", e)
                     _uiState.update { it.copy(isLoading = false, hasError = true) }
                 }

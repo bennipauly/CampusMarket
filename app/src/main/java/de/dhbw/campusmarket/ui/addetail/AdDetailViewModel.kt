@@ -1,5 +1,6 @@
 package de.dhbw.campusmarket.ui.addetail
 
+import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -41,6 +42,8 @@ class AdDetailViewModel(
         loadJob = viewModelScope.launch {
             repository.getAd(adId)
                 .catch { e ->
+                    // Only database errors are expected here; anything else is a bug and is thrown again.
+                    if (e !is SQLiteException) throw e
                     Log.e(TAG, "Loading ad $adId failed", e)
                     _uiState.update { it.copy(isLoading = false, hasError = true) }
                 }
@@ -57,7 +60,7 @@ class AdDetailViewModel(
             try {
                 repository.setFavorite(ad.id, !ad.isFavorite)
                 Log.d(TAG, "Ad ${ad.id}: favorite set to ${!ad.isFavorite}")
-            } catch (e: Exception) {
+            } catch (e: SQLiteException) {
                 // Saving failed: the heart stays as before and the app does not crash.
                 Log.e(TAG, "Changing the favorite of ad ${ad.id} failed", e)
             }
@@ -71,7 +74,7 @@ class AdDetailViewModel(
             try {
                 repository.setSold(ad.id, !ad.isSold)
                 Log.d(TAG, "Ad ${ad.id}: sold set to ${!ad.isSold}")
-            } catch (e: Exception) {
+            } catch (e: SQLiteException) {
                 // Saving failed: the status stays as before and the app does not crash.
                 Log.e(TAG, "Changing the status of ad ${ad.id} failed", e)
             }
@@ -79,6 +82,8 @@ class AdDetailViewModel(
     }
 
     fun onDeleteClick() {
+        // Test ads have no delete button; this is only a second safety net.
+        if (_uiState.value.ad?.isTestData == true) return
         _uiState.update { it.copy(showDeleteDialog = true) }
     }
 
@@ -88,6 +93,7 @@ class AdDetailViewModel(
 
     fun onDeleteConfirm() {
         val ad = _uiState.value.ad ?: return
+        if (ad.isTestData) return
         _uiState.update { it.copy(showDeleteDialog = false) }
         // Stop observing first. Otherwise Room would send "null" after deleting
         // and the screen would briefly show "ad not found" before navigating back.
@@ -97,7 +103,7 @@ class AdDetailViewModel(
                 repository.deleteAd(ad)
                 Log.i(TAG, "Ad ${ad.id} deleted")
                 _uiState.update { it.copy(isDeleted = true) }
-            } catch (e: Exception) {
+            } catch (e: SQLiteException) {
                 // Deleting failed: show an error instead of crashing.
                 Log.e(TAG, "Deleting ad ${ad.id} failed", e)
                 _uiState.update { it.copy(hasError = true) }

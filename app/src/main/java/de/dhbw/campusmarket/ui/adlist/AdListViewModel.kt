@@ -100,7 +100,7 @@ class AdListViewModel(private val repository: AdRepository) : ViewModel() {
             try {
                 repository.setFavorite(ad.id, !ad.isFavorite)
                 Log.d(TAG, "Ad ${ad.id}: favorite set to ${!ad.isFavorite}")
-            } catch (e: Exception) {
+            } catch (e: SQLiteException) {
                 // Saving failed: the heart stays as before and the app does not crash.
                 Log.e(TAG, "Changing the favorite of ad ${ad.id} failed", e)
             }

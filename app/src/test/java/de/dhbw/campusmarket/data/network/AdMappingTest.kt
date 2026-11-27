@@ -6,6 +6,7 @@ import de.dhbw.campusmarket.data.Condition
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AdMappingTest {
@@ -35,6 +36,12 @@ class AdMappingTest {
     }
 
     @Test
+    fun adsFromJson_areTestData() {
+        // Test data cannot be edited in the app.
+        assertTrue(toAds(listOf(dto), now = 0L).single().isTestData)
+    }
+
+    @Test
     fun newAdsHaveNoLocalState() {
         val ad = toAds(listOf(dto), now = 1000L).single()
         // id = 0: Room assigns the local id on insert.
@@ -60,5 +67,6 @@ class AdMappingTest {
         val own = Ad(title = "T", description = "", price = 1.0, category = Category.TECH,
             condition = Condition.NEW, location = "Mensa", createdAt = 0L)
         assertNull(own.remoteId)
+        assertFalse(own.isTestData)
     }
 }

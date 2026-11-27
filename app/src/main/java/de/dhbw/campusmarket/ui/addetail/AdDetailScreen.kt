@@ -100,7 +100,8 @@ fun AdDetailScreen(
                     // Favorite, edit and delete only exist when an ad is really shown.
                     if (uiState.ad != null) {
                         FavoriteButton(isFavorite = uiState.ad.isFavorite, onClick = onFavoriteClick)
-                        // Test ads from GitHub cannot be edited, so they get no pencil.
+                        // Test ads from GitHub can neither be edited nor deleted,
+                        // so they get no pencil and no trash can.
                         if (!uiState.ad.isTestData) {
                             IconButton(onClick = onEditClick) {
                                 Icon(
@@ -108,12 +109,12 @@ fun AdDetailScreen(
                                     contentDescription = stringResource(R.string.edit)
                                 )
                             }
-                        }
-                        IconButton(onClick = onDeleteClick) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_delete),
-                                contentDescription = stringResource(R.string.delete)
-                            )
+                            IconButton(onClick = onDeleteClick) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_delete),
+                                    contentDescription = stringResource(R.string.delete)
+                                )
+                            }
                         }
                     }
                 }
