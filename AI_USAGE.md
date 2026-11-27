@@ -16,7 +16,7 @@ Hinweis zum Format: Seit der Regeländerung in Eintrag 18 (24.11.2026) steht bei
 |-------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | IDE und Umgebung        | Android Studio (Gradle 9.6.0, Android Gradle Plugin 9.4.1, Kotlin 2.2.10), Windows 11                                                                                                                                                                                                                                 |
 | Assistenten und Modelle | Claude Code (Desktop-App, Code-Tab), Modell Claude Opus 5.5 (`claude-opus-5-5`)                                                                                                                                                                                                                                       |
-| Tools und Erweiterungen | eintragen (z. B. weitere Plugins in Android Studio, falls genutzt)                                                                                                                                                                                                                                                    |
+| Tools und Erweiterungen | Keine                                                                                                                                                                                                                                                                                                                 |
 | Instruction-File        | [`CLAUDE.md`](CLAUDE.md) im Root des Repos                                                                                                                                                                                                                                                                            |
 | Teamregeln              | Jeder Prompt wird sofort und wortwörtlich hier eingetragen. Die KI committet und pusht nie selbst; Commits machen wir, damit beide Mitglieder sinnvolle Commits haben. Jede Änderung wird von uns gelesen, verstanden und getestet, bevor sie committet wird. Jedes Mitglied muss jede Zeile ohne KI erklären können. |
 
@@ -436,7 +436,7 @@ App gebaut, Löschfunktion getestet
 ### Eintrag 8: Paketname auf `de.dhbw.campusmarket` ändern, Frage zum Projektfortschritt
 
 - **Datum:** 22.11.2026
-- **Autor:** eintragen
+- **Autor:** Benjamin
 - **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
 
 #### Prompt 1
@@ -465,13 +465,13 @@ Hinweis: Der Paketname `de.dhbw.campusmarket` stammt aus dem Vorschlag der KI in
 
 #### Akzeptiert / Geändert / Abgelehnt
 
-- **Akzeptiert:** eintragen
-- **Geändert:** eintragen
-- **Abgelehnt:** eintragen
+- **Akzeptiert:** Alles
+- **Geändert:** Nichts
+- **Abgelehnt:** Nichts
 
 #### Geprüft / Getestet
 
-eintragen
+Struktur geprüft
 
 #### Commits
 
@@ -1306,7 +1306,7 @@ Löschen getestet, nur eigene Anzeigen können gelöscht werden
 
 #### Commits
 
-Testanzeigen nicht löschbar, gezielte catch-Blöcke
+- `3b67dfa` Testanzeigen nicht löschbar, gezielte catch-Blöcke
 
 ---
 
@@ -1369,11 +1369,89 @@ Funktionen bei ausgeschaltetem Internet getestet
 
 #### Commits
 
-Anzeigen nur mit Internet erstellen und speichern
-CLAUDE.md, README und Logbuch
+- `2422e53` Anzeigen nur mit Internet erstellen und speichern
+- `b53432b` CLAUDE.md, README und Logbuch
+
+---
+
+### Eintrag 26: Reflexion
+
+- **Datum:** 27.11.2026
+- **Autor:** Benjamin und Semih
+- **Tool:** Claude Code (Desktop-App), Claude Opus 5.5
+
+#### Prompt 1
+
+````text
+Ok, alles ist comitted. Ich denke wir sind soweit dann fertig. Es fehlt jetzt nur noch die Reflexion
+````
+
+#### Ergebnis der KI zu Prompt 1
+
+**Ausgeführte Aktionen:**
+
+1. `git status`, `git log --oneline -6`, `git status -sb` ausgeführt. Ergebnis: Alles committet und gepusht (`b53432b`). Hashes in Eintrag 24 (`3b67dfa`) und Eintrag 25 (`2422e53`, `b53432b`) eingetragen, Eintrag 26 mit dem Prompt angelegt (Skript `log26.py`).
+2. Fakten für die Reflexion gesammelt: Überschriften aller Einträge, Felder „Geändert“/„Abgelehnt“ und „Geprüft“ des Teams, `git shortlog -sn` (25 und 9 Commits, 34 insgesamt), Anzahl der `@Test` (57).
+3. Entwurf der Reflexion (Abschnitt 3, etwa 850 Wörter) geschrieben und den Platzhalter ersetzt: Einsatz der KI, was gut funktioniert hat, wo die KI falsch lag (mit Verweisen auf die Einträge), Dokumentation, Abweichung vom Anfangskonzept, Lernpunkte, Fazit. Der Entwurf ist als KI-Vorschlag markiert. Persönliche Erfahrungen, die nur das Team kennt, stehen als [Team: …] darin. Einen Verweis (Editor-Problem bei „Eintrag 15“ statt 16) beim Gegenlesen korrigiert.
+4. Offene Team-Felder gesucht: Setup „Tools und Erweiterungen“, Autor/Akzeptiert/Geprüft/Commits in Eintrag 8 und 26, „Group“ im README, 23 Einträge mit „Alles“/„Ganze Antwort“ ohne Begründung.
+5. `AI_USAGE.md`: dieses Ergebnis eingetragen.
+
+**Kurzfazit im Antwortfeld der App:** „Der Entwurf der Reflexion steht in AI_USAGE.md, mit Verweisen auf die Einträge und markierten Lücken [Team: …] für eure eigenen Erfahrungen. Offen sind noch einige Team-Felder (Setup, Eintrag 8 und 26, Gruppe im README, Begründungen). Es ist nichts committet.“
+
+#### Akzeptiert / Geändert / Abgelehnt
+
+- **Akzeptiert:** Alles
+- **Geändert:** Kleine Änderungen bei den Formulieren und Inhalt
+- **Abgelehnt:** Nichts
+
+#### Geprüft / Getestet
+
+Reflexion Korrekturgelesen und Änderungen vorgenommen
+
+#### Commits
+
+Reflexion in der AI_USAGE.md und finale Änderungen
 
 ---
 
 ## 3. Reflexion
 
-_Platzhalter: Wird zum Projektende ausgefüllt (1–2 Seiten)._
+> **Entwurf der KI (Eintrag 26), vom Team überarbeitet.** Fakten stammen aus den Einträgen 1–25 und aus `git log`.
+
+### 3.1 Wie wir die KI eingesetzt haben
+
+Wir haben CampusMarket fast vollständig zusammen mit Claude Code (Desktop-App, Modell Claude Opus 5.5) entwickelt. Bevor die erste Codezeile entstand, haben wir die Vorgaben aus der Aufgabenstellung in eine `CLAUDE.md` übertragen: Architektur, State-Regeln, Kamera-Ablauf, Tests und die Regeln für das Logbuch. Die KI hat sich bei jedem Schritt daran gehalten. Als sich die Bewertungskriterien geändert haben (Code auf Englisch, Logging, Logbuch ohne Antworttexte, README auf Englisch), haben wir zuerst `CLAUDE.md` angepasst und den bestehenden Code danach in einem eigenen Schritt umgestellt (Eintrag 18 und 19).
+
+Gearbeitet haben wir in kleinen Schritten: erst die Mindestanforderungen (Room, Liste mit Suche, Detail mit Löschen, Erstellen mit Kamera, Tests, README), danach die übrigen Features (Bearbeiten, Favoriten, Status, Filter, Sortierung, Galerie). Nach jedem Schritt hat die KI erklärt, was sie geändert hat, eine Testanleitung geliefert und eine Commit-Nachricht vorgeschlagen. Die Commits haben wir immer selbst gemacht. So sind 34 Commits entstanden, davon 25 von Benjamin und 9 von Semih.
+
+### 3.2 Was gut funktioniert hat
+
+- **Feste Regeln vorab:** Durch die prüfbaren Regeln in `CLAUDE.md` sieht der Code überall gleich aus: Route, stateless Screen, ViewModel mit UiState, Repository, DAO.
+- **Testen auf dem Emulator:** Die KI hat nach jedem Schritt selbst gebaut, die JUnit-Tests laufen lassen (am Ende 57) und auf dem Emulator Drehung, Flugmodus, App-Neustart, verweigerte Permission und ungültige Eingaben ausprobiert. Dabei hat sie eigene Fehler gefunden, bevor wir sie gesehen haben. Ein Beispiel: Nach dem Sortieren blieb die Liste an der alten Stelle stehen (Eintrag 18).
+- **Erklärungen:** Zu jeder Änderung gab es eine Begründung („warum so und nicht anders“).
+- **Recherche:** Bei den Bibliotheksversionen hat die KI auf Maven Central nachgesehen, welche Version zu Kotlin 2.2 passt. So blieb `kotlinx-serialization-json` auf 1.9.0, obwohl es schon 1.13.0 gibt. Sie hat auch bemerkt, dass unser GitHub-Branch `master` heißt und nicht `main`. Mit der ursprünglich geplanten URL wäre jeder Abruf gescheitert (Eintrag 22).
+
+### 3.3 Wo die KI falsch lag oder an Grenzen kam
+
+- **Versionen:** Im ersten Schritt hat die KI Coil 3.6.3 eingetragen. Diese Version baut mit Kotlin 2.2 nicht. Wir mussten auf 3.3.0 zurückgehen (Eintrag 2). Seitdem steht die Versionsgrenze in `CLAUDE.md`.
+- **Nebenwirkungen beim Testen:** Für einen Drehtest hat die KI im Emulator „Automatisch drehen“ ausgeschaltet und vergessen, es wieder einzuschalten. Wir dachten danach, die App könne sich nicht mehr drehen (Eintrag 14).
+- **Grenzen des Emulators:** Die Kamera-Aufnahme konnte die KI nicht testen, weil der Emulator beim Öffnen der Kamera abstürzte. Das haben wir selbst übernommen (Eintrag 10).
+- **Lücken im Konzept:** Einige Fehler hat erst unser eigenes Testen gezeigt. Testanzeigen aus GitHub ließen sich bearbeiten (Eintrag 23), und ohne Internet konnte man trotzdem Anzeigen anlegen (Eintrag 25). Die KI hat umgesetzt, was wir verlangt haben, aber solche Folgen nicht von sich aus erkannt.
+- **Eigener Code gegen eigene Regeln:** Beim Abgleich mit dem Anfangsprompt (Eintrag 24) hat die KI in ihrem früheren Code sechs pauschale `catch (e: Exception)`, einen ungenutzten Rückgabewert und veraltete Stellen in `CLAUDE.md` gefunden. Regeln allein reichen also nicht. Man muss den Code auch gezielt dagegen prüfen.
+- **Werkzeugfehler:** Einmal hat ein Suchmuster der KI im Logbuch den falschen Abschnitt geändert. Das hat sie selbst bemerkt und korrigiert (Eintrag 20).
+
+### 3.4 Dokumentation und Zusammenarbeit
+
+Das Logbuch wortwörtlich und vollständig zu führen war aufwendig, hat uns aber gezwungen, jeden Schritt bewusst abzunehmen. Dreimal hat ein alter Editor-Stand in Android Studio `AI_USAGE.md` verändert: einmal als doppelte Kopie eines Eintrags (Eintrag 16), zweimal fehlten ganze Einträge (Eintrag 21 und 24). Es ging nur deshalb nichts verloren, weil jeder Stand committet war und die KI vor dem Wiederherstellen mit `git diff` geprüft hat, dass nichts Neues fehlt. Bei der Zusammenarbeit war wichtig, dass man immer den aktuellen Stand aus dem Github pulled, bevor man Änderungen vornimmt.
+
+### 3.5 Bewusste Abweichung vom Anfangskonzept
+
+Angemeldet war eine statische App ohne Netzwerk, mit eingebauten Beispieldaten. In Schritt 16 haben wir entschieden, die Testdaten stattdessen als JSON-Datei aus unserem GitHub-Repo zu laden. Room bleibt dabei die Single Source of Truth, und die App stürzt im Flugmodus nicht ab, sondern zeigt eine Fehlermeldung. Wir haben uns dazu entschieden, um zentrale Testdaten auf beiden Testumgebungen zu prüfen, ohne sie separat ändern zu müssen.
+
+### 3.6 Was wir gelernt haben
+
+Wir haben gelernt, wie man eine App in Android Studio entwickelt, wie man dabei vorgeht und wie man eine generelle Fehlerbehandlung einbaut. Außerdem sind wir mit der Android Studio Umgebung vertrauter geworden. Des Weiteren ist uns näher Bewusst geworden, dass man nicht vollständig auf die Antworten von KI vertrauen kann und es weiterer Überprüfungen bedarf. 
+
+### 3.7 Fazit
+
+Die KI hat uns viel Schreibarbeit abgenommen und die Architekturregeln konsequent umgesetzt. Die Verantwortung blieb aber bei uns: Wir haben jeden Schritt getestet, Fehler und Konzeptlücken gemeldet und jede Änderung erst nach dem Lesen committet. Für die Code Defence haben wir uns nochmal jede Datei angeschaut und bei Unklarheiten bei der KI nachgefragt, in den Vorlesungsfolien nachgeschaut und online recherchiert.

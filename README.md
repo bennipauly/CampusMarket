@@ -6,7 +6,7 @@ The app is an exam project for the module "Entwicklung mobiler Applikationen" (m
 The ads are **test data from this GitHub repository**: the app loads `testdata/anzeigen.json` (and the images in `testdata/images/`) via `https://raw.githubusercontent.com/bennipauly/CampusMarket/master/`. New ads are stored in a Room database on the device, which all screens read from. There is no own backend and no login.
 The user interface of the app is in German.
 
-**Group:** eintragen
+**Group:** Benjamin Pauly und Semih Selvi
 
 ## Features
 
